@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AuthProvider } from "@/lib/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -72,14 +74,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "LearnPath — AI-paced learning, page by page" },
+      { name: "description", content: "Upload a PDF or topic, pick 1–5 days, and get an adaptive AI study plan with quizzes and videos." },
+      { name: "author", content: "LearnPath" },
+      { property: "og:title", content: "LearnPath — AI-paced learning" },
+      { property: "og:description", content: "Adaptive PDF & topic learning plans. Page by page. 1–5 days." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -113,7 +114,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AuthProvider>
+        <Toaster richColors position="top-center" />
+        <Outlet />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

@@ -1,0 +1,7 @@
+project_id = "aafobycbxitrgffqouro"
+
+[functions.ai-generate]
+verify_jwt = true
+
+[functions.youtube-search]
+verify_jwt = true

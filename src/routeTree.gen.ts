@@ -9,38 +9,128 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as NewRouteImport } from './routes/new'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LearnPlanIdRouteImport } from './routes/learn.$planId'
+import { Route as QuizPlanIdDayRouteImport } from './routes/quiz.$planId.$day'
 
+const NewRoute = NewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearnPlanIdRoute = LearnPlanIdRouteImport.update({
+  id: '/learn/$planId',
+  path: '/learn/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizPlanIdDayRoute = QuizPlanIdDayRouteImport.update({
+  id: '/quiz/$planId/$day',
+  path: '/quiz/$planId/$day',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
+  '/new': typeof NewRoute
+  '/learn/$planId': typeof LearnPlanIdRoute
+  '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
+  '/new': typeof NewRoute
+  '/learn/$planId': typeof LearnPlanIdRoute
+  '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
+  '/new': typeof NewRoute
+  '/learn/$planId': typeof LearnPlanIdRoute
+  '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/new'
+    | '/learn/$planId'
+    | '/quiz/$planId/$day'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/new'
+    | '/learn/$planId'
+    | '/quiz/$planId/$day'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/new'
+    | '/learn/$planId'
+    | '/quiz/$planId/$day'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  DashboardRoute: typeof DashboardRoute
+  NewRoute: typeof NewRoute
+  LearnPlanIdRoute: typeof LearnPlanIdRoute
+  QuizPlanIdDayRoute: typeof QuizPlanIdDayRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/new': {
+      id: '/new'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof NewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +138,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn/$planId': {
+      id: '/learn/$planId'
+      path: '/learn/$planId'
+      fullPath: '/learn/$planId'
+      preLoaderRoute: typeof LearnPlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz/$planId/$day': {
+      id: '/quiz/$planId/$day'
+      path: '/quiz/$planId/$day'
+      fullPath: '/quiz/$planId/$day'
+      preLoaderRoute: typeof QuizPlanIdDayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  DashboardRoute: DashboardRoute,
+  NewRoute: NewRoute,
+  LearnPlanIdRoute: LearnPlanIdRoute,
+  QuizPlanIdDayRoute: QuizPlanIdDayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
