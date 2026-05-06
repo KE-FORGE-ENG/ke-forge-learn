@@ -63,6 +63,10 @@ function Index() {
           </div>
         ))}
       </section>
+
+      <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
+        <span className="font-semibold tracking-widest">ETech</span> · Crafted with care
+      </footer>
     </div>
   );
 }
