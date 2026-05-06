@@ -33,6 +33,11 @@ function AuthPage() {
     if (mode === "signup") toast.success("Account created! Check your email to verify, then sign in.");
   };
 
+  const googleSignIn = async () => {
+    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/dashboard` });
+    if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
+  };
+
   return (
     <div className="min-h-screen grid place-items-center px-4 bg-[image:var(--gradient-soft)]">
       <Card className="w-full max-w-md p-8 shadow-[var(--shadow-card)]">
