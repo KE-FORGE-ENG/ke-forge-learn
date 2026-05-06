@@ -13,6 +13,7 @@ import { Route as NewRouteImport } from './routes/new'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LearnPlanIdRouteImport } from './routes/learn.$planId'
 
 const NewRoute = NewRouteImport.update({
   id: '/new',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearnPlanIdRoute = LearnPlanIdRouteImport.update({
+  id: '/learn/$planId',
+  path: '/learn/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/new': typeof NewRoute
+  '/learn/$planId': typeof LearnPlanIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/new': typeof NewRoute
+  '/learn/$planId': typeof LearnPlanIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/new': typeof NewRoute
+  '/learn/$planId': typeof LearnPlanIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/new'
+  fullPaths: '/' | '/auth' | '/dashboard' | '/new' | '/learn/$planId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/new'
-  id: '__root__' | '/' | '/auth' | '/dashboard' | '/new'
+  to: '/' | '/auth' | '/dashboard' | '/new' | '/learn/$planId'
+  id: '__root__' | '/' | '/auth' | '/dashboard' | '/new' | '/learn/$planId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
   NewRoute: typeof NewRoute
+  LearnPlanIdRoute: typeof LearnPlanIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn/$planId': {
+      id: '/learn/$planId'
+      path: '/learn/$planId'
+      fullPath: '/learn/$planId'
+      preLoaderRoute: typeof LearnPlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
   NewRoute: NewRoute,
+  LearnPlanIdRoute: LearnPlanIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
