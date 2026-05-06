@@ -68,6 +68,15 @@ function AuthPage() {
           <Button type="submit" disabled={busy} className="w-full">{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</Button>
         </form>
 
+        <div className="mt-4 flex items-center gap-3">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground">OR</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <Button type="button" variant="outline" className="w-full mt-4" onClick={googleSignIn}>
+          Continue with Google
+        </Button>
+
         <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="mt-6 text-sm text-muted-foreground hover:text-foreground w-full text-center">
           {mode === "signin" ? "No account? Sign up" : "Have an account? Sign in"}
         </button>
