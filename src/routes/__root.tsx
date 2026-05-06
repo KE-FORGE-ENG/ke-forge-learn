@@ -74,13 +74,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LearnPath — AI-paced learning, page by page" },
-      { name: "description", content: "Upload a PDF or topic, pick 1–5 days, and get an adaptive AI study plan with quizzes and videos." },
+      { title: "FLB — fuoye learning hub AI-pace learning" },
+      { name: "description", content: "Built to make studying easier and interesting ." },
       { name: "author", content: "LearnPath" },
-      { property: "og:title", content: "LearnPath — AI-paced learning" },
-      { property: "og:description", content: "Adaptive PDF & topic learning plans. Page by page. 1–5 days." },
+      { property: "og:title", content: "FLB — fuoye learning hub AI-pace learning" },
+      { property: "og:description", content: "Built to make studying easier and interesting ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "FLB — fuoye learning hub AI-pace learning" },
+      { name: "twitter:description", content: "Built to make studying easier and interesting ." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/R8MKuakcAFgaimMA8ZMksqh5gPu1/social-images/social-1778110309284-1778013166411.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/R8MKuakcAFgaimMA8ZMksqh5gPu1/social-images/social-1778110309284-1778013166411.webp" },
     ],
     links: [
       {
