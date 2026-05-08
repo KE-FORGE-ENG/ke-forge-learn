@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Brain, Sparkles, Target, Youtube } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -23,7 +24,8 @@ function Index() {
             </div>
             LearnPath
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <ThemeToggle />
             <Button asChild variant="ghost"><Link to="/auth">Sign in</Link></Button>
             <Button asChild><Link to="/auth">Get started</Link></Button>
           </div>
