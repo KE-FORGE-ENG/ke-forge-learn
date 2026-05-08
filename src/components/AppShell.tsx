@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Brain, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { username, signOut, user } = useAuth();
@@ -18,6 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="flex items-center gap-3">
             {user && <span className="text-sm text-muted-foreground hidden sm:inline">@{username ?? "you"}</span>}
+            <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav({ to: "/" }); }}>
               <LogOut className="w-4 h-4 mr-1" /> Sign out
             </Button>
