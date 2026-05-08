@@ -200,6 +200,10 @@ function Learn() {
                 {content.followups.map((q, i) => <li key={i}>{q}</li>)}
               </ul>
             </Card>
+
+            <Card className="p-0 overflow-hidden">
+              <LiveChat planId={planId} day={day} sourceText={sourceText} />
+            </Card>
           </div>
 
           <div className="space-y-4">
