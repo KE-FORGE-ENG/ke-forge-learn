@@ -14,15 +14,25 @@ Deno.serve(async (req) => {
     if (!q) return new Response(JSON.stringify({ items: [] }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     if (YT_KEY) {
-      const r = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=4&q=${encodeURIComponent(q)}&key=${YT_KEY}`
-      );
+      const params = new URLSearchParams({
+        part: "snippet",
+        type: "video",
+        maxResults: "5",
+        q: `${q} tutorial explained`,
+        relevanceLanguage: "en",
+        videoEmbeddable: "true",
+        safeSearch: "moderate",
+        order: "relevance",
+        key: YT_KEY,
+      });
+      const r = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`);
       const d = await r.json();
       const items = (d.items || []).map((it: any) => ({
         id: it.id.videoId,
         title: it.snippet.title,
         channel: it.snippet.channelTitle,
         thumbnail: it.snippet.thumbnails?.medium?.url,
+        description: it.snippet.description,
       }));
       return new Response(JSON.stringify({ items }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
