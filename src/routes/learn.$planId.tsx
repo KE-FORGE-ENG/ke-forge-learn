@@ -201,9 +201,7 @@ function Learn() {
               </ul>
             </Card>
 
-            <Card className="p-0 overflow-hidden">
-              <LiveChat planId={planId} day={day} sourceText={sourceText} />
-            </Card>
+            <LiveChat planId={planId} day={day} sourceText={sourceText} />
           </div>
 
           <div className="space-y-4">
