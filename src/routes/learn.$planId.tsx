@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { callAi, youtubeSearchDirect } from "@/lib/api";
-import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { LiveChat } from "@/components/LiveChat";
 
 export const Route = createFileRoute("/learn/$planId")({ component: Learn });
 
@@ -85,9 +86,13 @@ function Learn() {
       setContent(sess?.content as DayContent);
       setCompleted(!!sess?.completed);
 
-      // Fetch youtube
+      // Fetch youtube — build a focused, topic-correlated query
       try {
-        const yt = await youtubeSearchDirect((sess?.content as DayContent)?.youtube_query ?? doc.title);
+        const c = sess?.content as DayContent;
+        const topics = (c?.classification ?? []).slice(0, 3).join(" ");
+        const built = [c?.youtube_query, c?.title, topics, doc.title]
+          .filter(Boolean).join(" ").slice(0, 180);
+        const yt = await youtubeSearchDirect(built || doc.title);
         setVideos(yt.items ?? []);
       } catch { /* ignore */ }
     } catch (e: any) {
