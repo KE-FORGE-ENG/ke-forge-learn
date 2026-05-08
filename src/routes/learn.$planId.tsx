@@ -86,13 +86,17 @@ function Learn() {
       setContent(sess?.content as DayContent);
       setCompleted(!!sess?.completed);
 
-      // Fetch youtube — build a focused, topic-correlated query
+      // Fetch youtube — semantic search using full lesson context + PDF excerpt
       try {
         const c = sess?.content as DayContent;
-        const topics = (c?.classification ?? []).slice(0, 3).join(" ");
-        const built = [c?.youtube_query, c?.title, topics, doc.title]
-          .filter(Boolean).join(" ").slice(0, 180);
-        const yt = await youtubeSearchDirect(built || doc.title);
+        const yt = await youtubeSearchDirect(c?.title || doc.title, {
+          title: c?.title,
+          summary: c?.summary,
+          classification: c?.classification,
+          concepts: c?.concepts,
+          docTitle: doc.title,
+          sourceExcerpt: sourceText.slice(0, 2000),
+        });
         setVideos(yt.items ?? []);
       } catch { /* ignore */ }
     } catch (e: any) {
