@@ -25,11 +25,20 @@ export async function youtubeSearch(q: string) {
   return data;
 }
 
-export async function youtubeSearchDirect(q: string) {
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search?q=${encodeURIComponent(q)}`;
+export async function youtubeSearchDirect(q: string, ctx?: Record<string, any>) {
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search`;
   const session = (await supabase.auth.getSession()).data.session;
-  const r = await fetch(url, {
-    headers: { Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+  const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (ctx) {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ q, ...ctx }),
+    });
+    return await r.json();
+  }
+  const r = await fetch(`${url}?q=${encodeURIComponent(q)}`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
   return await r.json();
 }
