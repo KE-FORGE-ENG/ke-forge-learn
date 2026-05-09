@@ -69,11 +69,6 @@ function Index() {
       <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
         Made by <span className="font-semibold tracking-widest">Enoch (Etech)</span>
       </footer>
-
-      {/* Global watermark */}
-      <div className="pointer-events-none fixed bottom-2 right-3 z-50 text-[10px] font-medium text-muted-foreground/70 select-none">
-        Made by Enoch (Etech)
-      </div>
     </div>
   );
 }
