@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] grid place-items-center text-primary-foreground">
               <Brain className="w-5 h-5" />
             </div>
-            LearnPath
+            Etech Learning Hub
           </Link>
           <div className="flex items-center gap-3">
             {user && <span className="text-sm text-muted-foreground hidden sm:inline">@{username ?? "you"}</span>}
