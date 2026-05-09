@@ -22,7 +22,7 @@ function Index() {
             <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] grid place-items-center text-primary-foreground">
               <Brain className="w-5 h-5" />
             </div>
-            LearnPath
+            Etech Learning Hub
           </div>
           <div className="flex gap-2 items-center">
             <ThemeToggle />
@@ -67,8 +67,13 @@ function Index() {
       </section>
 
       <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
-        <span className="font-semibold tracking-widest">ETech</span> · Crafted with care
+        Made by <span className="font-semibold tracking-widest">Enoch (Etech)</span>
       </footer>
+
+      {/* Global watermark */}
+      <div className="pointer-events-none fixed bottom-2 right-3 z-50 text-[10px] font-medium text-muted-foreground/70 select-none">
+        Made by Enoch (Etech)
+      </div>
     </div>
   );
 }
