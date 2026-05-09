@@ -117,6 +117,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  if (typeof window !== "undefined" && !(window as any).__etechReminderStarted) {
+    (window as any).__etechReminderStarted = true;
+    import("@/lib/reminders").then((m) => m.startReminderLoop());
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
