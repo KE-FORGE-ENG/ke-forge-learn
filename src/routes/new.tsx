@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parsePdf, chunkPages } from "@/lib/pdf";
-import { Upload, Loader2 } from "lucide-react";
+import { callAi } from "@/lib/api";
+import { Upload, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/new")({ component: NewPlan });
@@ -25,6 +26,8 @@ function NewPlan() {
   const [topic, setTopic] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [pageCount, setPageCount] = useState<number | null>(null);
+  const [images, setImages] = useState<{ name: string; dataUrl: string }[]>([]);
+  const [ocrPreview, setOcrPreview] = useState<string>("");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -83,6 +86,49 @@ function NewPlan() {
       }).select().single();
       if (pErr) throw pErr;
       toast.success("Plan created!");
+      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally { setBusy(false); }
+  };
+
+  const onImages = async (files: FileList) => {
+    const arr: { name: string; dataUrl: string }[] = [];
+    for (const f of Array.from(files)) {
+      const dataUrl = await new Promise<string>((res) => {
+        const r = new FileReader();
+        r.onload = () => res(String(r.result));
+        r.readAsDataURL(f);
+      });
+      arr.push({ name: f.name, dataUrl });
+    }
+    setImages([...images, ...arr]);
+  };
+
+  const createFromImages = async () => {
+    if (!user || images.length === 0) return;
+    setBusy(true);
+    try {
+      toast.message(`Reading ${images.length} image${images.length > 1 ? "s" : ""}…`);
+      const pages: { page: number; text: string }[] = [];
+      for (let i = 0; i < images.length; i++) {
+        const res = await callAi("ocr_image", { imageDataUrl: images[i].dataUrl });
+        const text = (res.text || "").trim();
+        if (text) pages.push({ page: i + 1, text });
+        setOcrPreview((prev) => prev + (prev ? "\n\n" : "") + text.slice(0, 200) + "…");
+      }
+      if (pages.length === 0) throw new Error("No readable text found in images");
+      const { data: doc, error: dErr } = await supabase.from("documents").insert({
+        user_id: user.id, title: title || `Notes ${new Date().toLocaleDateString()}`,
+        source_type: "images", pages, page_count: pages.length,
+      }).select().single();
+      if (dErr) throw dErr;
+      const chunks = chunkPages(pages.length, days);
+      const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
+        user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
+      }).select().single();
+      if (pErr) throw pErr;
+      toast.success(`Plan ready from ${pages.length} note${pages.length > 1 ? "s" : ""}!`);
       nav({ to: "/learn/$planId", params: { planId: plan.id } });
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
