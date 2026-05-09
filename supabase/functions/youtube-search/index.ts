@@ -83,13 +83,10 @@ Deno.serve(async (req) => {
     }
 
     if (!YT_KEY) {
-      return new Response(JSON.stringify({
-        items: [
-          { id: "dQw4w9WgXcQ", title: `${baseQ} — overview`, channel: "Demo", thumbnail: "" },
-          { id: "kJQP7kiw5Fk", title: `${baseQ} — deep dive`, channel: "Demo", thumbnail: "" },
-        ],
-        mock: true,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ items: [], error: "YOUTUBE_API_KEY not configured" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Step 1: Generate 2-3 optimized search queries from the day context
