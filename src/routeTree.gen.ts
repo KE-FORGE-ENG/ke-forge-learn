@@ -13,7 +13,9 @@ import { Route as NewRouteImport } from './routes/new'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MindmapPlanIdRouteImport } from './routes/mindmap.$planId'
 import { Route as LearnPlanIdRouteImport } from './routes/learn.$planId'
+import { Route as FlashcardsPlanIdRouteImport } from './routes/flashcards.$planId'
 import { Route as QuizPlanIdDayRouteImport } from './routes/quiz.$planId.$day'
 
 const NewRoute = NewRouteImport.update({
@@ -36,9 +38,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MindmapPlanIdRoute = MindmapPlanIdRouteImport.update({
+  id: '/mindmap/$planId',
+  path: '/mindmap/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnPlanIdRoute = LearnPlanIdRouteImport.update({
   id: '/learn/$planId',
   path: '/learn/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FlashcardsPlanIdRoute = FlashcardsPlanIdRouteImport.update({
+  id: '/flashcards/$planId',
+  path: '/flashcards/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuizPlanIdDayRoute = QuizPlanIdDayRouteImport.update({
@@ -52,7 +64,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/new': typeof NewRoute
+  '/flashcards/$planId': typeof FlashcardsPlanIdRoute
   '/learn/$planId': typeof LearnPlanIdRoute
+  '/mindmap/$planId': typeof MindmapPlanIdRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +74,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/new': typeof NewRoute
+  '/flashcards/$planId': typeof FlashcardsPlanIdRoute
   '/learn/$planId': typeof LearnPlanIdRoute
+  '/mindmap/$planId': typeof MindmapPlanIdRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesById {
@@ -69,7 +85,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/new': typeof NewRoute
+  '/flashcards/$planId': typeof FlashcardsPlanIdRoute
   '/learn/$planId': typeof LearnPlanIdRoute
+  '/mindmap/$planId': typeof MindmapPlanIdRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRouteTypes {
@@ -79,7 +97,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/new'
+    | '/flashcards/$planId'
     | '/learn/$planId'
+    | '/mindmap/$planId'
     | '/quiz/$planId/$day'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -87,7 +107,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/new'
+    | '/flashcards/$planId'
     | '/learn/$planId'
+    | '/mindmap/$planId'
     | '/quiz/$planId/$day'
   id:
     | '__root__'
@@ -95,7 +117,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/new'
+    | '/flashcards/$planId'
     | '/learn/$planId'
+    | '/mindmap/$planId'
     | '/quiz/$planId/$day'
   fileRoutesById: FileRoutesById
 }
@@ -104,7 +128,9 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
   NewRoute: typeof NewRoute
+  FlashcardsPlanIdRoute: typeof FlashcardsPlanIdRoute
   LearnPlanIdRoute: typeof LearnPlanIdRoute
+  MindmapPlanIdRoute: typeof MindmapPlanIdRoute
   QuizPlanIdDayRoute: typeof QuizPlanIdDayRoute
 }
 
@@ -138,11 +164,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mindmap/$planId': {
+      id: '/mindmap/$planId'
+      path: '/mindmap/$planId'
+      fullPath: '/mindmap/$planId'
+      preLoaderRoute: typeof MindmapPlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn/$planId': {
       id: '/learn/$planId'
       path: '/learn/$planId'
       fullPath: '/learn/$planId'
       preLoaderRoute: typeof LearnPlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flashcards/$planId': {
+      id: '/flashcards/$planId'
+      path: '/flashcards/$planId'
+      fullPath: '/flashcards/$planId'
+      preLoaderRoute: typeof FlashcardsPlanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quiz/$planId/$day': {
@@ -160,9 +200,21 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
   NewRoute: NewRoute,
+  FlashcardsPlanIdRoute: FlashcardsPlanIdRoute,
   LearnPlanIdRoute: LearnPlanIdRoute,
+  MindmapPlanIdRoute: MindmapPlanIdRoute,
   QuizPlanIdDayRoute: QuizPlanIdDayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
