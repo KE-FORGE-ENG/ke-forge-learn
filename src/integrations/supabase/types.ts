@@ -118,6 +118,51 @@ export type Database = {
         }
         Relationships: []
       }
+      flashcards: {
+        Row: {
+          back: string
+          created_at: string
+          day: number | null
+          due_at: string
+          ease: number
+          front: string
+          id: string
+          interval_days: number
+          last_reviewed_at: string | null
+          plan_id: string | null
+          reps: number
+          user_id: string
+        }
+        Insert: {
+          back: string
+          created_at?: string
+          day?: number | null
+          due_at?: string
+          ease?: number
+          front: string
+          id?: string
+          interval_days?: number
+          last_reviewed_at?: string | null
+          plan_id?: string | null
+          reps?: number
+          user_id: string
+        }
+        Update: {
+          back?: string
+          created_at?: string
+          day?: number | null
+          due_at?: string
+          ease?: number
+          front?: string
+          id?: string
+          interval_days?: number
+          last_reviewed_at?: string | null
+          plan_id?: string | null
+          reps?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       learning_plans: {
         Row: {
           created_at: string
@@ -176,6 +221,30 @@ export type Database = {
           id?: string
           profile?: Json
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mindmaps: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          plan_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          id?: string
+          plan_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          plan_id?: string
           user_id?: string
         }
         Relationships: []
@@ -241,6 +310,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reminder_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          last_notified_at: string | null
+          time_of_day: string
+          timezone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          last_notified_at?: string | null
+          time_of_day?: string
+          timezone?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          last_notified_at?: string | null
+          time_of_day?: string
+          timezone?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_interactions: {
         Row: {

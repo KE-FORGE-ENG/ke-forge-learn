@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parsePdf, chunkPages } from "@/lib/pdf";
-import { Upload, Loader2 } from "lucide-react";
+import { callAi } from "@/lib/api";
+import { Upload, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/new")({ component: NewPlan });
@@ -25,6 +26,8 @@ function NewPlan() {
   const [topic, setTopic] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [pageCount, setPageCount] = useState<number | null>(null);
+  const [images, setImages] = useState<{ name: string; dataUrl: string }[]>([]);
+  const [ocrPreview, setOcrPreview] = useState<string>("");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -89,18 +92,62 @@ function NewPlan() {
     } finally { setBusy(false); }
   };
 
+  const onImages = async (files: FileList) => {
+    const arr: { name: string; dataUrl: string }[] = [];
+    for (const f of Array.from(files)) {
+      const dataUrl = await new Promise<string>((res) => {
+        const r = new FileReader();
+        r.onload = () => res(String(r.result));
+        r.readAsDataURL(f);
+      });
+      arr.push({ name: f.name, dataUrl });
+    }
+    setImages([...images, ...arr]);
+  };
+
+  const createFromImages = async () => {
+    if (!user || images.length === 0) return;
+    setBusy(true);
+    try {
+      toast.message(`Reading ${images.length} image${images.length > 1 ? "s" : ""}…`);
+      const pages: { page: number; text: string }[] = [];
+      for (let i = 0; i < images.length; i++) {
+        const res = await callAi("ocr_image", { imageDataUrl: images[i].dataUrl });
+        const text = (res.text || "").trim();
+        if (text) pages.push({ page: i + 1, text });
+        setOcrPreview((prev) => prev + (prev ? "\n\n" : "") + text.slice(0, 200) + "…");
+      }
+      if (pages.length === 0) throw new Error("No readable text found in images");
+      const { data: doc, error: dErr } = await supabase.from("documents").insert({
+        user_id: user.id, title: title || `Notes ${new Date().toLocaleDateString()}`,
+        source_type: "images", pages, page_count: pages.length,
+      }).select().single();
+      if (dErr) throw dErr;
+      const chunks = chunkPages(pages.length, days);
+      const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
+        user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
+      }).select().single();
+      if (pErr) throw pErr;
+      toast.success(`Plan ready from ${pages.length} note${pages.length > 1 ? "s" : ""}!`);
+      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally { setBusy(false); }
+  };
+
   if (!user) return null;
 
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold">Create a learning plan</h1>
-        <p className="text-muted-foreground mt-1">Upload a PDF or describe a topic. We'll split it into a daily plan.</p>
+        <p className="text-muted-foreground mt-1">Upload a PDF, snap photos of notes, or describe a topic.</p>
 
         <Card className="mt-6 p-6">
           <Tabs defaultValue="pdf">
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="pdf">Upload PDF</TabsTrigger>
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="pdf">PDF</TabsTrigger>
+              <TabsTrigger value="images">Photo notes</TabsTrigger>
               <TabsTrigger value="topic">Topic</TabsTrigger>
             </TabsList>
             <TabsContent value="pdf" className="mt-6 space-y-4">
@@ -114,6 +161,33 @@ function NewPlan() {
                 <Label>Title</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Document title" />
               </div>
+            </TabsContent>
+            <TabsContent value="images" className="mt-6 space-y-4">
+              <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
+                <input type="file" accept="image/*" multiple capture="environment" className="hidden"
+                  onChange={(e) => e.target.files && onImages(e.target.files)} />
+                <Camera className="w-8 h-8 mx-auto text-muted-foreground" />
+                <p className="mt-2 text-sm font-medium">{images.length ? `${images.length} image${images.length > 1 ? "s" : ""} selected` : "Snap or choose photos of handwritten / printed notes"}</p>
+                <p className="text-xs text-muted-foreground mt-1">AI will extract text from each photo (OCR).</p>
+              </label>
+              {images.length > 0 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {images.map((im, i) => (
+                    <div key={i} className="relative aspect-square rounded-md overflow-hidden bg-muted">
+                      <img src={im.dataUrl} alt={im.name} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Lecture notes — Week 3" />
+              </div>
+              {ocrPreview && (
+                <div className="text-xs bg-muted/50 rounded-lg p-3 max-h-40 overflow-y-auto whitespace-pre-wrap">
+                  {ocrPreview}
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="topic" className="mt-6 space-y-4">
               <div className="space-y-2">
@@ -143,8 +217,8 @@ function NewPlan() {
           </div>
 
           <Button
-            disabled={busy || (!file && !topic.trim())}
-            onClick={() => (file ? createFromPdf() : createFromTopic())}
+            disabled={busy || (!file && !topic.trim() && images.length === 0)}
+            onClick={() => (images.length > 0 ? createFromImages() : file ? createFromPdf() : createFromTopic())}
             className="w-full mt-6 shadow-[var(--shadow-glow)]"
             size="lg"
           >

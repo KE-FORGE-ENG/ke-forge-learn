@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { callAi, youtubeSearchDirect } from "@/lib/api";
-import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network } from "lucide-react";
 import { toast } from "sonner";
 import { LiveChat } from "@/components/LiveChat";
+import { AudioLecture } from "@/components/AudioLecture";
 
 export const Route = createFileRoute("/learn/$planId")({ component: Learn });
 
@@ -183,6 +184,9 @@ function Learn() {
                 {content.classification.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
               </div>
               <p className="mt-4 whitespace-pre-wrap leading-relaxed text-foreground/90">{content.summary}</p>
+              <div className="mt-4">
+                <AudioLecture title={content.title} text={`${content.summary}\n\n${content.concepts.map((c) => `${c.name}. ${c.explanation}.${c.example ? " For example: " + c.example : ""}`).join("\n\n")}`} />
+              </div>
             </Card>
 
             <Card className="p-6">
@@ -230,6 +234,12 @@ function Learn() {
               </Button>
               <Button asChild variant="outline" className="w-full">
                 <Link to="/quiz/$planId/$day" params={{ planId, day: String(day) }}>Take quiz</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/flashcards/$planId" params={{ planId }}><Layers className="w-4 h-4 mr-1" /> Flashcards</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/mindmap/$planId" params={{ planId }}><Network className="w-4 h-4 mr-1" /> Mind map</Link>
               </Button>
               <Button onClick={completeDay} disabled={completed} className="w-full">
                 <CheckCircle2 className="w-4 h-4 mr-1" /> {completed ? "Day complete" : "Mark day complete"}

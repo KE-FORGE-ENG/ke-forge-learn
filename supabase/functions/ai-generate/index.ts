@@ -1,5 +1,5 @@
-// AI generation edge function for LearnPath
-// Handles: day plan generation, simpler re-explanation, quiz generation, quiz grading suggestions
+// AI generation edge function for Etech Learning Hub
+// Actions: generate_day, generate_quiz, generate_flashcards, generate_mindmap, ocr_image
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -13,7 +13,7 @@ const INTENSITY: Record<number, string> = {
   2: "Day 2 — EXTEND. Build on Day 1 with more examples, edge cases, and slightly deeper detail.",
   3: "Day 3 — DEEPER + CONNECTIONS. Cross-topic links, deeper follow-up questions, comparisons.",
   4: "Day 4 — REVIEW + DEEPER. AI summary, classification recap, deeper questions, more follow-ups.",
-  5: "Day 5 — INTENSE. Micro-topics, aggressive follow-ups, daily review, but NEVER overwhelming. Adaptive based on user pattern.",
+  5: "Day 5 — INTENSE. Micro-topics, aggressive follow-ups, daily review, but NEVER overwhelming.",
 };
 
 async function callAI(body: any) {
@@ -38,8 +38,8 @@ const dayTool = {
       type: "object",
       properties: {
         title: { type: "string" },
-        summary: { type: "string", description: "Concise day summary, markdown allowed" },
-        classification: { type: "array", items: { type: "string" }, description: "Topics/categories covered" },
+        summary: { type: "string" },
+        classification: { type: "array", items: { type: "string" } },
         concepts: {
           type: "array",
           items: {
@@ -52,8 +52,8 @@ const dayTool = {
             required: ["name", "explanation"],
           },
         },
-        followups: { type: "array", items: { type: "string" }, description: "Open-ended follow-up questions" },
-        youtube_query: { type: "string", description: "Best YouTube search query for this day" },
+        followups: { type: "array", items: { type: "string" } },
+        youtube_query: { type: "string" },
       },
       required: ["title", "summary", "classification", "concepts", "followups", "youtube_query"],
     },
@@ -88,6 +88,57 @@ const quizTool = {
   },
 };
 
+const flashTool = {
+  type: "function",
+  function: {
+    name: "emit_flashcards",
+    description: "Emit study flashcards",
+    parameters: {
+      type: "object",
+      properties: {
+        cards: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              front: { type: "string", description: "Question or term" },
+              back: { type: "string", description: "Concise answer or definition" },
+            },
+            required: ["front", "back"],
+          },
+        },
+      },
+      required: ["cards"],
+    },
+  },
+};
+
+const mindmapTool = {
+  type: "function",
+  function: {
+    name: "emit_mindmap",
+    description: "Emit a concept mind map",
+    parameters: {
+      type: "object",
+      properties: {
+        root: { type: "string", description: "Central topic" },
+        branches: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              label: { type: "string" },
+              children: { type: "array", items: { type: "string" } },
+            },
+            required: ["label", "children"],
+          },
+        },
+      },
+      required: ["root", "branches"],
+    },
+  },
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -102,13 +153,12 @@ Deno.serve(async (req) => {
           : "User is following well; you may push depth slightly more.";
       const sys = `You are an expert tutor building a ${days}-day learning plan. ${INTENSITY[day]} ${adaptive}${
         simplified ? " Use ELI5 tone — analogies, stories, very simple wording." : ""
-      } Use the source content provided. Be accurate, be concise, never invent facts not supported by the source.`;
-      const user = `SOURCE CONTENT (covering this day's pages/scope):\n\n${sourceText.slice(0, 18000)}\n\nGenerate the day's learning content.`;
+      } Use the source content provided. Be accurate, never invent facts.`;
       const data = await callAI({
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: sys },
-          { role: "user", content: user },
+          { role: "user", content: `SOURCE:\n\n${(sourceText || "").slice(0, 18000)}\n\nGenerate the day's content.` },
         ],
         tools: [dayTool],
         tool_choice: { type: "function", function: { name: "emit_day" } },
@@ -122,14 +172,67 @@ Deno.serve(async (req) => {
       const data = await callAI({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Create a CBT quiz of ${count} questions covering the source. Mix MCQ (4 options), True/False, and fill-in-blank. Provide concise explanations. Day context: ${day || "review"}.` },
-          { role: "user", content: `SOURCE:\n${sourceText.slice(0, 18000)}` },
+          { role: "system", content: `Create a CBT quiz of ${count} questions covering the source. Mix MCQ (4 options), True/False, and fill-in-blank. Provide concise explanations. Day: ${day || "review"}.` },
+          { role: "user", content: `SOURCE:\n${(sourceText || "").slice(0, 18000)}` },
         ],
         tools: [quizTool],
         tool_choice: { type: "function", function: { name: "emit_quiz" } },
       });
       const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
       return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "generate_flashcards") {
+      const { sourceText, dayContent, count = 10 } = payload;
+      const ctx = dayContent
+        ? `Lesson title: ${dayContent.title}\nSummary: ${dayContent.summary}\nConcepts: ${(dayContent.concepts || []).map((c: any) => `${c.name}: ${c.explanation}`).join("\n")}`
+        : "";
+      const data = await callAI({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: `Create ${count} high-quality study flashcards. Front = a precise question or term. Back = a CONCISE answer (1-2 sentences max). Cover the most important, testable facts. No duplicates.` },
+          { role: "user", content: `${ctx}\n\nSOURCE:\n${(sourceText || "").slice(0, 14000)}` },
+        ],
+        tools: [flashTool],
+        tool_choice: { type: "function", function: { name: "emit_flashcards" } },
+      });
+      const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
+      return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "generate_mindmap") {
+      const { sourceText, docTitle } = payload;
+      const data = await callAI({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: "Create a concept mind map. Pick ONE central root topic, then 4-7 main branches, each with 2-5 child concepts. Keep labels short (1-4 words)." },
+          { role: "user", content: `Document: ${docTitle || ""}\n\nSOURCE:\n${(sourceText || "").slice(0, 16000)}` },
+        ],
+        tools: [mindmapTool],
+        tool_choice: { type: "function", function: { name: "emit_mindmap" } },
+      });
+      const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
+      return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "ocr_image") {
+      const { imageDataUrl } = payload;
+      if (!imageDataUrl) throw new Error("imageDataUrl required");
+      const data = await callAI({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: "You are an OCR engine. Extract ALL readable text from the image (handwritten or printed). Preserve line breaks and structure. Return ONLY the extracted text, no commentary." },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Extract all text from this image:" },
+              { type: "image_url", image_url: { url: imageDataUrl } },
+            ],
+          },
+        ],
+      });
+      const text = data.choices[0].message.content || "";
+      return new Response(JSON.stringify({ text }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
