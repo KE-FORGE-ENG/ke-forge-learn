@@ -129,21 +129,13 @@ function DeepLearn() {
       }
       const result = (await callAi("deep_teach", {
         mode,
-        pageText: mode === "pdf" ? pageText : undefined,
+        pageText: mode === "pdf" ? pageText : mode === "notes" ? notes : undefined,
         pageNumber: mode === "pdf" ? page : undefined,
         totalPages: mode === "pdf" ? totalPages : undefined,
         topic: mode === "topic" ? topic : undefined,
         webContext,
       })) as DeepLesson;
-      // For notes mode, pass notes as pageText
-      if (mode === "notes") {
-        const r2 = (await callAi("deep_teach", {
-          mode: "notes", pageText: notes, webContext,
-        })) as DeepLesson;
-        setLesson(r2);
-      } else {
-        setLesson(result);
-      }
+      setLesson(result);
       await saveProgress({});
     } catch (e: any) { toast.error(e.message ?? "Failed"); }
     finally { setBusy(false); }
