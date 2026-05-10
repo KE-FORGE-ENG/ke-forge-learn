@@ -139,6 +139,47 @@ const mindmapTool = {
   },
 };
 
+const deepTool = {
+  type: "function",
+  function: {
+    name: "emit_deep_lesson",
+    description: "Emit a deep, exam-grade page lesson",
+    parameters: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        deep_explanation: { type: "string", description: "Thorough multi-paragraph teaching of the page content. Walk the student through it as a lecturer would." },
+        keywords: {
+          type: "array",
+          description: "Lecturer-style key terms — exact wording matters. Each with a precise definition.",
+          items: {
+            type: "object",
+            properties: {
+              term: { type: "string" },
+              definition: { type: "string" },
+              why_it_matters: { type: "string" },
+            },
+            required: ["term", "definition"],
+          },
+        },
+        important_facts: { type: "array", items: { type: "string" }, description: "Specific facts, numbers, names, dates, formulas a lecturer is likely to test." },
+        examples: { type: "array", items: { type: "string" } },
+        likely_exam_questions: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { question: { type: "string" }, answer: { type: "string" } },
+            required: ["question", "answer"],
+          },
+        },
+        recap: { type: "string" },
+        youtube_query: { type: "string" },
+      },
+      required: ["title", "deep_explanation", "keywords", "important_facts", "likely_exam_questions", "recap", "youtube_query"],
+    },
+  },
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -210,6 +251,36 @@ Deno.serve(async (req) => {
         ],
         tools: [mindmapTool],
         tool_choice: { type: "function", function: { name: "emit_mindmap" } },
+      });
+      const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
+      return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "deep_teach") {
+      const { pageText, pageNumber, totalPages, topic, webContext, mode } = payload;
+      const focus = mode === "topic"
+        ? `The student is studying the TOPIC: "${topic}". Teach the topic in depth as a lecturer would, going beyond surface summary.`
+        : mode === "notes"
+          ? `The student uploaded LECTURE NOTES (extracted via OCR). Teach exactly what's there, expanding every line into clear lecture-style explanation.`
+          : `The student is on PAGE ${pageNumber} of ${totalPages} of their PDF. Teach this page thoroughly — do NOT just summarize, walk through it as if lecturing.`;
+      const sys = `You are a deep-learning tutor preparing a student for an exam. Lecturers test BOTH conceptual understanding AND specific keywords, definitions, names, dates, formulas, and exact wording. Your job:
+1. Teach the content deeply (multi-paragraph, lecturer voice).
+2. Pull out every important KEYWORD/term with a precise definition and why a lecturer would test it.
+3. List specific FACTS likely to appear in exam questions (numbers, names, dates, formulas, exact phrases).
+4. Give worked EXAMPLES.
+5. Predict 4-6 likely EXAM QUESTIONS in the lecturer's style with model answers.
+${focus}
+${webContext ? "Use the WEB CONTEXT below to enrich and verify your teaching, citing useful additional facts not in the source." : "Use only the provided source."}
+Be accurate. Never invent facts.`;
+      const userMsg = `${mode === "topic" ? `TOPIC: ${topic}` : `SOURCE:\n${(pageText || "").slice(0, 14000)}`}${webContext ? `\n\nWEB CONTEXT:\n${webContext.slice(0, 8000)}` : ""}`;
+      const data = await callAI({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: userMsg },
+        ],
+        tools: [deepTool],
+        tool_choice: { type: "function", function: { name: "emit_deep_lesson" } },
       });
       const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
       return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });

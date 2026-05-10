@@ -24,26 +24,30 @@ function Quiz() {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [count, setCount] = useState(6);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
-  useEffect(() => {
+  const generate = async () => {
     if (!user) return;
-    (async () => {
-      setBusy(true);
-      try {
-        const { data: plan } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
-        const { data: doc } = await supabase.from("documents").select("*").eq("id", plan!.document_id).single();
-        const chunks = (plan!.page_chunks as any[]);
-        const upTo = chunks.find((c) => c.day === dayN)?.endPage ?? doc!.page_count;
-        const pages = (doc!.pages as { page: number; text: string }[]).filter((p) => p.page <= upTo);
-        const sourceText = pages.map((p) => p.text).join("\n\n");
-        const r = (await callAi("generate_quiz", { sourceText, day: dayN, count: 6 })) as { questions: Q[] };
-        setQuestions(r.questions);
-      } catch (e: any) { toast.error(e.message ?? "Failed"); }
-      finally { setBusy(false); }
-    })();
-  }, [user, planId, dayN]);
+    setStarted(true);
+    setBusy(true);
+    setQuestions(null);
+    setAnswers({});
+    setSubmitted(false);
+    try {
+      const { data: plan } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
+      const { data: doc } = await supabase.from("documents").select("*").eq("id", plan!.document_id).single();
+      const chunks = (plan!.page_chunks as any[]);
+      const upTo = chunks.find((c) => c.day === dayN)?.endPage ?? doc!.page_count;
+      const pages = (doc!.pages as { page: number; text: string }[]).filter((p) => p.page <= upTo);
+      const sourceText = pages.map((p) => p.text).join("\n\n");
+      const r = (await callAi("generate_quiz", { sourceText, day: dayN, count: Math.max(3, Math.min(30, count)) })) as { questions: Q[] };
+      setQuestions(r.questions);
+    } catch (e: any) { toast.error(e.message ?? "Failed"); }
+    finally { setBusy(false); }
+  };
 
   const score = useMemo(() => {
     if (!questions || !submitted) return 0;
@@ -78,8 +82,26 @@ function Quiz() {
         <h1 className="text-3xl font-bold mt-2">Day {dayN} quiz</h1>
         <p className="text-muted-foreground mt-1">Mix of MCQ, true/false, and fill-in-blank.</p>
 
-        {busy ? (
-          <Card className="p-12 text-center mt-6"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-sm text-muted-foreground">Generating quiz…</p></Card>
+        {!started ? (
+          <Card className="p-6 mt-6 space-y-4">
+            <div>
+              <Label htmlFor="qcount">How many questions?</Label>
+              <p className="text-xs text-muted-foreground">Choose between 3 and 30 questions.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Input id="qcount" type="number" min={3} max={30} value={count}
+                onChange={(e) => setCount(Math.max(3, Math.min(30, parseInt(e.target.value) || 6)))}
+                className="w-24" />
+              <div className="flex gap-1">
+                {[5, 10, 15, 20].map((n) => (
+                  <Button key={n} type="button" size="sm" variant={count === n ? "default" : "outline"} onClick={() => setCount(n)}>{n}</Button>
+                ))}
+              </div>
+            </div>
+            <Button onClick={generate} className="w-full" size="lg">Start quiz</Button>
+          </Card>
+        ) : busy ? (
+          <Card className="p-12 text-center mt-6"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-sm text-muted-foreground">Generating {count} questions…</p></Card>
         ) : !questions ? null : (
           <div className="mt-6 space-y-4">
             {questions.map((q, i) => {
