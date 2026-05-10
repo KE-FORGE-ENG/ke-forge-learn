@@ -351,7 +351,7 @@ function DeepLearn() {
               </div>
             )}
             <Button asChild variant="outline">
-              <Link to="/quiz/$planId/$day" params={{ planId, day: "1" }} search={{ deep: 1 } as any}>Take deep quiz</Link>
+              <Link to="/quiz/$planId/$day" params={{ planId, day: "1" }}>Take quiz</Link>
             </Button>
           </div>
         </div>
