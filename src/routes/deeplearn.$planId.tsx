@@ -141,12 +141,10 @@ function DeepLearn() {
     finally { setBusy(false); }
   };
 
-  // Auto-teach on page/topic/mode change unless paused
+  // Auto-teach for PDF page changes (topic/notes use explicit button)
   useEffect(() => {
     if (!user || !plan || !doc || paused) return;
     if (mode === "pdf" && pageText) teach();
-    if (mode === "topic" && topic.trim().length > 3) teach();
-    if (mode === "notes" && notes.trim().length > 20) teach();
     // eslint-disable-next-line
   }, [mode, page, doc, paused, webOn]);
 
