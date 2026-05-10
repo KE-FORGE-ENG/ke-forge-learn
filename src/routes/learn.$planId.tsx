@@ -241,6 +241,9 @@ function Learn() {
               <Button asChild variant="outline" className="w-full">
                 <Link to="/mindmap/$planId" params={{ planId }}><Network className="w-4 h-4 mr-1" /> Mind map</Link>
               </Button>
+              <Button asChild variant="default" className="w-full">
+                <Link to="/deeplearn/$planId" params={{ planId }}><Brain className="w-4 h-4 mr-1" /> Deep Learning</Link>
+              </Button>
               <Button onClick={completeDay} disabled={completed} className="w-full">
                 <CheckCircle2 className="w-4 h-4 mr-1" /> {completed ? "Day complete" : "Mark day complete"}
               </Button>
