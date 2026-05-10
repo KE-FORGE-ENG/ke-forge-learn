@@ -139,6 +139,47 @@ const mindmapTool = {
   },
 };
 
+const deepTool = {
+  type: "function",
+  function: {
+    name: "emit_deep_lesson",
+    description: "Emit a deep, exam-grade page lesson",
+    parameters: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        deep_explanation: { type: "string", description: "Thorough multi-paragraph teaching of the page content. Walk the student through it as a lecturer would." },
+        keywords: {
+          type: "array",
+          description: "Lecturer-style key terms — exact wording matters. Each with a precise definition.",
+          items: {
+            type: "object",
+            properties: {
+              term: { type: "string" },
+              definition: { type: "string" },
+              why_it_matters: { type: "string" },
+            },
+            required: ["term", "definition"],
+          },
+        },
+        important_facts: { type: "array", items: { type: "string" }, description: "Specific facts, numbers, names, dates, formulas a lecturer is likely to test." },
+        examples: { type: "array", items: { type: "string" } },
+        likely_exam_questions: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { question: { type: "string" }, answer: { type: "string" } },
+            required: ["question", "answer"],
+          },
+        },
+        recap: { type: "string" },
+        youtube_query: { type: "string" },
+      },
+      required: ["title", "deep_explanation", "keywords", "important_facts", "likely_exam_questions", "recap", "youtube_query"],
+    },
+  },
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
