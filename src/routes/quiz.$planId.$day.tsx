@@ -82,8 +82,26 @@ function Quiz() {
         <h1 className="text-3xl font-bold mt-2">Day {dayN} quiz</h1>
         <p className="text-muted-foreground mt-1">Mix of MCQ, true/false, and fill-in-blank.</p>
 
-        {busy ? (
-          <Card className="p-12 text-center mt-6"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-sm text-muted-foreground">Generating quiz…</p></Card>
+        {!started ? (
+          <Card className="p-6 mt-6 space-y-4">
+            <div>
+              <Label htmlFor="qcount">How many questions?</Label>
+              <p className="text-xs text-muted-foreground">Choose between 3 and 30 questions.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Input id="qcount" type="number" min={3} max={30} value={count}
+                onChange={(e) => setCount(Math.max(3, Math.min(30, parseInt(e.target.value) || 6)))}
+                className="w-24" />
+              <div className="flex gap-1">
+                {[5, 10, 15, 20].map((n) => (
+                  <Button key={n} type="button" size="sm" variant={count === n ? "default" : "outline"} onClick={() => setCount(n)}>{n}</Button>
+                ))}
+              </div>
+            </div>
+            <Button onClick={generate} className="w-full" size="lg">Start quiz</Button>
+          </Card>
+        ) : busy ? (
+          <Card className="p-12 text-center mt-6"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-sm text-muted-foreground">Generating {count} questions…</p></Card>
         ) : !questions ? null : (
           <div className="mt-6 space-y-4">
             {questions.map((q, i) => {
