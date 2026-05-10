@@ -286,6 +286,7 @@ Be accurate. Never invent facts.`;
       return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "ocr_image") {
       const { imageDataUrl } = payload;
       if (!imageDataUrl) throw new Error("imageDataUrl required");
       const data = await callAI({
