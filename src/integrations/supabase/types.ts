@@ -85,6 +85,45 @@ export type Database = {
           },
         ]
       }
+      deep_progress: {
+        Row: {
+          created_at: string
+          id: string
+          mode: string
+          notes_text: string | null
+          plan_id: string | null
+          position: number
+          topic: string | null
+          updated_at: string
+          user_id: string
+          web_search: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mode?: string
+          notes_text?: string | null
+          plan_id?: string | null
+          position?: number
+          topic?: string | null
+          updated_at?: string
+          user_id: string
+          web_search?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mode?: string
+          notes_text?: string | null
+          plan_id?: string | null
+          position?: number
+          topic?: string | null
+          updated_at?: string
+          user_id?: string
+          web_search?: boolean
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string
