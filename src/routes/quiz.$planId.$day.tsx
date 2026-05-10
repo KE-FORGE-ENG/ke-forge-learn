@@ -24,26 +24,30 @@ function Quiz() {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [count, setCount] = useState(6);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
-  useEffect(() => {
+  const generate = async () => {
     if (!user) return;
-    (async () => {
-      setBusy(true);
-      try {
-        const { data: plan } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
-        const { data: doc } = await supabase.from("documents").select("*").eq("id", plan!.document_id).single();
-        const chunks = (plan!.page_chunks as any[]);
-        const upTo = chunks.find((c) => c.day === dayN)?.endPage ?? doc!.page_count;
-        const pages = (doc!.pages as { page: number; text: string }[]).filter((p) => p.page <= upTo);
-        const sourceText = pages.map((p) => p.text).join("\n\n");
-        const r = (await callAi("generate_quiz", { sourceText, day: dayN, count: 6 })) as { questions: Q[] };
-        setQuestions(r.questions);
-      } catch (e: any) { toast.error(e.message ?? "Failed"); }
-      finally { setBusy(false); }
-    })();
-  }, [user, planId, dayN]);
+    setStarted(true);
+    setBusy(true);
+    setQuestions(null);
+    setAnswers({});
+    setSubmitted(false);
+    try {
+      const { data: plan } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
+      const { data: doc } = await supabase.from("documents").select("*").eq("id", plan!.document_id).single();
+      const chunks = (plan!.page_chunks as any[]);
+      const upTo = chunks.find((c) => c.day === dayN)?.endPage ?? doc!.page_count;
+      const pages = (doc!.pages as { page: number; text: string }[]).filter((p) => p.page <= upTo);
+      const sourceText = pages.map((p) => p.text).join("\n\n");
+      const r = (await callAi("generate_quiz", { sourceText, day: dayN, count: Math.max(3, Math.min(30, count)) })) as { questions: Q[] };
+      setQuestions(r.questions);
+    } catch (e: any) { toast.error(e.message ?? "Failed"); }
+    finally { setBusy(false); }
+  };
 
   const score = useMemo(() => {
     if (!questions || !submitted) return 0;
