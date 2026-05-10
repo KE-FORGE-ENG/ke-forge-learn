@@ -8,3 +8,6 @@ verify_jwt = true
 
 [functions.tutor-chat]
 verify_jwt = true
+
+[functions.web-search]
+verify_jwt = true
