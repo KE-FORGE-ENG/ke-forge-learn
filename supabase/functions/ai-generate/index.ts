@@ -1,4 +1,4 @@
-// AI generation edge function for Etech Learning Hub
+// AI generation edge function for Etek Learning Hub
 // Actions: generate_day, generate_quiz, generate_flashcards, generate_mindmap, ocr_image
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
