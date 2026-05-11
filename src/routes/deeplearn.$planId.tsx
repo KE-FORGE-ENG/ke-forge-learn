@@ -332,12 +332,16 @@ function DeepLearn() {
 
           {sources.length > 0 && (
             <Card className="p-4">
-              <div className="text-xs font-semibold mb-2 flex items-center gap-1"><Globe className="w-3 h-3" /> Web sources used</div>
-              <ul className="text-xs space-y-1">
-                {sources.map((s) => (
-                  <li key={s}><a href={s} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">{s} <ExternalLink className="w-3 h-3" /></a></li>
-                ))}
-              </ul>
+              <details>
+                <summary className="cursor-pointer text-xs font-semibold flex items-center gap-1 select-none">
+                  <Globe className="w-3 h-3" /> View sources ({sources.length})
+                </summary>
+                <ul className="text-xs space-y-1 mt-3">
+                  {sources.map((s) => (
+                    <li key={s}><a href={s} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 break-all">{s} <ExternalLink className="w-3 h-3 flex-shrink-0" /></a></li>
+                  ))}
+                </ul>
+              </details>
             </Card>
           )}
 
