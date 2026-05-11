@@ -210,11 +210,17 @@ Deno.serve(async (req) => {
     }
 
     if (action === "generate_quiz") {
-      const { sourceText, day, count = 6 } = payload;
+      const { sourceText, day, count = 6, mode = "practice", seed } = payload;
+      const styleSys =
+        mode === "cbt"
+          ? `Create a CBT (computer-based test) exam of ${count} THEORY questions. NO multiple-choice, NO true/false. Each is an open-ended short-answer / essay-style question testing real understanding. Provide a model answer and 3-6 KEYWORDS required for full marks (used to auto-grade). Provide a concise explanation. Day: ${day || "review"}.`
+          : mode === "test"
+            ? `Create a TEST of ${count} THEORY questions. NO multiple-choice, NO true/false. Short-answer questions a student can answer in 1-3 sentences. Provide a model answer, 2-5 grading KEYWORDS, and a brief explanation. Day: ${day || "review"}.`
+            : `Create a practice quiz of ${count} questions covering the source. Mix MCQ (4 options), True/False, and fill-in-blank. Provide concise explanations. Day: ${day || "review"}.`;
       const data = await callAI({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Create a CBT quiz of ${count} questions covering the source. Mix MCQ (4 options), True/False, and fill-in-blank. Provide concise explanations. Day: ${day || "review"}.` },
+          { role: "system", content: styleSys + (seed ? ` Variation seed: ${seed} — produce DIFFERENT questions than before.` : "") },
           { role: "user", content: `SOURCE:\n${(sourceText || "").slice(0, 18000)}` },
         ],
         tools: [quizTool],
