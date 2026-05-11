@@ -75,14 +75,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Etech Learning Hub — AI-paced learning" },
+      { title: "Etek Learning Hub — AI-paced learning" },
       { name: "description", content: "Built to make studying easier and interesting." },
-      { name: "author", content: "Enoch (Etech)" },
-      { property: "og:title", content: "Etech Learning Hub — AI-paced learning" },
+      { name: "author", content: "Enoch (Etek)" },
+      { property: "og:title", content: "Etek Learning Hub — AI-paced learning" },
       { property: "og:description", content: "Built to make studying easier and interesting." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Etech Learning Hub — AI-paced learning" },
+      { name: "twitter:title", content: "Etek Learning Hub — AI-paced learning" },
       { name: "twitter:description", content: "Built to make studying easier and interesting." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/R8MKuakcAFgaimMA8ZMksqh5gPu1/social-images/social-1778110309284-1778013166411.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/R8MKuakcAFgaimMA8ZMksqh5gPu1/social-images/social-1778110309284-1778013166411.webp" },
@@ -129,7 +129,7 @@ function RootComponent() {
           <Toaster richColors position="top-center" />
           <Outlet />
           <div className="pointer-events-none fixed bottom-2 right-3 z-[9999] text-[10px] font-medium text-muted-foreground/60 select-none">
-            Made by Enoch (Etech)
+            Made by Enoch (Etek)
           </div>
         </AuthProvider>
       </ThemeProvider>

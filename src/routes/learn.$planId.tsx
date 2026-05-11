@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { callAi, youtubeSearchDirect } from "@/lib/api";
-import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network, Brain } from "lucide-react";
+import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network } from "lucide-react";
 import { toast } from "sonner";
 import { LiveChat } from "@/components/LiveChat";
 import { AudioLecture } from "@/components/AudioLecture";
@@ -240,9 +240,6 @@ function Learn() {
               </Button>
               <Button asChild variant="outline" className="w-full">
                 <Link to="/mindmap/$planId" params={{ planId }}><Network className="w-4 h-4 mr-1" /> Mind map</Link>
-              </Button>
-              <Button asChild variant="default" className="w-full">
-                <Link to="/deeplearn/$planId" params={{ planId }}><Brain className="w-4 h-4 mr-1" /> Deep Learning</Link>
               </Button>
               <Button onClick={completeDay} disabled={completed} className="w-full">
                 <CheckCircle2 className="w-4 h-4 mr-1" /> {completed ? "Day complete" : "Mark day complete"}

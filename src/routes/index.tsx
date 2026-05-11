@@ -22,7 +22,7 @@ function Index() {
             <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] grid place-items-center text-primary-foreground">
               <Brain className="w-5 h-5" />
             </div>
-            Etech Learning Hub
+            Etek Learning Hub
           </div>
           <div className="flex gap-2 items-center">
             <ThemeToggle />
@@ -67,7 +67,7 @@ function Index() {
       </section>
 
       <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
-        Made by <span className="font-semibold tracking-widest">Enoch (Etech)</span>
+        Made by <span className="font-semibold tracking-widest">Enoch (Etek)</span>
       </footer>
     </div>
   );

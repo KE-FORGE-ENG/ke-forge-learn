@@ -242,12 +242,24 @@ function DeepLearn() {
         <Card className="p-4 mb-4 space-y-3">
           <div className="flex items-center justify-between">
             <Label>Lecture notes</Label>
-            <label className="cursor-pointer text-xs text-primary inline-flex items-center gap-1">
-              <Camera className="w-4 h-4" />
-              {ocrBusy ? "Extracting…" : "Snap photo"}
-              <input type="file" accept="image/*" capture="environment" className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleOcr(f); }} />
-            </label>
+            <div className="flex items-center gap-2">
+              {ocrBusy && (
+                <button type="button" onClick={() => setOcrBusy(false)} className="text-xs text-muted-foreground hover:text-destructive inline-flex items-center gap-1">
+                  Cancel
+                </button>
+              )}
+              <label className="cursor-pointer text-xs text-primary inline-flex items-center gap-1">
+                <Camera className="w-4 h-4" />
+                {ocrBusy ? "Extracting…" : "Snap photo"}
+                <input type="file" accept="image/*" capture="environment" className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleOcr(f); e.target.value = ""; }} />
+              </label>
+              {notes.trim().length > 0 && (
+                <button type="button" onClick={() => setNotes("")} className="text-xs text-muted-foreground hover:text-destructive">
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
           <Textarea rows={6} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Paste or extract your lecture notes here…" />
           <Button onClick={() => { saveProgress({ notes_text: notes }); teach(); }} disabled={busy || notes.trim().length < 20}>
@@ -332,12 +344,16 @@ function DeepLearn() {
 
           {sources.length > 0 && (
             <Card className="p-4">
-              <div className="text-xs font-semibold mb-2 flex items-center gap-1"><Globe className="w-3 h-3" /> Web sources used</div>
-              <ul className="text-xs space-y-1">
-                {sources.map((s) => (
-                  <li key={s}><a href={s} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">{s} <ExternalLink className="w-3 h-3" /></a></li>
-                ))}
-              </ul>
+              <details>
+                <summary className="cursor-pointer text-xs font-semibold flex items-center gap-1 select-none">
+                  <Globe className="w-3 h-3" /> View sources ({sources.length})
+                </summary>
+                <ul className="text-xs space-y-1 mt-3">
+                  {sources.map((s) => (
+                    <li key={s}><a href={s} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 break-all">{s} <ExternalLink className="w-3 h-3 flex-shrink-0" /></a></li>
+                  ))}
+                </ul>
+              </details>
             </Card>
           )}
 
