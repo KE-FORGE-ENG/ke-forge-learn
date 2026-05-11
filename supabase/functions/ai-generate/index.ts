@@ -73,10 +73,11 @@ const quizTool = {
           items: {
             type: "object",
             properties: {
-              type: { type: "string", enum: ["mcq", "tf", "fill"] },
+              type: { type: "string", enum: ["mcq", "tf", "fill", "theory"] },
               question: { type: "string" },
               options: { type: "array", items: { type: "string" } },
-              answer: { type: "string" },
+              answer: { type: "string", description: "For theory: a model answer / rubric used for grading." },
+              keywords: { type: "array", items: { type: "string" }, description: "For theory/fill questions: required keywords used to grade the answer." },
               explanation: { type: "string" },
             },
             required: ["type", "question", "answer", "explanation"],
