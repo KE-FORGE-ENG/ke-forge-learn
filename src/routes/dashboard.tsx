@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FileText, Plus, Sparkles, Calendar } from "lucide-react";
+import { FileText, Plus, Sparkles, Calendar, Brain } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
