@@ -290,9 +290,9 @@ Be accurate. Never invent facts.`;
       const { imageDataUrl } = payload;
       if (!imageDataUrl) throw new Error("imageDataUrl required");
       const data = await callAI({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: "You are an OCR engine. Extract ALL readable text from the image (handwritten or printed). Preserve line breaks and structure. Return ONLY the extracted text, no commentary." },
+          { role: "system", content: "You are a high-accuracy OCR engine specialized in lecture notes, handwritten text, math, diagrams, and printed pages. Extract EVERY readable character precisely. Preserve line breaks, bullet points, indentation, equations, and structure. For unclear handwriting, give your best transcription — do not skip lines. For diagrams, transcribe labels and captions. Do NOT add commentary, headers, or markdown — return ONLY the raw extracted text exactly as it appears." },
           {
             role: "user",
             content: [
