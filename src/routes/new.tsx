@@ -165,19 +165,35 @@ function NewPlan() {
             <TabsContent value="images" className="mt-6 space-y-4">
               <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
                 <input type="file" accept="image/*" multiple capture="environment" className="hidden"
-                  onChange={(e) => e.target.files && onImages(e.target.files)} />
+                  onChange={(e) => { if (e.target.files) onImages(e.target.files); e.target.value = ""; }} />
                 <Camera className="w-8 h-8 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-sm font-medium">{images.length ? `${images.length} image${images.length > 1 ? "s" : ""} selected` : "Snap or choose photos of handwritten / printed notes"}</p>
-                <p className="text-xs text-muted-foreground mt-1">AI will extract text from each photo (OCR).</p>
+                <p className="mt-2 text-sm font-medium">{images.length ? `${images.length} image${images.length > 1 ? "s" : ""} selected — tap to add more` : "Snap or choose photos of handwritten / printed notes"}</p>
+                <p className="text-xs text-muted-foreground mt-1">High-accuracy AI OCR (Gemini 2.5 Pro vision).</p>
               </label>
               {images.length > 0 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {images.map((im, i) => (
-                    <div key={i} className="relative aspect-square rounded-md overflow-hidden bg-muted">
-                      <img src={im.dataUrl} alt={im.name} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">{images.length} photo{images.length > 1 ? "s" : ""} ready</p>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => { setImages([]); setOcrPreview(""); }}>
+                      <X className="w-3 h-3 mr-1" /> Clear all
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {images.map((im, i) => (
+                      <div key={i} className="relative aspect-square rounded-md overflow-hidden bg-muted group">
+                        <img src={im.dataUrl} alt={im.name} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          aria-label="Remove photo"
+                          onClick={() => setImages(images.filter((_, j) => j !== i))}
+                          className="absolute top-1 right-1 bg-background/90 hover:bg-destructive hover:text-destructive-foreground rounded-full p-1 shadow"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
               <div className="space-y-2">
                 <Label>Title</Label>
