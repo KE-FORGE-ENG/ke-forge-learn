@@ -12,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parsePdf, chunkPages } from "@/lib/pdf";
 import { callAi } from "@/lib/api";
-import { Upload, Loader2, Camera } from "lucide-react";
+import { Upload, Loader2, Camera, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/new")({ component: NewPlan });
