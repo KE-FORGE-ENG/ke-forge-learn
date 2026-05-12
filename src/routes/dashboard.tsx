@@ -65,19 +65,19 @@ function Dashboard() {
       {plans.length > 0 && (
         <>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Active plans</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
             {plans.map((p) => {
               const doc = docs.find((d) => d.id === p.document_id);
               return (
-                <Card key={p.id} className="p-5 hover:shadow-[var(--shadow-card)] transition">
-                  <div className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" /> Day {p.current_day} of {p.days}</div>
-                  <h3 className="font-semibold mt-1 truncate">{doc?.title ?? "Plan"}</h3>
-                  <div className="flex gap-2 mt-4">
-                    <Button asChild size="sm" className="flex-1">
+                <Card key={p.id} className="p-3 sm:p-4 min-w-0 overflow-hidden hover:shadow-[var(--shadow-card)] transition">
+                  <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3 flex-shrink-0" /> Day {p.current_day}/{p.days}</div>
+                  <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{doc?.title ?? "Plan"}</h3>
+                  <div className="flex flex-col gap-1.5 mt-3">
+                    <Button asChild size="sm" className="w-full h-8 text-xs">
                       <Link to="/learn/$planId" params={{ planId: p.id }}>Continue</Link>
                     </Button>
-                    <Button asChild size="sm" variant="outline" className="flex-1">
-                      <Link to="/deeplearn/$planId" params={{ planId: p.id }}><Brain className="w-3.5 h-3.5 mr-1" /> Deep</Link>
+                    <Button asChild size="sm" variant="outline" className="w-full h-8 text-xs">
+                      <Link to="/deeplearn/$planId" params={{ planId: p.id }}><Brain className="w-3 h-3 mr-1" /> Deep learn</Link>
                     </Button>
                   </div>
                 </Card>
