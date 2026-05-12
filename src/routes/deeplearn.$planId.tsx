@@ -78,10 +78,8 @@ function DeepLearn() {
         .eq("plan_id", planId).eq("user_id", user.id).maybeSingle();
       if (pr) {
         setProgressId(pr.id);
-        setMode((pr.mode as Mode) ?? "pdf");
+        setMode("pdf");
         setPage(pr.position ?? 1);
-        setTopic(pr.topic ?? "");
-        setNotes(pr.notes_text ?? "");
         setWebOn(!!pr.web_search);
       }
     })();
