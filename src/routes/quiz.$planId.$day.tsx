@@ -134,7 +134,7 @@ function Quiz() {
   const modeMeta: Record<Mode, { label: string; icon: any; desc: string }> = {
     practice: { label: "Practice", icon: BookOpenCheck, desc: "Mixed MCQ, true/false, fill-in. Review at the end." },
     test: { label: "Test mode", icon: FlaskConical, desc: "Theory only. Instant correct/wrong feedback after each question. Up to 30 questions." },
-    cbt: { label: "CBT exam", icon: ClipboardCheck, desc: "Theory only. Timed. Marked at the end like a real exam. Up to 60 questions." },
+    cbt: { label: "CBT exam", icon: ClipboardCheck, desc: "Multiple choice only. Timed. Marked at the end like a real exam. Up to 60 questions." },
   };
 
   return (
