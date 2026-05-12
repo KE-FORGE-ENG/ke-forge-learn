@@ -211,35 +211,7 @@ function DeepLearn() {
         </div>
       </Card>
 
-      {mode === "notes" && (
-        <Card className="p-4 mb-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <Label>Lecture notes</Label>
-            <div className="flex items-center gap-2">
-              {ocrBusy && (
-                <button type="button" onClick={() => setOcrBusy(false)} className="text-xs text-muted-foreground hover:text-destructive inline-flex items-center gap-1">
-                  Cancel
-                </button>
-              )}
-              <label className="cursor-pointer text-xs text-primary inline-flex items-center gap-1">
-                <Camera className="w-4 h-4" />
-                {ocrBusy ? "Extracting…" : "Snap photo"}
-                <input type="file" accept="image/*" capture="environment" className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleOcr(f); e.target.value = ""; }} />
-              </label>
-              {notes.trim().length > 0 && (
-                <button type="button" onClick={() => setNotes("")} className="text-xs text-muted-foreground hover:text-destructive">
-                  Clear
-                </button>
-              )}
-            </div>
-          </div>
-          <Textarea rows={6} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Paste or extract your lecture notes here…" />
-          <Button onClick={() => { saveProgress({ notes_text: notes }); teach(); }} disabled={busy || notes.trim().length < 20}>
-            <FileText className="w-4 h-4 mr-1" /> Teach from notes
-          </Button>
-        </Card>
-      )}
+      {/* notes/topic UI removed in active-plan deep learn */}
 
       {/* Lesson body */}
       {paused ? (
