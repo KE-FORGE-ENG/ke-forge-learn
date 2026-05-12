@@ -201,7 +201,7 @@ function Quiz() {
             <Button onClick={() => generate(false)} className="w-full" size="lg">Start {modeMeta[mode].label}</Button>
           </Card>
         ) : busy ? (
-          <Card className="p-12 text-center mt-6"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-sm text-muted-foreground">Generating {count} {mode === "practice" ? "mixed" : "theory"} questions…</p></Card>
+          <Card className="p-12 text-center mt-6"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-sm text-muted-foreground">Generating {count} {mode === "practice" ? "mixed" : mode === "cbt" ? "multiple-choice" : "theory"} questions…</p></Card>
         ) : !questions ? null : (
           <>
             <div className="mt-6 flex items-center justify-between gap-2 flex-wrap">
