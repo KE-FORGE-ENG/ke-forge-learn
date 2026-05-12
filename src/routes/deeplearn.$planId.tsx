@@ -78,10 +78,8 @@ function DeepLearn() {
         .eq("plan_id", planId).eq("user_id", user.id).maybeSingle();
       if (pr) {
         setProgressId(pr.id);
-        setMode((pr.mode as Mode) ?? "pdf");
+        setMode("pdf");
         setPage(pr.position ?? 1);
-        setTopic(pr.topic ?? "");
-        setNotes(pr.notes_text ?? "");
         setWebOn(!!pr.web_search);
       }
     })();
@@ -190,83 +188,28 @@ function DeepLearn() {
         </div>
       </div>
 
-      {/* Mode switcher */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {([
-          { k: "pdf", label: "PDF page-by-page", icon: BookOpen },
-          { k: "topic", label: "Topic", icon: Sparkles },
-          { k: "notes", label: "Lecture notes (camera)", icon: Camera },
-        ] as const).map(({ k, label, icon: Icon }) => (
-          <button
-            key={k}
-            onClick={() => { setMode(k); setLesson(null); saveProgress({ mode: k }); }}
-            className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 border transition ${
-              mode === k ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-secondary"
-            }`}
-          ><Icon className="w-4 h-4" />{label}</button>
-        ))}
-      </div>
+      {/* Active-plan deep learn is locked to current PDF — no mode switcher, topic, or notes upload */}
 
-      {/* Mode controls */}
-      {mode === "pdf" && (
-        <Card className="p-4 mb-4 flex items-center justify-between flex-wrap gap-3">
-          <div className="text-sm">
-            <span className="font-semibold">Page {page}</span> of {totalPages} — {doc.title}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" disabled={page === 1} onClick={() => { const n = page - 1; setPage(n); saveProgress({ position: n }); }}>
-              <ChevronLeft className="w-4 h-4" /> Prev page
-            </Button>
-            <Input type="number" min={1} max={totalPages} value={page}
-              onChange={(e) => { const n = Math.max(1, Math.min(totalPages, parseInt(e.target.value) || 1)); setPage(n); }}
-              onBlur={() => saveProgress({ position: page })}
-              className="w-20" />
-            <Button size="sm" variant="outline" disabled={page === totalPages} onClick={() => { const n = page + 1; setPage(n); saveProgress({ position: n }); }}>
-              Next page <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </Card>
-      )}
-
-      {mode === "topic" && (
-        <Card className="p-4 mb-4 space-y-2">
-          <Label>Topic to study deeply</Label>
-          <div className="flex gap-2">
-            <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. Photosynthesis light-dependent reactions" />
-            <Button onClick={() => { saveProgress({ topic }); teach(); }} disabled={busy || !topic.trim()}>Teach</Button>
-          </div>
-        </Card>
-      )}
-
-      {mode === "notes" && (
-        <Card className="p-4 mb-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <Label>Lecture notes</Label>
-            <div className="flex items-center gap-2">
-              {ocrBusy && (
-                <button type="button" onClick={() => setOcrBusy(false)} className="text-xs text-muted-foreground hover:text-destructive inline-flex items-center gap-1">
-                  Cancel
-                </button>
-              )}
-              <label className="cursor-pointer text-xs text-primary inline-flex items-center gap-1">
-                <Camera className="w-4 h-4" />
-                {ocrBusy ? "Extracting…" : "Snap photo"}
-                <input type="file" accept="image/*" capture="environment" className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleOcr(f); e.target.value = ""; }} />
-              </label>
-              {notes.trim().length > 0 && (
-                <button type="button" onClick={() => setNotes("")} className="text-xs text-muted-foreground hover:text-destructive">
-                  Clear
-                </button>
-              )}
-            </div>
-          </div>
-          <Textarea rows={6} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Paste or extract your lecture notes here…" />
-          <Button onClick={() => { saveProgress({ notes_text: notes }); teach(); }} disabled={busy || notes.trim().length < 20}>
-            <FileText className="w-4 h-4 mr-1" /> Teach from notes
+      {/* PDF page controls */}
+      <Card className="p-4 mb-4 flex items-center justify-between flex-wrap gap-3">
+        <div className="text-sm">
+          <span className="font-semibold">Page {page}</span> of {totalPages} — <span className="break-all">{doc.title}</span>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button size="sm" variant="outline" disabled={page === 1} onClick={() => { const n = page - 1; setPage(n); saveProgress({ position: n }); }}>
+            <ChevronLeft className="w-4 h-4" /> Prev
           </Button>
-        </Card>
-      )}
+          <Input type="number" min={1} max={totalPages} value={page}
+            onChange={(e) => { const n = Math.max(1, Math.min(totalPages, parseInt(e.target.value) || 1)); setPage(n); }}
+            onBlur={() => saveProgress({ position: page })}
+            className="w-20" />
+          <Button size="sm" variant="outline" disabled={page === totalPages} onClick={() => { const n = page + 1; setPage(n); saveProgress({ position: n }); }}>
+            Next <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </Card>
+
+      {/* notes/topic UI removed in active-plan deep learn */}
 
       {/* Lesson body */}
       {paused ? (
