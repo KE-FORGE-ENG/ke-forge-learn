@@ -213,7 +213,7 @@ Deno.serve(async (req) => {
       const { sourceText, day, count = 6, mode = "practice", seed } = payload;
       const styleSys =
         mode === "cbt"
-          ? `Create a CBT (computer-based test) exam of ${count} THEORY questions. NO multiple-choice, NO true/false. Each is an open-ended short-answer / essay-style question testing real understanding. Provide a model answer and 3-6 KEYWORDS required for full marks (used to auto-grade). Provide a concise explanation. Day: ${day || "review"}.`
+          ? `Create a CBT (computer-based test) exam of ${count} MULTIPLE-CHOICE questions ONLY. Every question MUST be type "mcq" with EXACTLY 4 options. NO true/false, NO fill-in-blank, NO theory/open-ended. The "answer" field must be the exact text of the correct option. Make the questions test real understanding (not trivial recall) and include plausible distractors. Provide a concise explanation. Day: ${day || "review"}.`
           : mode === "test"
             ? `Create a TEST of ${count} THEORY questions. NO multiple-choice, NO true/false. Short-answer questions a student can answer in 1-3 sentences. Provide a model answer, 2-5 grading KEYWORDS, and a brief explanation. Day: ${day || "review"}.`
             : `Create a practice quiz of ${count} questions covering the source. Mix MCQ (4 options), True/False, and fill-in-blank. Provide concise explanations. Day: ${day || "review"}.`;
