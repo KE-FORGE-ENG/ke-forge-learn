@@ -36,15 +36,31 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Your library</h1>
-          <p className="text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Your library</h1>
+          <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
         </div>
-        <Button asChild size="lg" className="shadow-[var(--shadow-glow)]">
+        <Button asChild size="lg" className="shadow-[var(--shadow-glow)] w-full sm:w-auto">
           <Link to="/new"><Plus className="w-4 h-4 mr-1" /> New plan</Link>
         </Button>
       </div>
+
+      {/* Standalone Deep Learning entry */}
+      <Card className="p-5 mb-8 bg-[image:var(--gradient-soft)] border-primary/30">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="rounded-lg bg-primary/15 p-2.5 flex-shrink-0"><Brain className="w-5 h-5 text-primary" /></div>
+            <div className="min-w-0">
+              <h2 className="font-semibold text-base sm:text-lg">Deep Learning</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">Teach yourself from any PDF, topic, or lecture notes — page by page with optional web search.</p>
+            </div>
+          </div>
+          <Button asChild size="lg" className="w-full sm:w-auto flex-shrink-0">
+            <Link to="/deeplearn"><Brain className="w-4 h-4 mr-1" /> Start deep learn</Link>
+          </Button>
+        </div>
+      </Card>
 
       {plans.length > 0 && (
         <>
