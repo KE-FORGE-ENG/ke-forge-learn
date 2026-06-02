@@ -17,16 +17,28 @@ const INTENSITY: Record<number, string> = {
 };
 
 async function callAI(body: any) {
-  const r = await fetch(AI_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`AI error ${r.status}: ${t}`);
+  const primary = body.model || "google/gemini-2.5-flash";
+  const models = [primary, "google/gemini-2.5-flash-lite"];
+  let lastErr = "";
+  for (const model of models) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const r = await fetch(AI_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ ...body, model }),
+      });
+      if (r.ok) return await r.json();
+      const t = await r.text();
+      lastErr = `AI error ${r.status}: ${t}`;
+      if (r.status === 429) {
+        await new Promise((res) => setTimeout(res, 800 * Math.pow(2, attempt)));
+        continue;
+      }
+      if (r.status === 402) throw new Error(lastErr);
+      break;
+    }
   }
-  return await r.json();
+  throw new Error(lastErr || "AI call failed");
 }
 
 const dayTool = {
