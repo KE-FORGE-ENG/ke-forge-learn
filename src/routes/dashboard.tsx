@@ -94,12 +94,12 @@ function Dashboard() {
           <Button asChild className="mt-4"><Link to="/new"><Plus className="w-4 h-4 mr-1" /> Create your first plan</Link></Button>
         </Card>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {docs.map((d) => (
-            <Card key={d.id} className="p-5">
-              <div className="text-xs text-muted-foreground uppercase">{d.source_type}</div>
-              <h3 className="font-semibold mt-1 truncate">{d.title}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{d.page_count} pages</p>
+            <Card key={d.id} className="p-3 sm:p-5 min-w-0 overflow-hidden">
+              <div className="text-[10px] sm:text-xs text-muted-foreground uppercase truncate">{d.source_type}</div>
+              <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{d.title}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">{d.page_count} pages</p>
             </Card>
           ))}
         </div>
