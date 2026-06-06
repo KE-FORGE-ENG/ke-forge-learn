@@ -42,10 +42,10 @@ function AuthPage() {
     <div className="min-h-screen grid place-items-center px-4 bg-[image:var(--gradient-soft)]">
       <Card className="w-full max-w-md p-8 shadow-[var(--shadow-card)]">
         <Link to="/" className="flex items-center gap-2 font-semibold mb-6">
-          <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] grid place-items-center text-primary-foreground">
-            <Brain className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden">
+            <img src={(await import("@/assets/ke-forge-logo.png.asset.json")).default ? "" : ""} alt="" className="hidden" />
           </div>
-          Etek Learning Hub
+          KE-FORGE LEARN
         </Link>
         <h1 className="text-2xl font-bold">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
         <p className="text-sm text-muted-foreground mt-1">{mode === "signin" ? "Sign in to continue learning." : "Pick a unique username to get started."}</p>
