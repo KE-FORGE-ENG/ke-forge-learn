@@ -38,7 +38,7 @@ export function startReminderLoop() {
     if (localStorage.getItem(lastKey) === today) return;
     localStorage.setItem(lastKey, today);
     if (Notification.permission === "granted") {
-      new Notification("Etek Learning Hub", {
+      new Notification("KE-FORGE LEARN", {
         body: "Time to study! Your next lesson is ready 🚀",
         icon: "/favicon.ico",
       });

@@ -2,8 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Sparkles, Target, Youtube } from "lucide-react";
+import { BookOpen, Sparkles, Target, Youtube } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import logoAsset from "@/assets/ke-forge-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -19,10 +20,10 @@ function Index() {
       <header className="border-b border-border/60 backdrop-blur sticky top-0 z-10 bg-background/80">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-semibold text-lg">
-            <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] grid place-items-center text-primary-foreground">
-              <Brain className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden">
+              <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
             </div>
-            Etek Learning Hub
+            KE-FORGE LEARN
           </div>
           <div className="flex gap-2 items-center">
             <ThemeToggle />
