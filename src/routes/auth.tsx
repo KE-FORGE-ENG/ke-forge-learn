@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Brain } from "lucide-react";
+import logoAsset from "@/assets/ke-forge-logo.png.asset.json";
 import { toast } from "sonner";
 import { lovable } from "@/integrations/lovable";
 
