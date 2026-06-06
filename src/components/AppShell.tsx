@@ -14,10 +14,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-            <div className="w-8 h-8 rounded-lg bg-[image:var(--gradient-hero)] grid place-items-center text-primary-foreground">
-              <Brain className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden">
+              <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
             </div>
-            Etek Learning Hub
+            KE-FORGE LEARN
           </Link>
           <div className="flex items-center gap-3">
             {user && <span className="text-sm text-muted-foreground hidden sm:inline">@{username ?? "you"}</span>}
