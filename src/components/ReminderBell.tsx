@@ -20,9 +20,13 @@ export function ReminderBell() {
 
   const save = async (next: { enabled: boolean; time: string }) => {
     if (next.enabled) {
+      if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+        toast.error("Notifications are blocked. Tap the lock icon in the address bar → Notifications → Allow, then reload.", { duration: 8000 });
+        return;
+      }
       const ok = await ensurePermission();
       if (!ok) {
-        toast.error("Enable notifications in your browser settings to receive reminders.");
+        toast.error("Notification permission was not granted.");
         return;
       }
     }
