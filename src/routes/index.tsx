@@ -2,8 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Sparkles, Target, Youtube } from "lucide-react";
+import { BookOpen, Sparkles, Target, Youtube } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import logoAsset from "@/assets/ke-forge-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({ component: Index });
 
