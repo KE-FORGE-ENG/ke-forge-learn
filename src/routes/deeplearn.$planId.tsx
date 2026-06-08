@@ -98,7 +98,32 @@ function DeepLearn() {
     return pages.find((p) => p.page === page)?.text ?? "";
   }, [doc, page]);
 
-  const saveProgress = async (patch: Partial<{ mode: Mode; position: number; topic: string; notes_text: string; web_search: boolean }>) => {
+  // Resolve a signed URL for the PDF so we can render full-page images on demand
+  useEffect(() => {
+    if (!doc?.storage_path) { setPdfUrl(null); return; }
+    (async () => {
+      const { data } = await supabase.storage.from("pdfs").createSignedUrl(doc.storage_path, 3600);
+      if (data?.signedUrl) setPdfUrl(data.signedUrl);
+    })();
+  }, [doc?.storage_path]);
+
+  const viewPageImage = async () => {
+    if (!pdfUrl) { toast.error("Original PDF not available for this document"); return; }
+    setPageImgOpen(true);
+    setPageImgBusy(true);
+    setPageImgUrl(null);
+    try {
+      const url = await renderPdfPageImage(pdfUrl, page, 1.8);
+      setPageImgUrl(url);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to render page");
+      setPageImgOpen(false);
+    } finally {
+      setPageImgBusy(false);
+    }
+  };
+
+
     if (!user) return;
     const row = {
       user_id: user.id, plan_id: planId,
