@@ -12,10 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { callAi } from "@/lib/api";
 import {
-  Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText, Pause, Play, ExternalLink,
+  Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText, Pause, Play, ExternalLink, Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AudioLecture } from "@/components/AudioLecture";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { renderPdfPageImage } from "@/lib/pdf";
 
 export const Route = createFileRoute("/deeplearn/$planId")({ component: DeepLearn });
 
@@ -61,6 +63,10 @@ function DeepLearn() {
   const [sources, setSources] = useState<string[]>([]);
   const [progressId, setProgressId] = useState<string | null>(null);
   const [ocrBusy, setOcrBusy] = useState(false);
+  const [pageImgOpen, setPageImgOpen] = useState(false);
+  const [pageImgUrl, setPageImgUrl] = useState<string | null>(null);
+  const [pageImgBusy, setPageImgBusy] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -91,6 +97,31 @@ function DeepLearn() {
     const pages = (doc.pages as { page: number; text: string }[]) ?? [];
     return pages.find((p) => p.page === page)?.text ?? "";
   }, [doc, page]);
+
+  // Resolve a signed URL for the PDF so we can render full-page images on demand
+  useEffect(() => {
+    if (!doc?.storage_path) { setPdfUrl(null); return; }
+    (async () => {
+      const { data } = await supabase.storage.from("pdfs").createSignedUrl(doc.storage_path, 3600);
+      if (data?.signedUrl) setPdfUrl(data.signedUrl);
+    })();
+  }, [doc?.storage_path]);
+
+  const viewPageImage = async () => {
+    if (!pdfUrl) { toast.error("Original PDF not available for this document"); return; }
+    setPageImgOpen(true);
+    setPageImgBusy(true);
+    setPageImgUrl(null);
+    try {
+      const url = await renderPdfPageImage(pdfUrl, page, 1.8);
+      setPageImgUrl(url);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to render page");
+      setPageImgOpen(false);
+    } finally {
+      setPageImgBusy(false);
+    }
+  };
 
   const saveProgress = async (patch: Partial<{ mode: Mode; position: number; topic: string; notes_text: string; web_search: boolean }>) => {
     if (!user) return;
@@ -206,6 +237,11 @@ function DeepLearn() {
           <Button size="sm" variant="outline" disabled={page === totalPages} onClick={() => { const n = page + 1; setPage(n); saveProgress({ position: n }); }}>
             Next <ChevronRight className="w-4 h-4" />
           </Button>
+          {pdfUrl && (
+            <Button size="sm" variant="secondary" onClick={viewPageImage} title="See the original page image (diagrams, figures, equations)">
+              <ImageIcon className="w-4 h-4 mr-1" /> View page image
+            </Button>
+          )}
         </div>
       </Card>
 
@@ -317,6 +353,19 @@ function DeepLearn() {
           {mode === "pdf" ? "Loading page…" : mode === "topic" ? "Enter a topic to start." : "Add or snap your lecture notes to start."}
         </Card>
       )}
+
+      <Dialog open={pageImgOpen} onOpenChange={setPageImgOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Page {page} — original</DialogTitle>
+          </DialogHeader>
+          {pageImgBusy ? (
+            <div className="py-16 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="text-xs text-muted-foreground mt-2">Rendering page…</p></div>
+          ) : pageImgUrl ? (
+            <img src={pageImgUrl} alt={`Page ${page}`} className="w-full h-auto rounded border" />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

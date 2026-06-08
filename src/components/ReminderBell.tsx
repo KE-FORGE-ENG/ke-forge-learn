@@ -11,11 +11,15 @@ import { toast } from "sonner";
 export function ReminderBell() {
   const [enabled, setEnabled] = useState(false);
   const [time, setTime] = useState("18:00");
+  const [permGranted, setPermGranted] = useState(false);
 
   useEffect(() => {
     const p = getPref();
     setEnabled(p.enabled);
     setTime(p.time);
+    if (typeof Notification !== "undefined") {
+      setPermGranted(Notification.permission === "granted");
+    }
   }, []);
 
   const save = async (next: { enabled: boolean; time: string }) => {
@@ -49,30 +53,37 @@ export function ReminderBell() {
             <p className="font-semibold text-sm">Daily study reminder</p>
             <p className="text-xs text-muted-foreground mt-1">We'll send a browser notification at your chosen time.</p>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-full"
-            onClick={async () => {
-              if (typeof Notification === "undefined") {
-                toast.error("This browser doesn't support notifications.");
-                return;
-              }
-              if (Notification.permission === "denied") {
-                toast.error("Notifications are blocked. Enable them in your browser site settings.");
-                return;
-              }
-              const ok = await ensurePermission();
-              if (ok) {
-                new Notification("KE-FORGE LEARN", { body: "Notifications enabled ✅", icon: "/favicon.ico" });
-                toast.success("Browser notifications enabled");
-              } else {
-                toast.error("Permission not granted.");
-              }
-            }}
-          >
-            Enable browser notifications
-          </Button>
+          {permGranted ? (
+            <div className="text-xs rounded-md border border-primary/30 bg-primary/10 text-primary px-3 py-2">
+              ✅ Browser notifications are allowed for this site.
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={async () => {
+                if (typeof Notification === "undefined") {
+                  toast.error("This browser doesn't support notifications.");
+                  return;
+                }
+                if (Notification.permission === "denied") {
+                  toast.error("Notifications are blocked. Enable them in your browser site settings.");
+                  return;
+                }
+                const ok = await ensurePermission();
+                if (ok) {
+                  setPermGranted(true);
+                  new Notification("KE-FORGE LEARN", { body: "Notifications enabled ✅", icon: "/favicon.ico" });
+                  toast.success("Browser notifications enabled");
+                } else {
+                  toast.error("Permission not granted.");
+                }
+              }}
+            >
+              Enable browser notifications
+            </Button>
+          )}
           <div className="flex items-center justify-between">
             <Label htmlFor="rem-on">Enabled</Label>
             <Switch id="rem-on" checked={enabled} onCheckedChange={(v) => save({ enabled: v, time })} />
