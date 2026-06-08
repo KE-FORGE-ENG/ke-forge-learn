@@ -63,6 +63,10 @@ function DeepLearn() {
   const [sources, setSources] = useState<string[]>([]);
   const [progressId, setProgressId] = useState<string | null>(null);
   const [ocrBusy, setOcrBusy] = useState(false);
+  const [pageImgOpen, setPageImgOpen] = useState(false);
+  const [pageImgUrl, setPageImgUrl] = useState<string | null>(null);
+  const [pageImgBusy, setPageImgBusy] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
