@@ -237,6 +237,11 @@ function DeepLearn() {
           <Button size="sm" variant="outline" disabled={page === totalPages} onClick={() => { const n = page + 1; setPage(n); saveProgress({ position: n }); }}>
             Next <ChevronRight className="w-4 h-4" />
           </Button>
+          {pdfUrl && (
+            <Button size="sm" variant="secondary" onClick={viewPageImage} title="See the original page image (diagrams, figures, equations)">
+              <ImageIcon className="w-4 h-4 mr-1" /> View page image
+            </Button>
+          )}
         </div>
       </Card>
 
