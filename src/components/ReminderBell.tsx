@@ -11,11 +11,15 @@ import { toast } from "sonner";
 export function ReminderBell() {
   const [enabled, setEnabled] = useState(false);
   const [time, setTime] = useState("18:00");
+  const [permGranted, setPermGranted] = useState(false);
 
   useEffect(() => {
     const p = getPref();
     setEnabled(p.enabled);
     setTime(p.time);
+    if (typeof Notification !== "undefined") {
+      setPermGranted(Notification.permission === "granted");
+    }
   }, []);
 
   const save = async (next: { enabled: boolean; time: string }) => {
