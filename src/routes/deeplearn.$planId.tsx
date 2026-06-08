@@ -12,10 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { callAi } from "@/lib/api";
 import {
-  Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText, Pause, Play, ExternalLink,
+  Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText, Pause, Play, ExternalLink, Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AudioLecture } from "@/components/AudioLecture";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { renderPdfPageImage } from "@/lib/pdf";
 
 export const Route = createFileRoute("/deeplearn/$planId")({ component: DeepLearn });
 
