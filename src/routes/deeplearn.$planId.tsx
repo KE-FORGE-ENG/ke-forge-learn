@@ -353,6 +353,19 @@ function DeepLearn() {
           {mode === "pdf" ? "Loading page…" : mode === "topic" ? "Enter a topic to start." : "Add or snap your lecture notes to start."}
         </Card>
       )}
+
+      <Dialog open={pageImgOpen} onOpenChange={setPageImgOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Page {page} — original</DialogTitle>
+          </DialogHeader>
+          {pageImgBusy ? (
+            <div className="py-16 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="text-xs text-muted-foreground mt-2">Rendering page…</p></div>
+          ) : pageImgUrl ? (
+            <img src={pageImgUrl} alt={`Page ${page}`} className="w-full h-auto rounded border" />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
