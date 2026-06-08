@@ -123,7 +123,7 @@ function DeepLearn() {
     }
   };
 
-
+  const saveProgress = async (patch: Partial<{ mode: Mode; position: number; topic: string; notes_text: string; web_search: boolean }>) => {
     if (!user) return;
     const row = {
       user_id: user.id, plan_id: planId,
