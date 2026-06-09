@@ -120,6 +120,7 @@ function RootComponent() {
   if (typeof window !== "undefined" && !(window as any).__etechReminderStarted) {
     (window as any).__etechReminderStarted = true;
     import("@/lib/reminders").then((m) => m.startReminderLoop());
+    import("@/lib/accessibility").then((m) => m.applyA11y(m.loadA11y()));
   }
 
   return (

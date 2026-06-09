@@ -144,6 +144,9 @@ function Flashcards() {
           <h1 className="text-2xl font-bold mt-1 truncate max-w-xl">Flashcards · {doc.title}</h1>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Button onClick={share} variant="secondary" size="sm" disabled={sharing}>
+            <Share2 className="w-4 h-4 mr-1" /> {plan.is_public ? "Manage share" : "Share deck"}
+          </Button>
           <Button onClick={() => generate()} variant="outline" disabled={generating}>
             {generating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
             Generate from whole doc
@@ -155,6 +158,20 @@ function Flashcards() {
           ))}
         </div>
       </div>
+
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Share this flashcard deck</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Anyone with the link can review these cards (read-only).</p>
+          <div className="flex gap-2 mt-2">
+            <Input value={shareUrl} readOnly onFocus={(e) => e.currentTarget.select()} />
+            <Button onClick={async () => { await navigator.clipboard.writeText(shareUrl); toast.success("Copied"); }}>
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+          <Button variant="destructive" size="sm" onClick={unshare} className="mt-2 w-full">Disable sharing</Button>
+        </DialogContent>
+      </Dialog>
 
       {cards.length === 0 ? (
         <Card className="p-12 text-center">
