@@ -58,6 +58,11 @@ function Dashboard() {
         </Button>
       </div>
 
+      <div className="relative mb-6">
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search documents and plans…" className="pl-9" />
+      </div>
+
       {/* Standalone Deep Learning entry */}
       <Card className="p-5 mb-8 bg-[image:var(--gradient-soft)] border-primary/30">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -74,11 +79,11 @@ function Dashboard() {
         </div>
       </Card>
 
-      {plans.length > 0 && (
+      {filteredPlans.length > 0 && (
         <>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Active plans</h2>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
-            {plans.map((p) => {
+            {filteredPlans.map((p) => {
               const doc = docs.find((d) => d.id === p.document_id);
               return (
                 <Card key={p.id} className="p-3 sm:p-4 min-w-0 overflow-hidden hover:shadow-[var(--shadow-card)] transition">
@@ -100,14 +105,14 @@ function Dashboard() {
       )}
 
       <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> Saved documents</h2>
-      {docs.length === 0 ? (
+      {filteredDocs.length === 0 ? (
         <Card className="p-10 text-center">
-          <p className="text-muted-foreground">No documents yet. Upload a PDF or create a topic to begin.</p>
-          <Button asChild className="mt-4"><Link to="/new"><Plus className="w-4 h-4 mr-1" /> Create your first plan</Link></Button>
+          <p className="text-muted-foreground">{ql ? "No documents match your search." : "No documents yet. Upload a PDF or create a topic to begin."}</p>
+          {!ql && <Button asChild className="mt-4"><Link to="/new"><Plus className="w-4 h-4 mr-1" /> Create your first plan</Link></Button>}
         </Card>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          {docs.map((d) => (
+          {filteredDocs.map((d) => (
             <Card key={d.id} className="p-3 sm:p-5 min-w-0 overflow-hidden">
               <div className="text-[10px] sm:text-xs text-muted-foreground uppercase truncate">{d.source_type}</div>
               <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{d.title}</h3>
