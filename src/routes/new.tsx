@@ -87,6 +87,36 @@ function NewPlan() {
     } finally { setBusy(false); }
   };
 
+  const createBatch = async () => {
+    if (!user || batchFiles.length === 0) return;
+    setBusy(true);
+    setBatchProgress({ done: 0, total: batchFiles.length });
+    try {
+      for (let i = 0; i < batchFiles.length; i++) {
+        const f = batchFiles[i];
+        const pages = await parsePdf(f);
+        const path = `${user.id}/${Date.now()}-${i}-${f.name}`;
+        const { error: upErr } = await supabase.storage.from("pdfs").upload(path, f);
+        if (upErr) throw upErr;
+        const { data: doc, error: dErr } = await supabase.from("documents").insert({
+          user_id: user.id, title: f.name.replace(/\.pdf$/i, ""), source_type: "pdf",
+          storage_path: path, pages, page_count: pages.length,
+        }).select().single();
+        if (dErr) throw dErr;
+        const chunks = chunkPages(pages.length, days);
+        const { error: pErr } = await supabase.from("learning_plans").insert({
+          user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
+        });
+        if (pErr) throw pErr;
+        setBatchProgress({ done: i + 1, total: batchFiles.length });
+      }
+      toast.success(`Created ${batchFiles.length} plans`);
+      nav({ to: "/dashboard" });
+    } catch (e: any) {
+      toast.error(e.message ?? "Batch failed");
+    } finally { setBusy(false); setBatchProgress(null); }
+  };
+
   const createFromTopic = async () => {
     if (!topic.trim() || !user) return;
     setBusy(true);
@@ -162,12 +192,41 @@ function NewPlan() {
         <p className="text-muted-foreground mt-1">Upload a PDF, snap photos of notes, or describe a topic.</p>
 
         <Card className="mt-6 p-6">
-          <Tabs defaultValue="pdf">
-            <TabsList className="grid grid-cols-3 w-full">
+          <Tabs value={templateTab} onValueChange={setTemplateTab}>
+            <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="pdf">PDF</TabsTrigger>
-              <TabsTrigger value="images">Photo notes</TabsTrigger>
+              <TabsTrigger value="batch">Batch</TabsTrigger>
+              <TabsTrigger value="images">Photos</TabsTrigger>
               <TabsTrigger value="topic">Topic</TabsTrigger>
             </TabsList>
+            <TabsContent value="pdf" className="mt-6 space-y-4">
+              <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
+                <input type="file" accept="application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
+                <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
+                <p className="mt-2 text-sm font-medium">{file ? file.name : "Click to choose a PDF"}</p>
+                {pageCount && <p className="text-xs text-muted-foreground mt-1">{pageCount} pages</p>}
+              </label>
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Document title" />
+              </div>
+            </TabsContent>
+            <TabsContent value="batch" className="mt-6 space-y-4">
+              <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
+                <input type="file" accept="application/pdf" multiple className="hidden" onChange={(e) => { if (e.target.files) setBatchFiles(Array.from(e.target.files)); }} />
+                <FileStack className="w-8 h-8 mx-auto text-muted-foreground" />
+                <p className="mt-2 text-sm font-medium">{batchFiles.length ? `${batchFiles.length} PDFs selected` : "Choose multiple PDFs"}</p>
+                <p className="text-xs text-muted-foreground mt-1">One plan per file — uses the duration below for all.</p>
+              </label>
+              {batchFiles.length > 0 && (
+                <ul className="text-xs space-y-1 max-h-40 overflow-y-auto">
+                  {batchFiles.map((f, i) => <li key={i} className="truncate text-muted-foreground">• {f.name}</li>)}
+                </ul>
+              )}
+              {batchProgress && (
+                <div className="text-xs text-muted-foreground">Processing {batchProgress.done}/{batchProgress.total}…</div>
+              )}
+            </TabsContent>
             <TabsContent value="pdf" className="mt-6 space-y-4">
               <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
                 <input type="file" accept="application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
