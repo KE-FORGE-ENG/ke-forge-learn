@@ -12,14 +12,19 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parsePdf, chunkPages } from "@/lib/pdf";
 import { callAi } from "@/lib/api";
-import { Upload, Loader2, Camera, X } from "lucide-react";
+import { TEMPLATES } from "@/lib/templates";
+import { Upload, Loader2, Camera, X, FileStack } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/new")({ component: NewPlan });
+export const Route = createFileRoute("/new")({
+  component: NewPlan,
+  validateSearch: (s: Record<string, unknown>) => ({ template: typeof s.template === "string" ? s.template : undefined }),
+});
 
 function NewPlan() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
+  const search = Route.useSearch();
   const [days, setDays] = useState(3);
   const [busy, setBusy] = useState(false);
   const [title, setTitle] = useState("");
@@ -28,8 +33,21 @@ function NewPlan() {
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [images, setImages] = useState<{ name: string; dataUrl: string }[]>([]);
   const [ocrPreview, setOcrPreview] = useState<string>("");
+  const [batchFiles, setBatchFiles] = useState<File[]>([]);
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
+  const [templateTab, setTemplateTab] = useState<string>("pdf");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
+
+  useEffect(() => {
+    if (!search.template) return;
+    const t = TEMPLATES.find((x) => x.id === search.template);
+    if (!t) return;
+    setTopic(t.prompt);
+    setDays(t.days);
+    setTitle(t.title);
+    setTemplateTab("topic");
+  }, [search.template]);
 
   const onFile = async (f: File) => {
     setFile(f);
