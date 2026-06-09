@@ -227,18 +227,6 @@ function NewPlan() {
                 <div className="text-xs text-muted-foreground">Processing {batchProgress.done}/{batchProgress.total}…</div>
               )}
             </TabsContent>
-            <TabsContent value="pdf" className="mt-6 space-y-4">
-              <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
-                <input type="file" accept="application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
-                <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-sm font-medium">{file ? file.name : "Click to choose a PDF"}</p>
-                {pageCount && <p className="text-xs text-muted-foreground mt-1">{pageCount} pages</p>}
-              </label>
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Document title" />
-              </div>
-            </TabsContent>
             <TabsContent value="images" className="mt-6 space-y-4">
               <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
                 <input type="file" accept="image/*" multiple capture="environment" className="hidden"
