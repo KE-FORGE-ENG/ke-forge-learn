@@ -18,6 +18,7 @@ function Dashboard() {
   const nav = useNavigate();
   const [docs, setDocs] = useState<Doc[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [q, setQ] = useState("");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -32,6 +33,16 @@ function Dashboard() {
       setPlans((p ?? []) as Plan[]);
     })();
   }, [user]);
+
+  const ql = q.trim().toLowerCase();
+  const filteredDocs = useMemo(() => !ql ? docs : docs.filter((d) => d.title.toLowerCase().includes(ql)), [docs, ql]);
+  const filteredPlans = useMemo(() => {
+    if (!ql) return plans;
+    return plans.filter((p) => {
+      const t = docs.find((d) => d.id === p.document_id)?.title?.toLowerCase() ?? "";
+      return t.includes(ql);
+    });
+  }, [plans, docs, ql]);
 
   if (!user) return null;
 
