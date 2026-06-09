@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { callAi } from "@/lib/api";
-import { Loader2, Sparkles, RotateCw } from "lucide-react";
+import { Loader2, Sparkles, RotateCw, Share2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { sm2, nextDueAt } from "@/lib/sm2";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/flashcards/$planId")({ component: Flashcards });
 
@@ -29,8 +31,37 @@ function Flashcards() {
   const [flipped, setFlipped] = useState(false);
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [sharing, setSharing] = useState(false);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
+
+  const share = async () => {
+    if (!plan) return;
+    setSharing(true);
+    try {
+      let token = plan.share_token;
+      if (!token || !plan.is_public) {
+        token = token ?? Math.random().toString(36).slice(2, 12);
+        const { error } = await supabase.from("learning_plans").update({ share_token: token, is_public: true }).eq("id", plan.id);
+        if (error) throw error;
+        setPlan({ ...plan, share_token: token, is_public: true });
+      }
+      const url = `${window.location.origin}/shared/${token}`;
+      setShareUrl(url);
+      setShareOpen(true);
+    } catch (e: any) { toast.error(e.message ?? "Failed"); }
+    finally { setSharing(false); }
+  };
+
+  const unshare = async () => {
+    if (!plan) return;
+    await supabase.from("learning_plans").update({ is_public: false }).eq("id", plan.id);
+    setPlan({ ...plan, is_public: false });
+    setShareOpen(false);
+    toast.success("Sharing disabled");
+  };
 
   const load = async () => {
     if (!user) return;
@@ -113,6 +144,9 @@ function Flashcards() {
           <h1 className="text-2xl font-bold mt-1 truncate max-w-xl">Flashcards · {doc.title}</h1>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Button onClick={share} variant="secondary" size="sm" disabled={sharing}>
+            <Share2 className="w-4 h-4 mr-1" /> {plan.is_public ? "Manage share" : "Share deck"}
+          </Button>
           <Button onClick={() => generate()} variant="outline" disabled={generating}>
             {generating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
             Generate from whole doc
@@ -124,6 +158,20 @@ function Flashcards() {
           ))}
         </div>
       </div>
+
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Share this flashcard deck</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Anyone with the link can review these cards (read-only).</p>
+          <div className="flex gap-2 mt-2">
+            <Input value={shareUrl} readOnly onFocus={(e) => e.currentTarget.select()} />
+            <Button onClick={async () => { await navigator.clipboard.writeText(shareUrl); toast.success("Copied"); }}>
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+          <Button variant="destructive" size="sm" onClick={unshare} className="mt-2 w-full">Disable sharing</Button>
+        </DialogContent>
+      </Dialog>
 
       {cards.length === 0 ? (
         <Card className="p-12 text-center">

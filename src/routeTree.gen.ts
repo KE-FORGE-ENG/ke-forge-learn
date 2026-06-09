@@ -9,20 +9,42 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TemplatesRouteImport } from './routes/templates'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as NewRouteImport } from './routes/new'
+import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DeeplearnIndexRouteImport } from './routes/deeplearn.index'
+import { Route as SharedTokenRouteImport } from './routes/shared.$token'
 import { Route as MindmapPlanIdRouteImport } from './routes/mindmap.$planId'
 import { Route as LearnPlanIdRouteImport } from './routes/learn.$planId'
+import { Route as GroupsIdRouteImport } from './routes/groups.$id'
 import { Route as FlashcardsPlanIdRouteImport } from './routes/flashcards.$planId'
 import { Route as DeeplearnPlanIdRouteImport } from './routes/deeplearn.$planId'
+import { Route as CertificatePlanIdRouteImport } from './routes/certificate.$planId'
 import { Route as QuizPlanIdDayRouteImport } from './routes/quiz.$planId.$day'
 
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewRoute = NewRouteImport.update({
   id: '/new',
   path: '/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsRoute = GroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -35,6 +57,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +70,11 @@ const IndexRoute = IndexRouteImport.update({
 const DeeplearnIndexRoute = DeeplearnIndexRouteImport.update({
   id: '/deeplearn/',
   path: '/deeplearn/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SharedTokenRoute = SharedTokenRouteImport.update({
+  id: '/shared/$token',
+  path: '/shared/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MindmapPlanIdRoute = MindmapPlanIdRouteImport.update({
@@ -55,6 +87,11 @@ const LearnPlanIdRoute = LearnPlanIdRouteImport.update({
   path: '/learn/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GroupsIdRoute = GroupsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => GroupsRoute,
+} as any)
 const FlashcardsPlanIdRoute = FlashcardsPlanIdRouteImport.update({
   id: '/flashcards/$planId',
   path: '/flashcards/$planId',
@@ -65,6 +102,11 @@ const DeeplearnPlanIdRoute = DeeplearnPlanIdRouteImport.update({
   path: '/deeplearn/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CertificatePlanIdRoute = CertificatePlanIdRouteImport.update({
+  id: '/certificate/$planId',
+  path: '/certificate/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizPlanIdDayRoute = QuizPlanIdDayRouteImport.update({
   id: '/quiz/$planId/$day',
   path: '/quiz/$planId/$day',
@@ -73,38 +115,59 @@ const QuizPlanIdDayRoute = QuizPlanIdDayRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
+  '/settings': typeof SettingsRoute
+  '/templates': typeof TemplatesRoute
+  '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
   '/flashcards/$planId': typeof FlashcardsPlanIdRoute
+  '/groups/$id': typeof GroupsIdRoute
   '/learn/$planId': typeof LearnPlanIdRoute
   '/mindmap/$planId': typeof MindmapPlanIdRoute
+  '/shared/$token': typeof SharedTokenRoute
   '/deeplearn/': typeof DeeplearnIndexRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
+  '/settings': typeof SettingsRoute
+  '/templates': typeof TemplatesRoute
+  '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
   '/flashcards/$planId': typeof FlashcardsPlanIdRoute
+  '/groups/$id': typeof GroupsIdRoute
   '/learn/$planId': typeof LearnPlanIdRoute
   '/mindmap/$planId': typeof MindmapPlanIdRoute
+  '/shared/$token': typeof SharedTokenRoute
   '/deeplearn': typeof DeeplearnIndexRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
+  '/settings': typeof SettingsRoute
+  '/templates': typeof TemplatesRoute
+  '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
   '/flashcards/$planId': typeof FlashcardsPlanIdRoute
+  '/groups/$id': typeof GroupsIdRoute
   '/learn/$planId': typeof LearnPlanIdRoute
   '/mindmap/$planId': typeof MindmapPlanIdRoute
+  '/shared/$token': typeof SharedTokenRoute
   '/deeplearn/': typeof DeeplearnIndexRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
@@ -112,61 +175,109 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/analytics'
     | '/auth'
     | '/dashboard'
+    | '/groups'
     | '/new'
+    | '/settings'
+    | '/templates'
+    | '/certificate/$planId'
     | '/deeplearn/$planId'
     | '/flashcards/$planId'
+    | '/groups/$id'
     | '/learn/$planId'
     | '/mindmap/$planId'
+    | '/shared/$token'
     | '/deeplearn/'
     | '/quiz/$planId/$day'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/analytics'
     | '/auth'
     | '/dashboard'
+    | '/groups'
     | '/new'
+    | '/settings'
+    | '/templates'
+    | '/certificate/$planId'
     | '/deeplearn/$planId'
     | '/flashcards/$planId'
+    | '/groups/$id'
     | '/learn/$planId'
     | '/mindmap/$planId'
+    | '/shared/$token'
     | '/deeplearn'
     | '/quiz/$planId/$day'
   id:
     | '__root__'
     | '/'
+    | '/analytics'
     | '/auth'
     | '/dashboard'
+    | '/groups'
     | '/new'
+    | '/settings'
+    | '/templates'
+    | '/certificate/$planId'
     | '/deeplearn/$planId'
     | '/flashcards/$planId'
+    | '/groups/$id'
     | '/learn/$planId'
     | '/mindmap/$planId'
+    | '/shared/$token'
     | '/deeplearn/'
     | '/quiz/$planId/$day'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
+  GroupsRoute: typeof GroupsRouteWithChildren
   NewRoute: typeof NewRoute
+  SettingsRoute: typeof SettingsRoute
+  TemplatesRoute: typeof TemplatesRoute
+  CertificatePlanIdRoute: typeof CertificatePlanIdRoute
   DeeplearnPlanIdRoute: typeof DeeplearnPlanIdRoute
   FlashcardsPlanIdRoute: typeof FlashcardsPlanIdRoute
   LearnPlanIdRoute: typeof LearnPlanIdRoute
   MindmapPlanIdRoute: typeof MindmapPlanIdRoute
+  SharedTokenRoute: typeof SharedTokenRoute
   DeeplearnIndexRoute: typeof DeeplearnIndexRoute
   QuizPlanIdDayRoute: typeof QuizPlanIdDayRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/new': {
       id: '/new'
       path: '/new'
       fullPath: '/new'
       preLoaderRoute: typeof NewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/groups': {
+      id: '/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof GroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -183,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -195,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/deeplearn'
       fullPath: '/deeplearn/'
       preLoaderRoute: typeof DeeplearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shared/$token': {
+      id: '/shared/$token'
+      path: '/shared/$token'
+      fullPath: '/shared/$token'
+      preLoaderRoute: typeof SharedTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mindmap/$planId': {
@@ -211,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnPlanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/groups/$id': {
+      id: '/groups/$id'
+      path: '/$id'
+      fullPath: '/groups/$id'
+      preLoaderRoute: typeof GroupsIdRouteImport
+      parentRoute: typeof GroupsRoute
+    }
     '/flashcards/$planId': {
       id: '/flashcards/$planId'
       path: '/flashcards/$planId'
@@ -225,6 +357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeeplearnPlanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/certificate/$planId': {
+      id: '/certificate/$planId'
+      path: '/certificate/$planId'
+      fullPath: '/certificate/$planId'
+      preLoaderRoute: typeof CertificatePlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quiz/$planId/$day': {
       id: '/quiz/$planId/$day'
       path: '/quiz/$planId/$day'
@@ -235,28 +374,35 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface GroupsRouteChildren {
+  GroupsIdRoute: typeof GroupsIdRoute
+}
+
+const GroupsRouteChildren: GroupsRouteChildren = {
+  GroupsIdRoute: GroupsIdRoute,
+}
+
+const GroupsRouteWithChildren =
+  GroupsRoute._addFileChildren(GroupsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
+  GroupsRoute: GroupsRouteWithChildren,
   NewRoute: NewRoute,
+  SettingsRoute: SettingsRoute,
+  TemplatesRoute: TemplatesRoute,
+  CertificatePlanIdRoute: CertificatePlanIdRoute,
   DeeplearnPlanIdRoute: DeeplearnPlanIdRoute,
   FlashcardsPlanIdRoute: FlashcardsPlanIdRoute,
   LearnPlanIdRoute: LearnPlanIdRoute,
   MindmapPlanIdRoute: MindmapPlanIdRoute,
+  SharedTokenRoute: SharedTokenRoute,
   DeeplearnIndexRoute: DeeplearnIndexRoute,
   QuizPlanIdDayRoute: QuizPlanIdDayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

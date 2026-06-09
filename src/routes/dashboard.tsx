@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FileText, Plus, Sparkles, Calendar, Brain } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { FileText, Plus, Sparkles, Calendar, Brain, Search } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -17,6 +18,7 @@ function Dashboard() {
   const nav = useNavigate();
   const [docs, setDocs] = useState<Doc[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [q, setQ] = useState("");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -32,6 +34,16 @@ function Dashboard() {
     })();
   }, [user]);
 
+  const ql = q.trim().toLowerCase();
+  const filteredDocs = useMemo(() => !ql ? docs : docs.filter((d) => d.title.toLowerCase().includes(ql)), [docs, ql]);
+  const filteredPlans = useMemo(() => {
+    if (!ql) return plans;
+    return plans.filter((p) => {
+      const t = docs.find((d) => d.id === p.document_id)?.title?.toLowerCase() ?? "";
+      return t.includes(ql);
+    });
+  }, [plans, docs, ql]);
+
   if (!user) return null;
 
   return (
@@ -44,6 +56,11 @@ function Dashboard() {
         <Button asChild size="lg" className="shadow-[var(--shadow-glow)] w-full sm:w-auto">
           <Link to="/new"><Plus className="w-4 h-4 mr-1" /> New plan</Link>
         </Button>
+      </div>
+
+      <div className="relative mb-6">
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search documents and plans…" className="pl-9" />
       </div>
 
       {/* Standalone Deep Learning entry */}
@@ -62,11 +79,11 @@ function Dashboard() {
         </div>
       </Card>
 
-      {plans.length > 0 && (
+      {filteredPlans.length > 0 && (
         <>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Active plans</h2>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
-            {plans.map((p) => {
+            {filteredPlans.map((p) => {
               const doc = docs.find((d) => d.id === p.document_id);
               return (
                 <Card key={p.id} className="p-3 sm:p-4 min-w-0 overflow-hidden hover:shadow-[var(--shadow-card)] transition">
@@ -88,14 +105,14 @@ function Dashboard() {
       )}
 
       <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> Saved documents</h2>
-      {docs.length === 0 ? (
+      {filteredDocs.length === 0 ? (
         <Card className="p-10 text-center">
-          <p className="text-muted-foreground">No documents yet. Upload a PDF or create a topic to begin.</p>
-          <Button asChild className="mt-4"><Link to="/new"><Plus className="w-4 h-4 mr-1" /> Create your first plan</Link></Button>
+          <p className="text-muted-foreground">{ql ? "No documents match your search." : "No documents yet. Upload a PDF or create a topic to begin."}</p>
+          {!ql && <Button asChild className="mt-4"><Link to="/new"><Plus className="w-4 h-4 mr-1" /> Create your first plan</Link></Button>}
         </Card>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          {docs.map((d) => (
+          {filteredDocs.map((d) => (
             <Card key={d.id} className="p-3 sm:p-5 min-w-0 overflow-hidden">
               <div className="text-[10px] sm:text-xs text-muted-foreground uppercase truncate">{d.source_type}</div>
               <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{d.title}</h3>
