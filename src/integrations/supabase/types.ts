@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          color: string
+          created_at: string
+          document_id: string | null
+          id: string
+          note: string | null
+          page: number
+          plan_id: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          note?: string | null
+          page: number
+          plan_id?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          note?: string | null
+          page?: number
+          plan_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "learning_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -202,6 +250,35 @@ export type Database = {
         }
         Relationships: []
       }
+      group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          points: number
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          points?: number
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          points?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_plans: {
         Row: {
           created_at: string
@@ -209,7 +286,9 @@ export type Database = {
           days: number
           document_id: string
           id: string
+          is_public: boolean
           page_chunks: Json
+          share_token: string | null
           user_id: string
         }
         Insert: {
@@ -218,7 +297,9 @@ export type Database = {
           days: number
           document_id: string
           id?: string
+          is_public?: boolean
           page_chunks?: Json
+          share_token?: string | null
           user_id: string
         }
         Update: {
@@ -227,7 +308,9 @@ export type Database = {
           days?: number
           document_id?: string
           id?: string
+          is_public?: boolean
           page_chunks?: Json
+          share_token?: string | null
           user_id?: string
         }
         Relationships: [
@@ -377,6 +460,33 @@ export type Database = {
         }
         Relationships: []
       }
+      study_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          join_code: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          join_code?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          join_code?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
       user_interactions: {
         Row: {
           created_at: string
@@ -420,7 +530,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_group_member: {
+        Args: { _group: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
