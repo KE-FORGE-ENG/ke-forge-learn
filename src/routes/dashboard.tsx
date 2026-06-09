@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FileText, Plus, Sparkles, Calendar, Brain } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { FileText, Plus, Sparkles, Calendar, Brain, Search } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
