@@ -298,12 +298,17 @@ function NewPlan() {
           </div>
 
           <Button
-            disabled={busy || (!file && !topic.trim() && images.length === 0)}
-            onClick={() => (images.length > 0 ? createFromImages() : file ? createFromPdf() : createFromTopic())}
+            disabled={busy || (!file && !topic.trim() && images.length === 0 && batchFiles.length === 0)}
+            onClick={() => {
+              if (templateTab === "batch" && batchFiles.length > 0) return createBatch();
+              if (images.length > 0) return createFromImages();
+              if (file) return createFromPdf();
+              return createFromTopic();
+            }}
             className="w-full mt-6 shadow-[var(--shadow-glow)]"
             size="lg"
           >
-            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building plan…</> : "Create plan"}
+            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building plan…</> : (templateTab === "batch" && batchFiles.length > 0 ? `Create ${batchFiles.length} plans` : "Create plan")}
           </Button>
         </Card>
       </div>
