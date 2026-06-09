@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { callAi } from "@/lib/api";
 import {
-  Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText, Pause, Play, ExternalLink, Image as ImageIcon,
+  Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText, Pause, Play, ExternalLink, Image as ImageIcon, Bookmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AudioLecture } from "@/components/AudioLecture";
@@ -242,6 +242,18 @@ function DeepLearn() {
               <ImageIcon className="w-4 h-4 mr-1" /> View page image
             </Button>
           )}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={async () => {
+              if (!user) return;
+              await supabase.from("bookmarks").insert({ user_id: user.id, plan_id: planId, document_id: doc.id, page });
+              toast.success(`Page ${page} bookmarked`);
+            }}
+            title="Bookmark this page"
+          >
+            <Bookmark className="w-4 h-4 mr-1" /> Bookmark
+          </Button>
         </div>
       </Card>
 
