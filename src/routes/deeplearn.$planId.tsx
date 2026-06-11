@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { AudioLecture } from "@/components/AudioLecture";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { renderPdfPageImage } from "@/lib/pdf";
+import { renderPdfPageImage, pageHasImages } from "@/lib/pdf";
 
 export const Route = createFileRoute("/deeplearn/$planId")({ component: DeepLearn });
 
@@ -67,6 +67,7 @@ function DeepLearn() {
   const [pageImgUrl, setPageImgUrl] = useState<string | null>(null);
   const [pageImgBusy, setPageImgBusy] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [hasImages, setHasImages] = useState(false);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -106,6 +107,18 @@ function DeepLearn() {
       if (data?.signedUrl) setPdfUrl(data.signedUrl);
     })();
   }, [doc?.storage_path]);
+
+  // Detect whether the current page contains diagrams/images
+  useEffect(() => {
+    let cancelled = false;
+    setHasImages(false);
+    if (!pdfUrl || mode !== "pdf") return;
+    (async () => {
+      const has = await pageHasImages(pdfUrl, page);
+      if (!cancelled) setHasImages(has);
+    })();
+    return () => { cancelled = true; };
+  }, [pdfUrl, page, mode]);
 
   const viewPageImage = async () => {
     if (!pdfUrl) { toast.error("Original PDF not available for this document"); return; }
@@ -238,8 +251,15 @@ function DeepLearn() {
             Next <ChevronRight className="w-4 h-4" />
           </Button>
           {pdfUrl && (
-            <Button size="sm" variant="secondary" onClick={viewPageImage} title="See the original page image (diagrams, figures, equations)">
-              <ImageIcon className="w-4 h-4 mr-1" /> View page image
+            <Button
+              size="sm"
+              variant={hasImages ? "default" : "secondary"}
+              onClick={viewPageImage}
+              title="See the original page image (diagrams, figures, equations)"
+              className={hasImages ? "animate-pulse" : ""}
+            >
+              <ImageIcon className="w-4 h-4 mr-1" />
+              {hasImages ? "Diagrams on this page — view" : "View page image"}
             </Button>
           )}
           <Button

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
-import { LogOut, Menu, BarChart3, Layout, Users, Settings as SettingsIcon, LayoutDashboard } from "lucide-react";
+import { LogOut, Menu, BarChart3, Layout, Users, Settings as SettingsIcon, LayoutDashboard, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ReminderBell } from "@/components/ReminderBell";
@@ -33,6 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuItem onClick={() => nav({ to: "/analytics" })}><BarChart3 className="w-4 h-4 mr-2" /> Analytics</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => nav({ to: "/templates" })}><Layout className="w-4 h-4 mr-2" /> Templates</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => nav({ to: "/groups" })}><Users className="w-4 h-4 mr-2" /> Study groups</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => nav({ to: "/youtube-tool" })}><Youtube className="w-4 h-4 mr-2" /> YouTube key points</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => nav({ to: "/settings" })}><SettingsIcon className="w-4 h-4 mr-2" /> Settings</DropdownMenuItem>
                 </DropdownMenuContent>
