@@ -17,12 +17,11 @@ export async function callAi(action: string, payload: any) {
   if (error) {
     const response = (error as any).context;
     if (response instanceof Response) {
+      let body: any = null;
       try {
-        const body = await response.clone().json();
-        throw new Error(friendlyAiError(body?.error, body?.code));
-      } catch {
-        throw new Error(friendlyAiError(error.message));
-      }
+        body = await response.clone().json();
+      } catch { /* non-json error body */ }
+      throw new Error(friendlyAiError(body?.error ?? error.message, body?.code));
     }
     throw new Error(friendlyAiError(error.message));
   }
