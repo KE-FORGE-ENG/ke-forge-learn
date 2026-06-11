@@ -406,6 +406,7 @@ Produce the structured key-points outline.`;
     const msg = e instanceof Error ? e.message : "Unknown error";
     const status = e instanceof AiGatewayError ? e.status : msg.includes("429") ? 429 : msg.includes("402") ? 402 : 500;
     const code = e instanceof AiGatewayError ? e.code : status === 429 ? "rate_limited" : status === 402 ? "credits_exhausted" : "server_error";
-    return new Response(JSON.stringify({ error: msg, code }), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const responseStatus = code === "rate_limited" || code === "credits_exhausted" ? 200 : status;
+    return new Response(JSON.stringify({ error: msg, code, retryable: code === "rate_limited" }), { status: responseStatus, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
