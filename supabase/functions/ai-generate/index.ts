@@ -16,12 +16,26 @@ const INTENSITY: Record<number, string> = {
   5: "Day 5 — INTENSE. Micro-topics, aggressive follow-ups, daily review, but NEVER overwhelming.",
 };
 
+class AiGatewayError extends Error {
+  status: number;
+  code: string;
+
+  constructor(status: number, message: string, code = "ai_error") {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 async function callAI(body: any) {
   const primary = body.model || "google/gemini-2.5-flash";
-  const models = [primary, "google/gemini-2.5-flash-lite"];
+  const models = [...new Set([primary, "google/gemini-2.5-flash-lite"])] as string[];
   let lastErr = "";
+  let lastStatus = 500;
   for (const model of models) {
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 4; attempt++) {
       const r = await fetch(AI_URL, {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -29,16 +43,23 @@ async function callAI(body: any) {
       });
       if (r.ok) return await r.json();
       const t = await r.text();
+      lastStatus = r.status;
       lastErr = `AI error ${r.status}: ${t}`;
       if (r.status === 429) {
-        await new Promise((res) => setTimeout(res, 800 * Math.pow(2, attempt)));
+        const retryAfter = Number(r.headers.get("retry-after"));
+        const retryAfterMs = Number.isFinite(retryAfter) ? retryAfter * 1000 : 0;
+        const backoffMs = Math.min(6000, 900 * Math.pow(2, attempt)) + Math.floor(Math.random() * 300);
+        await wait(Math.max(retryAfterMs, backoffMs));
         continue;
       }
-      if (r.status === 402) throw new Error(lastErr);
+      if (r.status === 402) throw new AiGatewayError(402, "AI credits are exhausted. Please add AI balance or try again later.", "credits_exhausted");
       break;
     }
   }
-  throw new Error(lastErr || "AI call failed");
+  if (lastStatus === 429) {
+    throw new AiGatewayError(429, "The AI service is busy right now. Please wait a minute and try again.", "rate_limited");
+  }
+  throw new AiGatewayError(lastStatus, lastErr || "AI call failed");
 }
 
 const dayTool = {
@@ -383,7 +404,9 @@ Produce the structured key-points outline.`;
   } catch (e) {
     console.error(e);
     const msg = e instanceof Error ? e.message : "Unknown error";
-    const status = msg.includes("429") ? 429 : msg.includes("402") ? 402 : 500;
-    return new Response(JSON.stringify({ error: msg }), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const status = e instanceof AiGatewayError ? e.status : msg.includes("429") ? 429 : msg.includes("402") ? 402 : 500;
+    const code = e instanceof AiGatewayError ? e.code : status === 429 ? "rate_limited" : status === 402 ? "credits_exhausted" : "server_error";
+    const responseStatus = code === "rate_limited" || code === "credits_exhausted" ? 200 : status;
+    return new Response(JSON.stringify({ error: msg, code, retryable: code === "rate_limited" }), { status: responseStatus, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

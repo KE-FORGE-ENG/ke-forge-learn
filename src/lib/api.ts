@@ -1,11 +1,31 @@
 import { supabase } from "@/integrations/supabase/client";
 
+function friendlyAiError(message: string, code?: string) {
+  if (code === "rate_limited" || message.includes("429") || message.toLowerCase().includes("rate_limited")) {
+    return "The AI service is busy right now. Please wait a minute and try again.";
+  }
+  if (code === "credits_exhausted" || message.includes("402")) {
+    return "AI credits are exhausted. Please add AI balance or try again later.";
+  }
+  return message || "The AI request failed. Please try again.";
+}
+
 export async function callAi(action: string, payload: any) {
   const { data, error } = await supabase.functions.invoke("ai-generate", {
     body: { action, payload },
   });
-  if (error) throw error;
-  if ((data as any)?.error) throw new Error((data as any).error);
+  if (error) {
+    const response = (error as any).context;
+    if (response instanceof Response) {
+      let body: any = null;
+      try {
+        body = await response.clone().json();
+      } catch { /* non-json error body */ }
+      throw new Error(friendlyAiError(body?.error ?? error.message, body?.code));
+    }
+    throw new Error(friendlyAiError(error.message));
+  }
+  if ((data as any)?.error) throw new Error(friendlyAiError((data as any).error, (data as any).code));
   return data;
 }
 
