@@ -12,6 +12,7 @@ import { planToIcs, downloadIcs } from "@/lib/ics";
 import { toast } from "sonner";
 import { LiveChat } from "@/components/LiveChat";
 import { AudioLecture } from "@/components/AudioLecture";
+import { YoutubeKeypointsButton } from "@/components/YoutubeKeypoints";
 
 export const Route = createFileRoute("/learn/$planId")({ component: Learn });
 
@@ -221,8 +222,17 @@ function Learn() {
               ) : (
                 <div className="space-y-3">
                   {videos.slice(0, 2).map((v) => (
-                    <div key={v.id} className="rounded-lg overflow-hidden bg-muted aspect-video">
-                      <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${v.id}`} title={v.title} allowFullScreen />
+                    <div key={v.id} className="space-y-2">
+                      <div className="rounded-lg overflow-hidden bg-muted aspect-video">
+                        <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${v.id}`} title={v.title} allowFullScreen />
+                      </div>
+                      <YoutubeKeypointsButton
+                        videoTitle={v.title}
+                        videoDescription={v.description}
+                        channel={v.channelTitle}
+                        contextText={`${content.title}\n\n${content.summary}\n\nConcepts: ${content.concepts.map((c) => c.name).join(", ")}`}
+                        label="Key points from this video"
+                      />
                     </div>
                   ))}
                 </div>
