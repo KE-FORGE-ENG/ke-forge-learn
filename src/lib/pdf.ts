@@ -52,6 +52,23 @@ export async function renderPdfPageImage(url: string, pageNumber: number, scale 
   return canvas.toDataURL("image/png");
 }
 
+// Detect whether a PDF page contains any raster/inline images.
+export async function pageHasImages(url: string, pageNumber: number): Promise<boolean> {
+  try {
+    const doc = await loadPdfFromUrl(url);
+    const page = await doc.getPage(pageNumber);
+    const ops = await page.getOperatorList();
+    const OPS: any = (pdfjs as any).OPS ?? {};
+    const imageOps = new Set<number>(
+      [OPS.paintImageXObject, OPS.paintInlineImageXObject, OPS.paintImageMaskXObject, OPS.paintJpegXObject]
+        .filter((v) => typeof v === "number"),
+    );
+    return (ops.fnArray as number[]).some((fn) => imageOps.has(fn));
+  } catch {
+    return false;
+  }
+}
+
 export function chunkPages(totalPages: number, days: number) {
   const per = Math.ceil(totalPages / days);
   const chunks: { day: number; startPage: number; endPage: number }[] = [];

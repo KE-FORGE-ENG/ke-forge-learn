@@ -325,6 +325,60 @@ Be accurate. Never invent facts.`;
       return new Response(JSON.stringify({ text }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "youtube_keypoints") {
+      const { videoTitle, videoDescription, channel, contextText } = payload;
+      if (!videoTitle) throw new Error("videoTitle required");
+      const ytTool = {
+        type: "function",
+        function: {
+          name: "emit_keypoints",
+          description: "Emit a structured key-points outline for a YouTube video",
+          parameters: {
+            type: "object",
+            properties: {
+              main_topic: { type: "string", description: "The single overarching topic the video covers." },
+              overview: { type: "string", description: "2-4 sentence overview of what the video is about." },
+              sub_topics: {
+                type: "array",
+                description: "3-7 sub-topics the video most likely covers, in logical order.",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    summary: { type: "string" },
+                    key_points: { type: "array", items: { type: "string" }, description: "4-8 concise factual bullets a student should memorize." },
+                  },
+                  required: ["name", "summary", "key_points"],
+                },
+              },
+              exam_takeaways: { type: "array", items: { type: "string" }, description: "5-8 likely exam-style takeaways." },
+            },
+            required: ["main_topic", "overview", "sub_topics", "exam_takeaways"],
+          },
+        },
+      };
+      const sys = `You produce structured study notes from a YouTube video's metadata. The student cannot watch the video right now — your outline must stand alone as study material. Be accurate, organized, and exam-focused. If the topic is ambiguous, use the provided context to disambiguate. Never invent specific numbers or names that aren't supported by the title, description, or context.`;
+      const userMsg = `VIDEO TITLE: ${videoTitle}
+CHANNEL: ${channel || "unknown"}
+DESCRIPTION:
+${(videoDescription || "").slice(0, 4000)}
+
+${contextText ? `STUDY CONTEXT (what the student is learning):\n${contextText.slice(0, 6000)}` : ""}
+
+Produce the structured key-points outline.`;
+      const data = await callAI({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: userMsg },
+        ],
+        tools: [ytTool],
+        tool_choice: { type: "function", function: { name: "emit_keypoints" } },
+      });
+      const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
+      return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error(e);
