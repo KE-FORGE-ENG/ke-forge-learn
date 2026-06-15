@@ -130,7 +130,7 @@ function RootComponent() {
           <Toaster richColors position="top-center" />
           <Outlet />
           <div className="pointer-events-none fixed bottom-2 right-3 z-[9999] text-[10px] font-medium text-muted-foreground/60 select-none">
-            Made by Enoch (Etek)
+            ©ke-forge
           </div>
         </AuthProvider>
       </ThemeProvider>
