@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "KE-FORGE LEARN — AI-paced learning" },
       { name: "description", content: "KE-FORGE LEARN is an AI-powered platform that creates personalized study plans from your content." },
-      { name: "author", content: "Enoch (Etek)" },
+      { name: "author", content: "ke-forge" },
       { property: "og:title", content: "KE-FORGE LEARN — AI-paced learning" },
       { property: "og:description", content: "KE-FORGE LEARN is an AI-powered platform that creates personalized study plans from your content." },
       { property: "og:type", content: "website" },
