@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 function NotFoundComponent() {
   return (
@@ -132,6 +133,7 @@ function RootComponent() {
         <AuthProvider>
           <Toaster richColors position="top-center" />
           <Outlet />
+          <OfflineIndicator />
           <div className="pointer-events-none fixed bottom-2 right-3 z-[9999] text-[10px] font-medium text-muted-foreground/60 select-none">
             ©ke-forge
           </div>
