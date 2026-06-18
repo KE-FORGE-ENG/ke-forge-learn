@@ -1,0 +1,15 @@
+{
+  "name": "KE-FORGE LEARN",
+  "short_name": "KE-FORGE",
+  "description": "AI-paced learning by ke-forge",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b0b",
+  "theme_color": "#0b0b0b",
+  "icons": [
+    { "src": "/__l5e/assets-v1/b7fa5631-67a6-4800-a0f0-4fdc7d365dd3/ke-forge-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/__l5e/assets-v1/b7fa5631-67a6-4800-a0f0-4fdc7d365dd3/ke-forge-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
