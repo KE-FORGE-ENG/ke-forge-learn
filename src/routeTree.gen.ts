@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as YoutubeToolRouteImport } from './routes/youtube-tool'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as NotesRouteImport } from './routes/notes'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -41,6 +42,11 @@ const TemplatesRoute = TemplatesRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotesRoute = NotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewRoute = NewRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
+  '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/youtube-tool': typeof YoutubeToolRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
+  '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/youtube-tool': typeof YoutubeToolRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
+  '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/youtube-tool': typeof YoutubeToolRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/groups'
     | '/new'
+    | '/notes'
     | '/settings'
     | '/templates'
     | '/youtube-tool'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/groups'
     | '/new'
+    | '/notes'
     | '/settings'
     | '/templates'
     | '/youtube-tool'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/groups'
     | '/new'
+    | '/notes'
     | '/settings'
     | '/templates'
     | '/youtube-tool'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   GroupsRoute: typeof GroupsRouteWithChildren
   NewRoute: typeof NewRoute
+  NotesRoute: typeof NotesRoute
   SettingsRoute: typeof SettingsRoute
   TemplatesRoute: typeof TemplatesRoute
   YoutubeToolRoute: typeof YoutubeToolRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notes': {
+      id: '/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof NotesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/new': {
@@ -412,6 +432,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   GroupsRoute: GroupsRouteWithChildren,
   NewRoute: NewRoute,
+  NotesRoute: NotesRoute,
   SettingsRoute: SettingsRoute,
   TemplatesRoute: TemplatesRoute,
   YoutubeToolRoute: YoutubeToolRoute,
