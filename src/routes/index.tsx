@@ -28,7 +28,7 @@ function Index() {
           <div className="flex gap-2 items-center">
             <ThemeToggle />
             <Button asChild variant="ghost"><Link to="/auth">Sign in</Link></Button>
-            <Button asChild><Link to="/auth">Get started</Link></Button>
+            <Button asChild><Link to="/try">Get started</Link></Button>
           </div>
         </div>
       </header>
