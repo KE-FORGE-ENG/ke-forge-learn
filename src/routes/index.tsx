@@ -28,7 +28,7 @@ function Index() {
           <div className="flex gap-2 items-center">
             <ThemeToggle />
             <Button asChild variant="ghost"><Link to="/auth">Sign in</Link></Button>
-            <Button asChild><Link to="/auth">Get started</Link></Button>
+            <Button asChild><Link to="/try">Get started</Link></Button>
           </div>
         </div>
       </header>
@@ -46,7 +46,8 @@ function Index() {
             Upload a PDF or paste a topic. We split it page-by-page, build a daily plan, and adapt as you learn — with quizzes, videos, and an "I'm lost" button that actually helps.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg" className="shadow-[var(--shadow-glow)]"><Link to="/auth">Start learning free</Link></Button>
+            <Button asChild size="lg" className="shadow-[var(--shadow-glow)]"><Link to="/try">Start learning free</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/auth">Sign in for full access</Link></Button>
           </div>
         </div>
       </section>

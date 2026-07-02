@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as YoutubeToolRouteImport } from './routes/youtube-tool'
+import { Route as TryRouteImport } from './routes/try'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as NotesRouteImport } from './routes/notes'
@@ -32,6 +33,11 @@ import { Route as QuizPlanIdDayRouteImport } from './routes/quiz.$planId.$day'
 const YoutubeToolRoute = YoutubeToolRouteImport.update({
   id: '/youtube-tool',
   path: '/youtube-tool',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TryRoute = TryRouteImport.update({
+  id: '/try',
+  path: '/try',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesRoute = TemplatesRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
+  '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
+  '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
+  '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/notes'
     | '/settings'
     | '/templates'
+    | '/try'
     | '/youtube-tool'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/notes'
     | '/settings'
     | '/templates'
+    | '/try'
     | '/youtube-tool'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/notes'
     | '/settings'
     | '/templates'
+    | '/try'
     | '/youtube-tool'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
@@ -265,6 +277,7 @@ export interface RootRouteChildren {
   NotesRoute: typeof NotesRoute
   SettingsRoute: typeof SettingsRoute
   TemplatesRoute: typeof TemplatesRoute
+  TryRoute: typeof TryRoute
   YoutubeToolRoute: typeof YoutubeToolRoute
   CertificatePlanIdRoute: typeof CertificatePlanIdRoute
   DeeplearnPlanIdRoute: typeof DeeplearnPlanIdRoute
@@ -283,6 +296,13 @@ declare module '@tanstack/react-router' {
       path: '/youtube-tool'
       fullPath: '/youtube-tool'
       preLoaderRoute: typeof YoutubeToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/try': {
+      id: '/try'
+      path: '/try'
+      fullPath: '/try'
+      preLoaderRoute: typeof TryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/templates': {
@@ -435,6 +455,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotesRoute: NotesRoute,
   SettingsRoute: SettingsRoute,
   TemplatesRoute: TemplatesRoute,
+  TryRoute: TryRoute,
   YoutubeToolRoute: YoutubeToolRoute,
   CertificatePlanIdRoute: CertificatePlanIdRoute,
   DeeplearnPlanIdRoute: DeeplearnPlanIdRoute,
