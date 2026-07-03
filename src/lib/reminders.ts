@@ -26,24 +26,40 @@ export async function ensurePermission(): Promise<boolean> {
 
 export function startReminderLoop() {
   if (typeof window === "undefined") return;
-  // Check every minute whether we should fire
   const tick = () => {
     const pref = getPref();
     if (!pref.enabled) return;
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
     const now = new Date();
     const [h, m] = pref.time.split(":").map(Number);
-    if (now.getHours() !== h || now.getMinutes() !== m) return;
+    const scheduled = new Date(now);
+    scheduled.setHours(h, m, 0, 0);
+    if (now < scheduled) return;
     const lastKey = "etech.reminder.last";
     const today = now.toISOString().slice(0, 10);
     if (localStorage.getItem(lastKey) === today) return;
     localStorage.setItem(lastKey, today);
-    if (Notification.permission === "granted") {
+    try {
       new Notification("KE-FORGE LEARN", {
         body: "Time to study! Your next lesson is ready 🚀",
         icon: "/favicon.ico",
       });
-    }
+    } catch {}
   };
   tick();
-  return setInterval(tick, 60_000);
+  const id = setInterval(tick, 30_000);
+  window.addEventListener("focus", tick);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+  return id;
+}
+
+export function sendTestNotification(): { ok: boolean; reason?: string } {
+  if (typeof Notification === "undefined") return { ok: false, reason: "This browser doesn't support notifications." };
+  if (Notification.permission !== "granted") return { ok: false, reason: "Notifications aren't allowed yet." };
+  try {
+    new Notification("KE-FORGE LEARN", { body: "✅ Test notification — reminders will work like this.", icon: "/favicon.ico" });
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, reason: e?.message || "Failed to send." };
+  }
 }
