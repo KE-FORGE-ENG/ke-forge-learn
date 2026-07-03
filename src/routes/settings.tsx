@@ -73,32 +73,58 @@ function Settings() {
   };
 
   if (!user) return null;
+
+  return (
+    <AppShell>
+      <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
+
       <Card className="p-5 mt-6">
         <div className="flex items-center gap-2 mb-2">
           <Bell className="w-5 h-5 text-primary" />
           <h2 className="font-semibold">Notifications</h2>
         </div>
+
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm">Status:</span>
+          <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${
+            notifState === "granted" ? "bg-green-500/15 text-green-600" :
+            notifState === "denied" ? "bg-red-500/15 text-red-600" :
+            notifState === "unsupported" ? "bg-muted text-muted-foreground" :
+            "bg-yellow-500/15 text-yellow-600"
+          }`}>
+            {notifState === "granted" ? "Allowed" :
+             notifState === "denied" ? "Blocked" :
+             notifState === "unsupported" ? "Unsupported" : "Not asked yet"}
+          </span>
+        </div>
+
         {notifState === "granted" ? (
-          <>
-            <p className="text-sm text-muted-foreground">Browser notifications are allowed for this site. ✅</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={() => { const r = sendTestNotification(); if (!r.ok) toast.error(r.reason || "Failed"); }}>Send test</Button>
-          </>
+          <p className="text-sm text-muted-foreground">Browser notifications are allowed for this site. ✅</p>
         ) : notifState === "denied" ? (
           <p className="text-sm text-muted-foreground">Notifications are blocked. Open your browser's site settings for this page, allow notifications, then reload.</p>
         ) : notifState === "unsupported" ? (
           <p className="text-sm text-muted-foreground">This browser doesn't support notifications.</p>
         ) : (
-          <>
-            <p className="text-sm text-muted-foreground">Allow browser notifications so we can send your daily study reminder.</p>
-            <Button className="mt-3" onClick={requestNotif}><Bell className="w-4 h-4 mr-1" /> Allow notifications</Button>
-          </>
+          <p className="text-sm text-muted-foreground">Allow browser notifications so we can send your daily study reminder.</p>
         )}
-      </Card>
 
-      
-  return (
-    <AppShell>
-      <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
+        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={notifState !== "granted"}
+            onClick={() => { const r = sendTestNotification(); if (!r.ok) toast.error(r.reason || "Failed"); }}
+          >
+            Send test notification
+          </Button>
+
+          {notifState !== "granted" && notifState !== "unsupported" && (
+            <Button size="sm" onClick={requestNotif}>
+              <Bell className="w-4 h-4 mr-1" /> Allow notifications
+            </Button>
+          )}
+        </div>
+      </Card>
 
       <Card className="p-5 mt-6">
         <div className="flex items-center gap-2 mb-4">
