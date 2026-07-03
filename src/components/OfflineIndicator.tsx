@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { WifiOff } from "lucide-react";
 
 export function OfflineIndicator() {
-  const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
+  const [mounted, setMounted] = useState(false);
+  const [online, setOnline] = useState(true);
   useEffect(() => {
+    setMounted(true);
+    setOnline(navigator.onLine);
     const on = () => setOnline(true);
     const off = () => setOnline(false);
     window.addEventListener("online", on);
@@ -13,7 +16,7 @@ export function OfflineIndicator() {
       window.removeEventListener("offline", off);
     };
   }, []);
-  if (online) return null;
+  if (!mounted || online) return null;
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9998] flex items-center gap-2 rounded-full bg-amber-500/95 text-black text-xs font-medium px-3 py-1.5 shadow-lg">
       <WifiOff className="w-3.5 h-3.5" />
