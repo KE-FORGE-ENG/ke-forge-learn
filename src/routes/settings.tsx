@@ -20,9 +20,39 @@ function Settings() {
   const nav = useNavigate();
   const [s, setS] = useState<A11ySettings>(defaultA11y);
   const [busy, setBusy] = useState(false);
+  const [notifState, setNotifState] = useState<"default" | "granted" | "denied" | "unsupported">("default");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
-  useEffect(() => { setS(loadA11y()); }, []);
+  useEffect(() => {
+    setS(loadA11y());
+    if (typeof Notification === "undefined") { setNotifState("unsupported"); return; }
+    setNotifState(Notification.permission as any);
+    // One-time auto prompt when landing on settings, only if never asked before
+    const askedKey = "etech.notif.asked";
+    if (Notification.permission === "default" && !localStorage.getItem(askedKey)) {
+      localStorage.setItem(askedKey, "1");
+      ensurePermission().then((ok) => {
+        setNotifState(Notification.permission as any);
+        if (ok) toast.success("Notifications enabled");
+      });
+    }
+  }, []);
+
+  const requestNotif = async () => {
+    if (typeof Notification === "undefined") { toast.error("This browser doesn't support notifications."); return; }
+    if (Notification.permission === "denied") {
+      toast.error("Blocked. Open your browser's site settings for this page and allow notifications, then reload.", { duration: 8000 });
+      return;
+    }
+    const ok = await ensurePermission();
+    setNotifState(Notification.permission as any);
+    if (ok) {
+      sendTestNotification();
+      toast.success("Notifications enabled");
+    } else {
+      toast.error("Permission not granted.");
+    }
+  };
 
   const update = (patch: Partial<A11ySettings>) => {
     const next = { ...s, ...patch };
