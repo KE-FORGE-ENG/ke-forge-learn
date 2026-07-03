@@ -34,6 +34,8 @@ export function ReminderBell() {
         return;
       }
     }
+    // Clear the "already fired today" marker so a new time can trigger today
+    try { localStorage.removeItem("etech.reminder.last"); } catch {}
     setPref(next);
     setEnabled(next.enabled);
     setTime(next.time);
