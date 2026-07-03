@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { loadA11y, saveA11y, defaultA11y, type A11ySettings } from "@/lib/accessibility";
 import { exportUserBackup } from "@/lib/backup";
-import { Accessibility, Download, RotateCcw, Loader2 } from "lucide-react";
+import { ensurePermission, sendTestNotification } from "@/lib/reminders";
+import { Accessibility, Download, RotateCcw, Loader2, Bell } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
@@ -19,9 +20,39 @@ function Settings() {
   const nav = useNavigate();
   const [s, setS] = useState<A11ySettings>(defaultA11y);
   const [busy, setBusy] = useState(false);
+  const [notifState, setNotifState] = useState<"default" | "granted" | "denied" | "unsupported">("default");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
-  useEffect(() => { setS(loadA11y()); }, []);
+  useEffect(() => {
+    setS(loadA11y());
+    if (typeof Notification === "undefined") { setNotifState("unsupported"); return; }
+    setNotifState(Notification.permission as any);
+    // One-time auto prompt when landing on settings, only if never asked before
+    const askedKey = "etech.notif.asked";
+    if (Notification.permission === "default" && !localStorage.getItem(askedKey)) {
+      localStorage.setItem(askedKey, "1");
+      ensurePermission().then((ok) => {
+        setNotifState(Notification.permission as any);
+        if (ok) toast.success("Notifications enabled");
+      });
+    }
+  }, []);
+
+  const requestNotif = async () => {
+    if (typeof Notification === "undefined") { toast.error("This browser doesn't support notifications."); return; }
+    if (Notification.permission === "denied") {
+      toast.error("Blocked. Open your browser's site settings for this page and allow notifications, then reload.", { duration: 8000 });
+      return;
+    }
+    const ok = await ensurePermission();
+    setNotifState(Notification.permission as any);
+    if (ok) {
+      sendTestNotification();
+      toast.success("Notifications enabled");
+    } else {
+      toast.error("Permission not granted.");
+    }
+  };
 
   const update = (patch: Partial<A11ySettings>) => {
     const next = { ...s, ...patch };
@@ -42,7 +73,29 @@ function Settings() {
   };
 
   if (!user) return null;
+      <Card className="p-5 mt-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Bell className="w-5 h-5 text-primary" />
+          <h2 className="font-semibold">Notifications</h2>
+        </div>
+        {notifState === "granted" ? (
+          <>
+            <p className="text-sm text-muted-foreground">Browser notifications are allowed for this site. ✅</p>
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => { const r = sendTestNotification(); if (!r.ok) toast.error(r.reason || "Failed"); }}>Send test</Button>
+          </>
+        ) : notifState === "denied" ? (
+          <p className="text-sm text-muted-foreground">Notifications are blocked. Open your browser's site settings for this page, allow notifications, then reload.</p>
+        ) : notifState === "unsupported" ? (
+          <p className="text-sm text-muted-foreground">This browser doesn't support notifications.</p>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">Allow browser notifications so we can send your daily study reminder.</p>
+            <Button className="mt-3" onClick={requestNotif}><Bell className="w-4 h-4 mr-1" /> Allow notifications</Button>
+          </>
+        )}
+      </Card>
 
+      
   return (
     <AppShell>
       <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
