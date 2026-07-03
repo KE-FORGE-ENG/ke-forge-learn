@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { loadA11y, saveA11y, defaultA11y, type A11ySettings } from "@/lib/accessibility";
 import { exportUserBackup } from "@/lib/backup";
-import { Accessibility, Download, RotateCcw, Loader2 } from "lucide-react";
+import { ensurePermission, sendTestNotification } from "@/lib/reminders";
+import { Accessibility, Download, RotateCcw, Loader2, Bell } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
