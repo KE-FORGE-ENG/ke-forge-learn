@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ensurePermission, getPref, setPref } from "@/lib/reminders";
+import { ensurePermission, getPref, setPref, sendTestNotification } from "@/lib/reminders";
 import { toast } from "sonner";
 
 export function ReminderBell() {
