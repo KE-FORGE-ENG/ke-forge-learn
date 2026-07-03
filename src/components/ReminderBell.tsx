@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ensurePermission, getPref, setPref } from "@/lib/reminders";
+import { ensurePermission, getPref, setPref, sendTestNotification } from "@/lib/reminders";
 import { toast } from "sonner";
 
 export function ReminderBell() {
@@ -34,6 +34,8 @@ export function ReminderBell() {
         return;
       }
     }
+    // Clear the "already fired today" marker so a new time can trigger today
+    try { localStorage.removeItem("etech.reminder.last"); } catch {}
     setPref(next);
     setEnabled(next.enabled);
     setTime(next.time);
@@ -92,6 +94,21 @@ export function ReminderBell() {
             <Label htmlFor="rem-t">Time</Label>
             <Input id="rem-t" type="time" value={time} onChange={(e) => save({ enabled, time: e.target.value })} />
           </div>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="w-full"
+            onClick={() => {
+              const r = sendTestNotification();
+              if (r.ok) toast.success("Test notification sent");
+              else toast.error(r.reason || "Couldn't send test");
+            }}
+          >
+            Send test notification
+          </Button>
+          <p className="text-[11px] text-muted-foreground leading-snug">
+            Reminders fire while this site is open in your browser. For notifications when the tab is closed, install the app to your home screen from your browser menu.
+          </p>
         </div>
       </PopoverContent>
     </Popover>
