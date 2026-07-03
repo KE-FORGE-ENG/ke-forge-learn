@@ -73,7 +73,29 @@ function Settings() {
   };
 
   if (!user) return null;
+      <Card className="p-5 mt-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Bell className="w-5 h-5 text-primary" />
+          <h2 className="font-semibold">Notifications</h2>
+        </div>
+        {notifState === "granted" ? (
+          <>
+            <p className="text-sm text-muted-foreground">Browser notifications are allowed for this site. ✅</p>
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => { const r = sendTestNotification(); if (!r.ok) toast.error(r.reason || "Failed"); }}>Send test</Button>
+          </>
+        ) : notifState === "denied" ? (
+          <p className="text-sm text-muted-foreground">Notifications are blocked. Open your browser's site settings for this page, allow notifications, then reload.</p>
+        ) : notifState === "unsupported" ? (
+          <p className="text-sm text-muted-foreground">This browser doesn't support notifications.</p>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">Allow browser notifications so we can send your daily study reminder.</p>
+            <Button className="mt-3" onClick={requestNotif}><Bell className="w-4 h-4 mr-1" /> Allow notifications</Button>
+          </>
+        )}
+      </Card>
 
+      
   return (
     <AppShell>
       <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
