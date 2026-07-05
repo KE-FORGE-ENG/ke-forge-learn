@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { callAi, youtubeSearchDirect } from "@/lib/api";
-import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network, Calendar, Award } from "lucide-react";
+import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network, Calendar, Award, Globe } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { planToIcs, downloadIcs } from "@/lib/ics";
+
 import { toast } from "sonner";
 import { LiveChat } from "@/components/LiveChat";
 import { AudioLecture } from "@/components/AudioLecture";
