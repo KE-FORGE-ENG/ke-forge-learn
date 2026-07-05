@@ -38,6 +38,62 @@ const profileTool = {
   },
 };
 
+// Real tools the tutor can invoke during the chat
+const chatTools = [
+  {
+    type: "function",
+    function: {
+      name: "web_search",
+      description: "Search the live web for up-to-date facts, definitions, current events, or things not covered by the source. Returns text summaries plus source URLs.",
+      parameters: {
+        type: "object",
+        properties: {
+          queries: { type: "array", items: { type: "string" }, description: "1-3 focused search queries." },
+        },
+        required: ["queries"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "youtube_search",
+      description: "Find relevant YouTube videos to recommend to the student. Returns title, channel, and video id list.",
+      parameters: {
+        type: "object",
+        properties: {
+          q: { type: "string", description: "Search query." },
+        },
+        required: ["q"],
+      },
+    },
+  },
+];
+
+async function runTool(name: string, args: any, auth: string) {
+  const base = Deno.env.get("SUPABASE_URL")!;
+  const headers = { Authorization: auth || `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`, "Content-Type": "application/json" };
+  try {
+    if (name === "web_search") {
+      const r = await fetch(`${base}/functions/v1/web-search`, {
+        method: "POST", headers, body: JSON.stringify({ queries: args.queries ?? [args.q] }),
+      });
+      const d = await r.json();
+      return { text: (d.text || "").slice(0, 6000), sources: d.sources ?? [] };
+    }
+    if (name === "youtube_search") {
+      const r = await fetch(`${base}/functions/v1/youtube-search?q=${encodeURIComponent(args.q)}`, { headers });
+      const d = await r.json();
+      const items = (d.items ?? []).slice(0, 5).map((v: any) => ({ id: v.id, title: v.title, channel: v.channelTitle }));
+      return { items };
+    }
+    return { error: `unknown tool ${name}` };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "tool failed" };
+  }
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
