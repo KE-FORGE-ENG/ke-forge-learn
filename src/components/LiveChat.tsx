@@ -97,9 +97,17 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
               <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1">
                 <ReactMarkdown>{m.content}</ReactMarkdown>
               </div>
+              {m.sources && m.sources.length > 0 && (
+                <div className="mt-1 text-[10px] opacity-70">
+                  {m.sources.slice(0, 4).map((s, j) => (
+                    <a key={j} href={s} target="_blank" rel="noreferrer" className="underline mr-2">[{j + 1}]</a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ))}
+
         {busy && <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" /> Thinking…</div>}
       </div>
 
