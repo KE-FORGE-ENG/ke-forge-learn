@@ -6,7 +6,7 @@ import { Mic, MicOff, Send, Volume2, VolumeX, Sparkles, Brain, Loader2 } from "l
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; sources?: string[] };
 
 export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: number; sourceText?: string }) {
   const [messages, setMessages] = useState<Msg[]>([
