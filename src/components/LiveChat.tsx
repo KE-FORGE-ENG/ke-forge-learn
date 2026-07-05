@@ -51,8 +51,10 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const answer = (data as any).answer as string;
-      setMessages((m) => [...m, { role: "assistant", content: answer }]);
+      const sources = ((data as any).sources ?? []) as string[];
+      setMessages((m) => [...m, { role: "assistant", content: answer, sources }]);
       speak(answer);
+
     } catch (e: any) {
       toast.error(e.message ?? "Chat failed");
       setMessages((m) => [...m, { role: "assistant", content: "Sorry, I hit an error. Try again." }]);
