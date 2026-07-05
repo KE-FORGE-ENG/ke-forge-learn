@@ -70,7 +70,7 @@ function Learn() {
 
   const loadDay = async (force = false) => {
     if (!user || !plan || !doc) return;
-    setContent(null); setSimplified(false); setVideos([]);
+    setContent(null); setSimplified(false); setVideos([]); setWebSources([]);
     setBusy(true);
     try {
       const { data: existing } = await supabase
@@ -83,9 +83,31 @@ function Learn() {
           .from("user_interactions").select("id").eq("plan_id", planId).eq("kind", "lost");
         const lostCount = lost?.length ?? 0;
 
+        // Real tool: web search for extra context (opt-in)
+        let webContext = "";
+        if (webOn) {
+          try {
+            const seed = (sourceText.split(/\s+/).slice(0, 30).join(" ") + ` ${doc.title ?? ""}`).trim();
+            if (seed) {
+              const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/web-search`;
+              const session = (await supabase.auth.getSession()).data.session;
+              const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+              const r = await fetch(url, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ queries: [seed.slice(0, 200)] }),
+              });
+              const w = await r.json();
+              webContext = w.text || "";
+              setWebSources(w.sources ?? []);
+            }
+          } catch { /* ignore web failure */ }
+        }
+
         const result = (await callAi("generate_day", {
-          day, days: plan.days, sourceText, lostCount,
+          day, days: plan.days, sourceText, lostCount, webContext,
         })) as DayContent;
+
 
         const upsert = await supabase.from("daily_sessions").upsert({
           plan_id: planId, user_id: user.id, day, content: result,
