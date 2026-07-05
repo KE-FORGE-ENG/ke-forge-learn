@@ -192,12 +192,28 @@ function Learn() {
         </div>
       </div>
 
-      {currentChunk && (
-        <p className="text-xs text-muted-foreground mb-4">
-          Day {day} • Pages {currentChunk.startPage}–{currentChunk.endPage} of {doc.page_count}
-          {simplified && <Badge variant="secondary" className="ml-2">Simplified</Badge>}
-        </p>
+      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        {currentChunk && (
+          <p className="text-xs text-muted-foreground">
+            Day {day} • Pages {currentChunk.startPage}–{currentChunk.endPage} of {doc.page_count}
+            {simplified && <Badge variant="secondary" className="ml-2">Simplified</Badge>}
+            {webOn && <Badge variant="secondary" className="ml-2"><Globe className="w-3 h-3 mr-1" />Web-augmented</Badge>}
+          </p>
+        )}
+        <div className="flex items-center gap-2">
+          <Label htmlFor="web-learn" className="text-xs">Web search</Label>
+          <Switch id="web-learn" checked={webOn} onCheckedChange={(v) => { setWebOn(v); if (content) loadDay(true); }} />
+        </div>
+      </div>
+
+      {webOn && webSources.length > 0 && (
+        <div className="mb-4 text-[11px] text-muted-foreground">
+          Sources: {webSources.slice(0, 4).map((s, i) => (
+            <a key={i} href={s} target="_blank" rel="noreferrer" className="underline mr-2">[{i + 1}]</a>
+          ))}
+        </div>
       )}
+
 
       {busy && !content ? (
         <Card className="p-12 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-muted-foreground">Generating today's lesson…</p></Card>
