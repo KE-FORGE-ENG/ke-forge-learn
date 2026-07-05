@@ -38,6 +38,9 @@ function Learn() {
   const [busy, setBusy] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [videos, setVideos] = useState<any[]>([]);
+  const [webOn, setWebOn] = useState(false);
+  const [webSources, setWebSources] = useState<string[]>([]);
+
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
