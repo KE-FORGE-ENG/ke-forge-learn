@@ -221,19 +221,24 @@ Deno.serve(async (req) => {
     const { action, payload } = await req.json();
 
     if (action === "generate_day") {
-      const { day, days, sourceText, lostCount = 0, simplified = false } = payload;
+      const { day, days, sourceText, lostCount = 0, simplified = false, webContext = "" } = payload;
       const adaptive =
         lostCount > 2
           ? "User has clicked 'I'm lost' multiple times. Slow down, repeat key ideas, use simpler language and analogies."
           : "User is following well; you may push depth slightly more.";
       const sys = `You are an expert tutor building a ${days}-day learning plan. ${INTENSITY[day]} ${adaptive}${
         simplified ? " Use ELI5 tone — analogies, stories, very simple wording." : ""
-      } Use the source content provided. Be accurate, never invent facts.`;
+      } Use the source content provided. Be accurate, never invent facts.${
+        webContext ? " Use the WEB CONTEXT to enrich and verify your teaching with additional real-world facts not in the source." : ""
+      }`;
+      const userMsg = `SOURCE:\n\n${(sourceText || "").slice(0, 18000)}${
+        webContext ? `\n\nWEB CONTEXT:\n${String(webContext).slice(0, 8000)}` : ""
+      }\n\nGenerate the day's content.`;
       const data = await callAI({
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: sys },
-          { role: "user", content: `SOURCE:\n\n${(sourceText || "").slice(0, 18000)}\n\nGenerate the day's content.` },
+          { role: "user", content: userMsg },
         ],
         tools: [dayTool],
         tool_choice: { type: "function", function: { name: "emit_day" } },
@@ -241,6 +246,7 @@ Deno.serve(async (req) => {
       const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
       return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
 
     if (action === "generate_quiz") {
       const { sourceText, day, count = 6, mode = "practice", seed } = payload;

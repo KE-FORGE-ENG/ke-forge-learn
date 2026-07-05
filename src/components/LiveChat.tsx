@@ -6,7 +6,7 @@ import { Mic, MicOff, Send, Volume2, VolumeX, Sparkles, Brain, Loader2 } from "l
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; sources?: string[] };
 
 export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: number; sourceText?: string }) {
   const [messages, setMessages] = useState<Msg[]>([
@@ -51,8 +51,10 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const answer = (data as any).answer as string;
-      setMessages((m) => [...m, { role: "assistant", content: answer }]);
+      const sources = ((data as any).sources ?? []) as string[];
+      setMessages((m) => [...m, { role: "assistant", content: answer, sources }]);
       speak(answer);
+
     } catch (e: any) {
       toast.error(e.message ?? "Chat failed");
       setMessages((m) => [...m, { role: "assistant", content: "Sorry, I hit an error. Try again." }]);
@@ -95,9 +97,17 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
               <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1">
                 <ReactMarkdown>{m.content}</ReactMarkdown>
               </div>
+              {m.sources && m.sources.length > 0 && (
+                <div className="mt-1 text-[10px] opacity-70">
+                  {m.sources.slice(0, 4).map((s, j) => (
+                    <a key={j} href={s} target="_blank" rel="noreferrer" className="underline mr-2">[{j + 1}]</a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ))}
+
         {busy && <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" /> Thinking…</div>}
       </div>
 

@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { callAi, youtubeSearchDirect } from "@/lib/api";
-import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network, Calendar, Award } from "lucide-react";
+import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network, Calendar, Award, Globe } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { planToIcs, downloadIcs } from "@/lib/ics";
+
 import { toast } from "sonner";
 import { LiveChat } from "@/components/LiveChat";
 import { AudioLecture } from "@/components/AudioLecture";
@@ -35,6 +38,9 @@ function Learn() {
   const [busy, setBusy] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [videos, setVideos] = useState<any[]>([]);
+  const [webOn, setWebOn] = useState(false);
+  const [webSources, setWebSources] = useState<string[]>([]);
+
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -64,7 +70,7 @@ function Learn() {
 
   const loadDay = async (force = false) => {
     if (!user || !plan || !doc) return;
-    setContent(null); setSimplified(false); setVideos([]);
+    setContent(null); setSimplified(false); setVideos([]); setWebSources([]);
     setBusy(true);
     try {
       const { data: existing } = await supabase
@@ -77,9 +83,31 @@ function Learn() {
           .from("user_interactions").select("id").eq("plan_id", planId).eq("kind", "lost");
         const lostCount = lost?.length ?? 0;
 
+        // Real tool: web search for extra context (opt-in)
+        let webContext = "";
+        if (webOn) {
+          try {
+            const seed = (sourceText.split(/\s+/).slice(0, 30).join(" ") + ` ${doc.title ?? ""}`).trim();
+            if (seed) {
+              const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/web-search`;
+              const session = (await supabase.auth.getSession()).data.session;
+              const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+              const r = await fetch(url, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ queries: [seed.slice(0, 200)] }),
+              });
+              const w = await r.json();
+              webContext = w.text || "";
+              setWebSources(w.sources ?? []);
+            }
+          } catch { /* ignore web failure */ }
+        }
+
         const result = (await callAi("generate_day", {
-          day, days: plan.days, sourceText, lostCount,
+          day, days: plan.days, sourceText, lostCount, webContext,
         })) as DayContent;
+
 
         const upsert = await supabase.from("daily_sessions").upsert({
           plan_id: planId, user_id: user.id, day, content: result,
@@ -164,12 +192,28 @@ function Learn() {
         </div>
       </div>
 
-      {currentChunk && (
-        <p className="text-xs text-muted-foreground mb-4">
-          Day {day} • Pages {currentChunk.startPage}–{currentChunk.endPage} of {doc.page_count}
-          {simplified && <Badge variant="secondary" className="ml-2">Simplified</Badge>}
-        </p>
+      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        {currentChunk && (
+          <p className="text-xs text-muted-foreground">
+            Day {day} • Pages {currentChunk.startPage}–{currentChunk.endPage} of {doc.page_count}
+            {simplified && <Badge variant="secondary" className="ml-2">Simplified</Badge>}
+            {webOn && <Badge variant="secondary" className="ml-2"><Globe className="w-3 h-3 mr-1" />Web-augmented</Badge>}
+          </p>
+        )}
+        <div className="flex items-center gap-2">
+          <Label htmlFor="web-learn" className="text-xs">Web search</Label>
+          <Switch id="web-learn" checked={webOn} onCheckedChange={(v) => { setWebOn(v); if (content) loadDay(true); }} />
+        </div>
+      </div>
+
+      {webOn && webSources.length > 0 && (
+        <div className="mb-4 text-[11px] text-muted-foreground">
+          Sources: {webSources.slice(0, 4).map((s, i) => (
+            <a key={i} href={s} target="_blank" rel="noreferrer" className="underline mr-2">[{i + 1}]</a>
+          ))}
+        </div>
       )}
+
 
       {busy && !content ? (
         <Card className="p-12 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /><p className="mt-3 text-muted-foreground">Generating today's lesson…</p></Card>
