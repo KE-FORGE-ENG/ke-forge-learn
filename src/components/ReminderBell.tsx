@@ -9,11 +9,13 @@ import { ensurePermission, getPref, setPref, sendTestNotification } from "@/lib/
 import { toast } from "sonner";
 
 export function ReminderBell() {
+  const [mounted, setMounted] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [time, setTime] = useState("18:00");
   const [permGranted, setPermGranted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const p = getPref();
     setEnabled(p.enabled);
     setTime(p.time);
@@ -21,6 +23,7 @@ export function ReminderBell() {
       setPermGranted(Notification.permission === "granted");
     }
   }, []);
+
 
   const save = async (next: { enabled: boolean; time: string }) => {
     if (next.enabled) {
@@ -46,9 +49,10 @@ export function ReminderBell() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Reminders">
-          {enabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4" />}
+          {mounted && enabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4" />}
         </Button>
       </PopoverTrigger>
+
       <PopoverContent align="end" className="w-72">
         <div className="space-y-4">
           <div>

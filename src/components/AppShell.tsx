@@ -29,14 +29,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <Button variant="ghost" size="sm" aria-label="Menu"><Menu className="w-4 h-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => nav({ to: "/dashboard" })}><LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => nav({ to: "/analytics" })}><BarChart3 className="w-4 h-4 mr-2" /> Analytics</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => nav({ to: "/templates" })}><Layout className="w-4 h-4 mr-2" /> Templates</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => nav({ to: "/groups" })}><Users className="w-4 h-4 mr-2" /> Study groups</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => nav({ to: "/notes" })}><StickyNote className="w-4 h-4 mr-2" /> Notes</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => nav({ to: "/youtube-tool" })}><Youtube className="w-4 h-4 mr-2" /> YouTube key points</DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/dashboard"><LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/analytics"><BarChart3 className="w-4 h-4 mr-2" /> Analytics</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/templates"><Layout className="w-4 h-4 mr-2" /> Templates</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/groups"><Users className="w-4 h-4 mr-2" /> Study groups</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/notes"><StickyNote className="w-4 h-4 mr-2" /> Notes</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/youtube-tool"><Youtube className="w-4 h-4 mr-2" /> YouTube key points</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => nav({ to: "/settings" })}><SettingsIcon className="w-4 h-4 mr-2" /> Settings</DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/settings"><SettingsIcon className="w-4 h-4 mr-2" /> Settings</Link></DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -53,3 +53,4 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
