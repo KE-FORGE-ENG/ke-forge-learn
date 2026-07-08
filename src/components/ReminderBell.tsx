@@ -49,9 +49,10 @@ export function ReminderBell() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Reminders">
-          {enabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4" />}
+          {mounted && enabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4" />}
         </Button>
       </PopoverTrigger>
+
       <PopoverContent align="end" className="w-72">
         <div className="space-y-4">
           <div>
