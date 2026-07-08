@@ -9,11 +9,13 @@ import { ensurePermission, getPref, setPref, sendTestNotification } from "@/lib/
 import { toast } from "sonner";
 
 export function ReminderBell() {
+  const [mounted, setMounted] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [time, setTime] = useState("18:00");
   const [permGranted, setPermGranted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const p = getPref();
     setEnabled(p.enabled);
     setTime(p.time);
@@ -21,6 +23,7 @@ export function ReminderBell() {
       setPermGranted(Notification.permission === "granted");
     }
   }, []);
+
 
   const save = async (next: { enabled: boolean; time: string }) => {
     if (next.enabled) {
