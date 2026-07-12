@@ -7,6 +7,34 @@ const corsHeaders = {
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const IMAGE_URL = "https://ai.gateway.lovable.dev/v1/images/generations";
+const TTS_URL = "https://ai.gateway.lovable.dev/v1/audio/speech";
+const STT_URL = "https://ai.gateway.lovable.dev/v1/audio/transcriptions";
+const FALLBACK_AI_URL = Deno.env.get("FALLBACK_AI_URL")
+  || "https://project--c76adba8-5105-4513-a89e-8734841407f3.lovable.app/api/public/ai";
+
+async function fallbackAI(action: string, payload: any) {
+  const r = await fetch(FALLBACK_AI_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, payload }),
+  });
+  if (!r.ok) throw new AiGatewayError(r.status, `Fallback AI error ${r.status}: ${await r.text()}`, "fallback_failed");
+  const ct = r.headers.get("content-type") || "";
+  if (ct.includes("application/json")) return await r.json();
+  return { raw: await r.text() };
+}
+
+async function withFallback<T>(action: string, payload: any, primary: () => Promise<T>): Promise<T> {
+  try { return await primary(); }
+  catch (e) {
+    if (e instanceof AiGatewayError && (e.code === "credits_exhausted" || e.status === 402)) {
+      console.log(`[ai] primary out of credits — falling back to external endpoint for ${action}`);
+      return await fallbackAI(action, payload) as T;
+    }
+    throw e;
+  }
+}
 
 const INTENSITY: Record<number, string> = {
   1: "Day 1 — FOUNDATIONAL. Summarize, categorise, classify the content. Explain main concepts plainly. Goal: solid understanding within 24h. Keep it digestible.",
@@ -332,25 +360,98 @@ Be accurate. Never invent facts.`;
       return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    if (action === "ocr_image") {
-      const { imageDataUrl } = payload;
+    if (action === "ocr_image" || action === "describe_image") {
+      const { imageDataUrl, prompt } = payload;
       if (!imageDataUrl) throw new Error("imageDataUrl required");
-      const data = await callAI({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: "You are a high-accuracy OCR engine specialized in lecture notes, handwritten text, math, diagrams, and printed pages. Extract EVERY readable character precisely. Preserve line breaks, bullet points, indentation, equations, and structure. For unclear handwriting, give your best transcription — do not skip lines. For diagrams, transcribe labels and captions. Do NOT add commentary, headers, or markdown — return ONLY the raw extracted text exactly as it appears." },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Extract all text from this image:" },
+      const isOcr = action === "ocr_image";
+      const sysMsg = isOcr
+        ? "You are a high-accuracy OCR engine specialized in lecture notes, handwritten text, math, diagrams, and printed pages. Extract EVERY readable character precisely. Preserve line breaks, bullet points, indentation, equations, and structure. For unclear handwriting, give your best transcription — do not skip lines. For diagrams, transcribe labels and captions. Do NOT add commentary, headers, or markdown — return ONLY the raw extracted text exactly as it appears."
+        : "You are a precise image description assistant. Describe the image in useful detail.";
+      const userText = isOcr ? "Extract all text from this image:" : (prompt || "Describe this image in detail.");
+      const result = await withFallback(action, payload, async () => {
+        const data = await callAI({
+          model: "google/gemini-2.5-pro",
+          messages: [
+            { role: "system", content: sysMsg },
+            { role: "user", content: [
+              { type: "text", text: userText },
               { type: "image_url", image_url: { url: imageDataUrl } },
-            ],
-          },
-        ],
+            ] },
+          ],
+        });
+        return { text: data.choices[0].message.content || "" };
       });
-      const text = data.choices[0].message.content || "";
-      return new Response(JSON.stringify({ text }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    if (action === "tts") {
+      const { text, voice = "alloy", format = "mp3" } = payload;
+      if (!text) throw new Error("text required");
+      const result = await withFallback("tts", payload, async () => {
+        const r = await fetch(TTS_URL, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "openai/gpt-4o-mini-tts", input: text, voice, response_format: format }),
+        });
+        if (r.status === 402) throw new AiGatewayError(402, "credits exhausted", "credits_exhausted");
+        if (!r.ok) throw new AiGatewayError(r.status, `TTS ${r.status}: ${await r.text()}`);
+        const buf = new Uint8Array(await r.arrayBuffer());
+        let bin = ""; for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+        return { audio: btoa(bin), format, mime: `audio/${format}` };
+      });
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "generate_image") {
+      const { prompt, size = "1024x1024" } = payload;
+      if (!prompt) throw new Error("prompt required");
+      const result = await withFallback("generate_image", payload, async () => {
+        const r = await fetch(IMAGE_URL, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-image-preview",
+            messages: [{ role: "user", content: [{ type: "text", text: prompt }] }],
+            modalities: ["image", "text"],
+          }),
+        });
+        if (r.status === 402) throw new AiGatewayError(402, "credits exhausted", "credits_exhausted");
+        if (!r.ok) throw new AiGatewayError(r.status, `Image ${r.status}: ${await r.text()}`);
+        const data = await r.json();
+        // Try multiple response shapes
+        const b64 = data?.data?.[0]?.b64_json
+          || data?.choices?.[0]?.message?.images?.[0]?.image_url?.url
+          || data?.choices?.[0]?.message?.content?.[0]?.image_url?.url
+          || null;
+        return { image: b64, raw: data, size };
+      });
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "transcribe_audio") {
+      const { audioBase64, mime = "audio/webm", filename = "audio.webm", language } = payload;
+      if (!audioBase64) throw new Error("audioBase64 required");
+      const result = await withFallback("transcribe_audio", payload, async () => {
+        const bin = atob(audioBase64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const fd = new FormData();
+        fd.append("file", new Blob([bytes], { type: mime }), filename);
+        fd.append("model", "openai/whisper-1");
+        if (language) fd.append("language", language);
+        const r = await fetch(STT_URL, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}` },
+          body: fd,
+        });
+        if (r.status === 402) throw new AiGatewayError(402, "credits exhausted", "credits_exhausted");
+        if (!r.ok) throw new AiGatewayError(r.status, `STT ${r.status}: ${await r.text()}`);
+        const data = await r.json();
+        return { text: data.text || "" };
+      });
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
 
     if (action === "youtube_keypoints") {
       const { videoTitle, videoDescription, channel, contextText } = payload;
