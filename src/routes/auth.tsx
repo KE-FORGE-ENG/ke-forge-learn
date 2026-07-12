@@ -34,8 +34,13 @@ function AuthPage() {
   };
 
   const googleSignIn = async () => {
-    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/dashboard` });
-    if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
+    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    if (res.error) {
+      const msg = res.error.message ?? "";
+      // User closed the popup — don't show a scary error
+      if (/cancel|closed|popup/i.test(msg)) return;
+      toast.error(msg || "Google sign-in failed");
+    }
   };
 
   return (
