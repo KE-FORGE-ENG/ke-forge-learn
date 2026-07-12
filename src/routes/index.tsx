@@ -69,7 +69,7 @@ function Index() {
       </section>
 
       <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
-        Made by <span className="font-semibold tracking-widest">Enoch (Etek)</span>
+        &copy; KE-FORGE
       </footer>
     </div>
   );
