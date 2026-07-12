@@ -7,6 +7,34 @@ const corsHeaders = {
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const IMAGE_URL = "https://ai.gateway.lovable.dev/v1/images/generations";
+const TTS_URL = "https://ai.gateway.lovable.dev/v1/audio/speech";
+const STT_URL = "https://ai.gateway.lovable.dev/v1/audio/transcriptions";
+const FALLBACK_AI_URL = Deno.env.get("FALLBACK_AI_URL")
+  || "https://project--c76adba8-5105-4513-a89e-8734841407f3.lovable.app/api/public/ai";
+
+async function fallbackAI(action: string, payload: any) {
+  const r = await fetch(FALLBACK_AI_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, payload }),
+  });
+  if (!r.ok) throw new AiGatewayError(r.status, `Fallback AI error ${r.status}: ${await r.text()}`, "fallback_failed");
+  const ct = r.headers.get("content-type") || "";
+  if (ct.includes("application/json")) return await r.json();
+  return { raw: await r.text() };
+}
+
+async function withFallback<T>(action: string, payload: any, primary: () => Promise<T>): Promise<T> {
+  try { return await primary(); }
+  catch (e) {
+    if (e instanceof AiGatewayError && (e.code === "credits_exhausted" || e.status === 402)) {
+      console.log(`[ai] primary out of credits — falling back to external endpoint for ${action}`);
+      return await fallbackAI(action, payload) as T;
+    }
+    throw e;
+  }
+}
 
 const INTENSITY: Record<number, string> = {
   1: "Day 1 — FOUNDATIONAL. Summarize, categorise, classify the content. Explain main concepts plainly. Goal: solid understanding within 24h. Keep it digestible.",
