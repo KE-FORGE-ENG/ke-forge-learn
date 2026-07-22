@@ -15,6 +15,7 @@ import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as NotesRouteImport } from './routes/notes'
 import { Route as NewRouteImport } from './routes/new'
+import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -60,6 +61,11 @@ const NewRoute = NewRouteImport.update({
   path: '/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GroupsRoute = GroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -81,9 +87,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const GroupsIndexRoute = GroupsIndexRouteImport.update({
-  id: '/groups/',
-  path: '/groups/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => GroupsRoute,
 } as any)
 const DeeplearnIndexRoute = DeeplearnIndexRouteImport.update({
   id: '/deeplearn/',
@@ -106,9 +112,9 @@ const LearnPlanIdRoute = LearnPlanIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const GroupsIdRoute = GroupsIdRouteImport.update({
-  id: '/groups/$id',
-  path: '/groups/$id',
-  getParentRoute: () => rootRouteImport,
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => GroupsRoute,
 } as any)
 const FlashcardsPlanIdRoute = FlashcardsPlanIdRouteImport.update({
   id: '/flashcards/$planId',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
@@ -181,6 +188,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
@@ -205,6 +213,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/auth'
     | '/dashboard'
+    | '/groups'
     | '/new'
     | '/notes'
     | '/settings'
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/auth'
     | '/dashboard'
+    | '/groups'
     | '/new'
     | '/notes'
     | '/settings'
@@ -272,6 +282,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
+  GroupsRoute: typeof GroupsRouteWithChildren
   NewRoute: typeof NewRoute
   NotesRoute: typeof NotesRoute
   SettingsRoute: typeof SettingsRoute
@@ -281,12 +292,10 @@ export interface RootRouteChildren {
   CertificatePlanIdRoute: typeof CertificatePlanIdRoute
   DeeplearnPlanIdRoute: typeof DeeplearnPlanIdRoute
   FlashcardsPlanIdRoute: typeof FlashcardsPlanIdRoute
-  GroupsIdRoute: typeof GroupsIdRoute
   LearnPlanIdRoute: typeof LearnPlanIdRoute
   MindmapPlanIdRoute: typeof MindmapPlanIdRoute
   SharedTokenRoute: typeof SharedTokenRoute
   DeeplearnIndexRoute: typeof DeeplearnIndexRoute
-  GroupsIndexRoute: typeof GroupsIndexRoute
   QuizPlanIdDayRoute: typeof QuizPlanIdDayRoute
 }
 
@@ -334,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/groups': {
+      id: '/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof GroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -364,10 +380,10 @@ declare module '@tanstack/react-router' {
     }
     '/groups/': {
       id: '/groups/'
-      path: '/groups'
+      path: '/'
       fullPath: '/groups/'
       preLoaderRoute: typeof GroupsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GroupsRoute
     }
     '/deeplearn/': {
       id: '/deeplearn/'
@@ -399,10 +415,10 @@ declare module '@tanstack/react-router' {
     }
     '/groups/$id': {
       id: '/groups/$id'
-      path: '/groups/$id'
+      path: '/$id'
       fullPath: '/groups/$id'
       preLoaderRoute: typeof GroupsIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GroupsRoute
     }
     '/flashcards/$planId': {
       id: '/flashcards/$planId'
@@ -435,11 +451,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface GroupsRouteChildren {
+  GroupsIdRoute: typeof GroupsIdRoute
+  GroupsIndexRoute: typeof GroupsIndexRoute
+}
+
+const GroupsRouteChildren: GroupsRouteChildren = {
+  GroupsIdRoute: GroupsIdRoute,
+  GroupsIndexRoute: GroupsIndexRoute,
+}
+
+const GroupsRouteWithChildren =
+  GroupsRoute._addFileChildren(GroupsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
+  GroupsRoute: GroupsRouteWithChildren,
   NewRoute: NewRoute,
   NotesRoute: NotesRoute,
   SettingsRoute: SettingsRoute,
@@ -449,12 +479,10 @@ const rootRouteChildren: RootRouteChildren = {
   CertificatePlanIdRoute: CertificatePlanIdRoute,
   DeeplearnPlanIdRoute: DeeplearnPlanIdRoute,
   FlashcardsPlanIdRoute: FlashcardsPlanIdRoute,
-  GroupsIdRoute: GroupsIdRoute,
   LearnPlanIdRoute: LearnPlanIdRoute,
   MindmapPlanIdRoute: MindmapPlanIdRoute,
   SharedTokenRoute: SharedTokenRoute,
   DeeplearnIndexRoute: DeeplearnIndexRoute,
-  GroupsIndexRoute: GroupsIndexRoute,
   QuizPlanIdDayRoute: QuizPlanIdDayRoute,
 }
 export const routeTree = rootRouteImport
