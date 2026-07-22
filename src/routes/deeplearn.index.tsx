@@ -14,7 +14,7 @@ import { callAi } from "@/lib/api";
 import { parsePdf } from "@/lib/pdf";
 import {
   Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText,
-  Pause, Play, ExternalLink, Upload, X,
+  Pause, Play, ExternalLink, Upload, X, Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AudioLecture } from "@/components/AudioLecture";
