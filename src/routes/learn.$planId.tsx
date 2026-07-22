@@ -139,6 +139,30 @@ function Learn() {
 
   useEffect(() => { if (plan && doc) loadDay(); /* eslint-disable-next-line */ }, [plan, doc, day]);
 
+  // Reference image lookup (toggle on = fetch, off = clear)
+  useEffect(() => {
+    if (!imgOn) { setRefImages([]); return; }
+    if (!content) return;
+    (async () => {
+      try {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/image-search`;
+        const session = (await supabase.auth.getSession()).data.session;
+        const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const queries = [
+          content.title,
+          ...(content.concepts?.slice(0, 2).map((c) => c.name) ?? []),
+        ].filter(Boolean).slice(0, 3);
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ queries, limit: 4 }),
+        });
+        const d = await r.json();
+        setRefImages(d.images ?? []);
+      } catch { /* ignore */ }
+    })();
+  }, [imgOn, content]);
+
   const explainSimpler = async () => {
     if (!user || !plan) return;
     setBusy(true);
