@@ -62,6 +62,8 @@ function StandaloneDeepLearn() {
   const [paused, setPaused] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
   const [ocrBusy, setOcrBusy] = useState(false);
+  const [imgOn, setImgOn] = useState(false);
+  const [refImages, setRefImages] = useState<{ url: string; thumbnail: string; title: string; source: string; author?: string }[]>([]);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
