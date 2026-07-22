@@ -61,6 +61,8 @@ function DeepLearn() {
   const [busy, setBusy] = useState(false);
   const [paused, setPaused] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
+  const [imgOn, setImgOn] = useState(false);
+  const [refImages, setRefImages] = useState<{ url: string; thumbnail: string; title: string; source: string; author?: string }[]>([]);
   const [progressId, setProgressId] = useState<string | null>(null);
   const [ocrBusy, setOcrBusy] = useState(false);
   const [pageImgOpen, setPageImgOpen] = useState(false);
