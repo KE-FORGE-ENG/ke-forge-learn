@@ -382,6 +382,22 @@ function StandaloneDeepLearn() {
             </Card>
           )}
 
+          {imgOn && refImages.length > 0 && (
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-3 text-xs font-semibold"><ImageIcon className="w-3 h-3 text-primary" /> Reference images</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {refImages.slice(0, 8).map((img, i) => (
+                  <a key={i} href={img.source} target="_blank" rel="noreferrer" className="group block" title={img.title}>
+                    <div className="aspect-video overflow-hidden rounded border bg-muted">
+                      <img src={img.thumbnail} alt={img.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                    </div>
+                    <div className="text-[10px] text-muted-foreground truncate mt-1">{img.title}</div>
+                  </a>
+                ))}
+              </div>
+            </Card>
+          )}
+
           {mode === "pdf" && pdfPages.length > 0 && (
             <div className="flex gap-2">
               <Button variant="outline" disabled={page === 1} onClick={() => setPage(page - 1)} className="flex-1"><ChevronLeft className="w-4 h-4" /> Previous</Button>
