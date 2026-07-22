@@ -20,6 +20,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GroupsIndexRouteImport } from './routes/groups.index'
 import { Route as DeeplearnIndexRouteImport } from './routes/deeplearn.index'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
 import { Route as MindmapPlanIdRouteImport } from './routes/mindmap.$planId'
@@ -84,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsIndexRoute = GroupsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GroupsRoute,
 } as any)
 const DeeplearnIndexRoute = DeeplearnIndexRouteImport.update({
   id: '/deeplearn/',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/mindmap/$planId': typeof MindmapPlanIdRoute
   '/shared/$token': typeof SharedTokenRoute
   '/deeplearn/': typeof DeeplearnIndexRoute
+  '/groups/': typeof GroupsIndexRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesByTo {
@@ -158,7 +165,6 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
-  '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
@@ -173,6 +179,7 @@ export interface FileRoutesByTo {
   '/mindmap/$planId': typeof MindmapPlanIdRoute
   '/shared/$token': typeof SharedTokenRoute
   '/deeplearn': typeof DeeplearnIndexRoute
+  '/groups': typeof GroupsIndexRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesById {
@@ -196,6 +203,7 @@ export interface FileRoutesById {
   '/mindmap/$planId': typeof MindmapPlanIdRoute
   '/shared/$token': typeof SharedTokenRoute
   '/deeplearn/': typeof DeeplearnIndexRoute
+  '/groups/': typeof GroupsIndexRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRouteTypes {
@@ -220,6 +228,7 @@ export interface FileRouteTypes {
     | '/mindmap/$planId'
     | '/shared/$token'
     | '/deeplearn/'
+    | '/groups/'
     | '/quiz/$planId/$day'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -227,7 +236,6 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/auth'
     | '/dashboard'
-    | '/groups'
     | '/new'
     | '/notes'
     | '/settings'
@@ -242,6 +250,7 @@ export interface FileRouteTypes {
     | '/mindmap/$planId'
     | '/shared/$token'
     | '/deeplearn'
+    | '/groups'
     | '/quiz/$planId/$day'
   id:
     | '__root__'
@@ -264,6 +273,7 @@ export interface FileRouteTypes {
     | '/mindmap/$planId'
     | '/shared/$token'
     | '/deeplearn/'
+    | '/groups/'
     | '/quiz/$planId/$day'
   fileRoutesById: FileRoutesById
 }
@@ -368,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/groups/': {
+      id: '/groups/'
+      path: '/'
+      fullPath: '/groups/'
+      preLoaderRoute: typeof GroupsIndexRouteImport
+      parentRoute: typeof GroupsRoute
+    }
     '/deeplearn/': {
       id: '/deeplearn/'
       path: '/deeplearn'
@@ -436,10 +453,12 @@ declare module '@tanstack/react-router' {
 
 interface GroupsRouteChildren {
   GroupsIdRoute: typeof GroupsIdRoute
+  GroupsIndexRoute: typeof GroupsIndexRoute
 }
 
 const GroupsRouteChildren: GroupsRouteChildren = {
   GroupsIdRoute: GroupsIdRoute,
+  GroupsIndexRoute: GroupsIndexRoute,
 }
 
 const GroupsRouteWithChildren =
