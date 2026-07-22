@@ -226,11 +226,33 @@ function Learn() {
             {webOn && <Badge variant="secondary" className="ml-2"><Globe className="w-3 h-3 mr-1" />Web-augmented</Badge>}
           </p>
         )}
-        <div className="flex items-center gap-2">
-          <Label htmlFor="web-learn" className="text-xs">Web search</Label>
-          <Switch id="web-learn" checked={webOn} onCheckedChange={(v) => { setWebOn(v); if (content) loadDay(true); }} />
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="web-learn" className="text-xs">Web search</Label>
+            <Switch id="web-learn" checked={webOn} onCheckedChange={(v) => { setWebOn(v); if (content) loadDay(true); }} />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="img-learn" className="text-xs">Image search</Label>
+            <Switch id="img-learn" checked={imgOn} onCheckedChange={setImgOn} />
+          </div>
         </div>
       </div>
+
+      {imgOn && refImages.length > 0 && (
+        <Card className="p-4 mb-4">
+          <div className="flex items-center gap-2 mb-3 text-xs font-semibold"><ImageIcon className="w-3 h-3 text-primary" /> Reference images</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+            {refImages.slice(0, 8).map((img, i) => (
+              <a key={i} href={img.source} target="_blank" rel="noreferrer" className="group block" title={img.title}>
+                <div className="aspect-video overflow-hidden rounded border bg-muted">
+                  <img src={img.thumbnail} alt={img.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                </div>
+                <div className="text-[10px] text-muted-foreground truncate mt-1">{img.title}</div>
+              </a>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {webOn && webSources.length > 0 && (
         <div className="mb-4 text-[11px] text-muted-foreground">
