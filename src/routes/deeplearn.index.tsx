@@ -186,6 +186,11 @@ function StandaloneDeepLearn() {
             <Label htmlFor="web" className="text-xs">Web search</Label>
             <Switch id="web" checked={webOn} onCheckedChange={setWebOn} />
           </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border">
+            <ImageIcon className="w-4 h-4 text-primary" />
+            <Label htmlFor="img" className="text-xs">Image search</Label>
+            <Switch id="img" checked={imgOn} onCheckedChange={setImgOn} />
+          </div>
           <Button variant={paused ? "default" : "outline"} size="sm" onClick={() => setPaused((p) => !p)}>
             {paused ? <><Play className="w-4 h-4 mr-1" /> Resume</> : <><Pause className="w-4 h-4 mr-1" /> Pause</>}
           </Button>
