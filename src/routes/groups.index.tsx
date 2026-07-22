@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Users, Plus, LogIn } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/groups")({ component: Groups });
+export const Route = createFileRoute("/groups/")({ component: Groups });
 
 type Group = { id: string; name: string; description: string | null; owner_id: string; join_code: string };
 
