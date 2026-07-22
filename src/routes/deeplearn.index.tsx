@@ -14,7 +14,7 @@ import { callAi } from "@/lib/api";
 import { parsePdf } from "@/lib/pdf";
 import {
   Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText,
-  Pause, Play, ExternalLink, Upload, X,
+  Pause, Play, ExternalLink, Upload, X, Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AudioLecture } from "@/components/AudioLecture";
@@ -62,6 +62,8 @@ function StandaloneDeepLearn() {
   const [paused, setPaused] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
   const [ocrBusy, setOcrBusy] = useState(false);
+  const [imgOn, setImgOn] = useState(false);
+  const [refImages, setRefImages] = useState<{ url: string; thumbnail: string; title: string; source: string; author?: string }[]>([]);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -123,6 +125,30 @@ function StandaloneDeepLearn() {
     // eslint-disable-next-line
   }, [page, mode, paused, webOn, pdfPages.length]);
 
+  // Reference image lookup (toggle on = fetch, off = clear)
+  useEffect(() => {
+    if (!imgOn) { setRefImages([]); return; }
+    if (!lesson) return;
+    (async () => {
+      try {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/image-search`;
+        const session = (await supabase.auth.getSession()).data.session;
+        const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const queries = [
+          lesson.title,
+          ...(lesson.keywords?.slice(0, 2).map((k) => k.term) ?? []),
+        ].filter(Boolean).slice(0, 3);
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ queries, limit: 4 }),
+        });
+        const d = await r.json();
+        setRefImages(d.images ?? []);
+      } catch { /* ignore */ }
+    })();
+  }, [imgOn, lesson]);
+
   const handleOcr = async (file: File) => {
     setOcrBusy(true);
     try {
@@ -159,6 +185,11 @@ function StandaloneDeepLearn() {
             <Globe className="w-4 h-4 text-primary" />
             <Label htmlFor="web" className="text-xs">Web search</Label>
             <Switch id="web" checked={webOn} onCheckedChange={setWebOn} />
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border">
+            <ImageIcon className="w-4 h-4 text-primary" />
+            <Label htmlFor="img" className="text-xs">Image search</Label>
+            <Switch id="img" checked={imgOn} onCheckedChange={setImgOn} />
           </div>
           <Button variant={paused ? "default" : "outline"} size="sm" onClick={() => setPaused((p) => !p)}>
             {paused ? <><Play className="w-4 h-4 mr-1" /> Resume</> : <><Pause className="w-4 h-4 mr-1" /> Pause</>}
@@ -348,6 +379,22 @@ function StandaloneDeepLearn() {
                   ))}
                 </ul>
               </details>
+            </Card>
+          )}
+
+          {imgOn && refImages.length > 0 && (
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-3 text-xs font-semibold"><ImageIcon className="w-3 h-3 text-primary" /> Reference images</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {refImages.slice(0, 8).map((img, i) => (
+                  <a key={i} href={img.source} target="_blank" rel="noreferrer" className="group block" title={img.title}>
+                    <div className="aspect-video overflow-hidden rounded border bg-muted">
+                      <img src={img.thumbnail} alt={img.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                    </div>
+                    <div className="text-[10px] text-muted-foreground truncate mt-1">{img.title}</div>
+                  </a>
+                ))}
+              </div>
             </Card>
           )}
 
