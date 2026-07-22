@@ -125,6 +125,30 @@ function StandaloneDeepLearn() {
     // eslint-disable-next-line
   }, [page, mode, paused, webOn, pdfPages.length]);
 
+  // Reference image lookup (toggle on = fetch, off = clear)
+  useEffect(() => {
+    if (!imgOn) { setRefImages([]); return; }
+    if (!lesson) return;
+    (async () => {
+      try {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/image-search`;
+        const session = (await supabase.auth.getSession()).data.session;
+        const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const queries = [
+          lesson.title,
+          ...(lesson.keywords?.slice(0, 2).map((k) => k.term) ?? []),
+        ].filter(Boolean).slice(0, 3);
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ queries, limit: 4 }),
+        });
+        const d = await r.json();
+        setRefImages(d.images ?? []);
+      } catch { /* ignore */ }
+    })();
+  }, [imgOn, lesson]);
+
   const handleOcr = async (file: File) => {
     setOcrBusy(true);
     try {
