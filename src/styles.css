@@ -156,6 +156,9 @@
 
 /* Accessibility utilities */
 html { font-size: calc(16px * var(--a11y-font-scale, 1)); }
+@media (min-width: 1024px) {
+  html { font-size: calc(18px * var(--a11y-font-scale, 1)); }
+}
 html.a11y-dyslexia, html.a11y-dyslexia body {
   font-family: "Comic Sans MS", "Verdana", system-ui, sans-serif;
   letter-spacing: 0.03em;
