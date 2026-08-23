@@ -54,15 +54,43 @@ async function wikimedia(q: string, limit: number): Promise<Img[]> {
   } catch { return []; }
 }
 
+const STOP = new Set([
+  "the","a","an","and","or","of","to","in","on","for","with","from","by","is","are","was","were",
+  "this","that","these","those","it","its","as","at","be","how","what","why","introduction","overview",
+  "day","lesson","part","chapter","topic","basics","basic","concept","concepts","understanding","study",
+]);
+
+function tokenize(s: string): string[] {
+  return (s ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length > 2 && !STOP.has(w));
+}
+
+// Loose stem so "cells" matches "cell", "mitochondria" matches "mitochondrial"
+function stem(w: string): string {
+  return w.replace(/(ies|es|s|ing|ed|al|ic)$/, "");
+}
+
+function relevance(img: Img, terms: string[]): number {
+  const hay = new Set(tokenize(`${img.title} ${img.author ?? ""} ${img.source}`).map(stem));
+  if (!hay.size) return 0;
+  let hits = 0;
+  for (const t of terms) if (hay.has(t)) hits++;
+  return terms.length ? hits / terms.length : 0;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { q, queries, limit } = await req.json();
+    const { q, queries, limit, context } = await req.json();
     const list: string[] = (queries?.length ? queries : [q]).filter(Boolean);
     const perQ = Math.max(1, Math.min(6, limit ?? 4));
 
     const perQueryResults = await Promise.all(list.map(async (query: string) => {
-      const [a, b] = await Promise.all([openverse(query, perQ), wikimedia(query, perQ)]);
+      const [a, b] = await Promise.all([openverse(query, perQ * 3), wikimedia(query, perQ * 3)]);
       // Interleave openverse + wikimedia so we get a mix
       const merged: Img[] = [];
       const max = Math.max(a.length, b.length);
@@ -70,7 +98,21 @@ Deno.serve(async (req) => {
         if (a[i]) merged.push(a[i]);
         if (b[i]) merged.push(b[i]);
       }
-      return { query, images: merged.slice(0, perQ * 2) };
+
+      // STRICT relevance gate: image metadata must overlap the query terms.
+      const terms = Array.from(new Set(tokenize(query).map(stem)));
+      const ctxTerms = Array.from(new Set(tokenize(context ?? "").map(stem)));
+      const scored = merged
+        .map((img) => {
+          const primary = relevance(img, terms);
+          const secondary = ctxTerms.length ? relevance(img, ctxTerms) : 0;
+          return { img, score: primary + secondary * 0.35, primary };
+        })
+        // Must match the query itself, not just generic context.
+        .filter((s) => (terms.length >= 2 ? s.primary >= 0.5 : s.primary >= 0.99))
+        .sort((x, y) => y.score - x.score);
+
+      return { query, images: scored.slice(0, perQ).map((s) => s.img) };
     }));
 
     // Deduplicate by thumbnail URL across all queries
@@ -95,3 +137,4 @@ Deno.serve(async (req) => {
     });
   }
 });
+
