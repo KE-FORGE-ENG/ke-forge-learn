@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ReferenceImages } from "@/components/ReferenceImages";
 import { Badge } from "@/components/ui/badge";
 import { callAi, youtubeSearchDirect } from "@/lib/api";
 import { Loader2, HelpCircle, CheckCircle2, Youtube, Sparkles, ChevronLeft, ChevronRight, Layers, Network, Calendar, Award, Globe, Image as ImageIcon } from "lucide-react";
@@ -238,21 +239,7 @@ function Learn() {
         </div>
       </div>
 
-      {imgOn && refImages.length > 0 && (
-        <Card className="p-4 mb-4">
-          <div className="flex items-center gap-2 mb-3 text-xs font-semibold"><ImageIcon className="w-3 h-3 text-primary" /> Reference images</div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-            {refImages.slice(0, 8).map((img, i) => (
-              <a key={i} href={img.source} target="_blank" rel="noreferrer" className="group block" title={img.title}>
-                <div className="aspect-video overflow-hidden rounded border bg-muted">
-                  <img src={img.thumbnail} alt={img.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition" />
-                </div>
-                <div className="text-[10px] text-muted-foreground truncate mt-1">{img.title}</div>
-              </a>
-            ))}
-          </div>
-        </Card>
-      )}
+      {imgOn && <ReferenceImages images={refImages} className="mb-4" />}
 
       {webOn && webSources.length > 0 && (
         <div className="mb-4 text-[11px] text-muted-foreground">
