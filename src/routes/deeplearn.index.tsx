@@ -142,7 +142,7 @@ function StandaloneDeepLearn() {
         const r = await fetch(url, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ queries, limit: 4 }),
+          body: JSON.stringify({ queries, limit: 4, context: `${lesson.title} ${(lesson.keywords ?? []).map((k) => k.term).join(" ")}` }),
         });
         const d = await r.json();
         setRefImages(d.images ?? []);
