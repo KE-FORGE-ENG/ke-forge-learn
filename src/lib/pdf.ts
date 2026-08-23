@@ -83,3 +83,61 @@ export function chunkPages(totalPages: number, days: number) {
   }
   return chunks;
 }
+
+// --- Smart content splitting -------------------------------------------------
+// Weighs each page by how much real content it carries, then splits the document
+// into day-chunks of roughly equal workload (instead of equal page counts).
+
+const HEADING_RE = /(^|\n)\s*(chapter|section|unit|topic|part|lesson)\b/i;
+
+export function pageWeight(text: string) {
+  const clean = (text || "").replace(/\s+/g, " ").trim();
+  const words = clean ? clean.split(" ").length : 0;
+  // A near-empty page still costs a little (likely a diagram/figure page).
+  return Math.max(words, 40);
+}
+
+export function suggestDays(pages: ParsedPage[], min = 1, max = 5) {
+  const total = pages.reduce((s, p) => s + pageWeight(p.text), 0);
+  // ~1200 words of study material per day feels like a solid session.
+  const est = Math.round(total / 1200);
+  return Math.min(max, Math.max(min, est || 1));
+}
+
+export function smartChunkPages(pages: ParsedPage[], days: number) {
+  const n = pages.length;
+  if (n === 0) return chunkPages(1, days);
+  if (days >= n) return chunkPages(n, days);
+
+  const weights = pages.map((p) => pageWeight(p.text));
+  const total = weights.reduce((a, b) => a + b, 0);
+  const target = total / days;
+
+  const chunks: { day: number; startPage: number; endPage: number }[] = [];
+  let start = 0;
+  let acc = 0;
+  for (let i = 0; i < n; i++) {
+    acc += weights[i];
+    const remainingDays = days - chunks.length;
+    const remainingPages = n - i - 1;
+    const startsNewSection = i + 1 < n && HEADING_RE.test(pages[i + 1]?.text ?? "");
+    const full = acc >= target * 0.85;
+    const mustClose = remainingPages < remainingDays; // keep at least 1 page per remaining day
+
+    if (
+      chunks.length < days - 1 &&
+      (mustClose || (full && (startsNewSection || acc >= target)))
+    ) {
+      chunks.push({ day: chunks.length + 1, startPage: start + 1, endPage: i + 1 });
+      start = i + 1;
+      acc = 0;
+    }
+  }
+  chunks.push({ day: chunks.length + 1, startPage: start + 1, endPage: n });
+
+  // Pad in the unlikely case we produced fewer chunks than days.
+  while (chunks.length < days) {
+    chunks.push({ day: chunks.length + 1, startPage: n, endPage: n });
+  }
+  return chunks;
+}
