@@ -54,7 +54,7 @@ function Dashboard() {
           <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
         </div>
         <Button asChild size="lg" className="shadow-[var(--shadow-glow)] w-full sm:w-auto">
-          <Link to="/new"><Plus className="w-4 h-4 mr-1" /> New plan</Link>
+          <Link to="/new" search={{ template: undefined }}><Plus className="w-4 h-4 mr-1" /> New plan</Link>
         </Button>
       </div>
 
@@ -108,7 +108,7 @@ function Dashboard() {
       {filteredDocs.length === 0 ? (
         <Card className="p-10 text-center">
           <p className="text-muted-foreground">{ql ? "No documents match your search." : "No documents yet. Upload a PDF or create a topic to begin."}</p>
-          {!ql && <Button asChild className="mt-4"><Link to="/new"><Plus className="w-4 h-4 mr-1" /> Create your first plan</Link></Button>}
+          {!ql && <Button asChild className="mt-4"><Link to="/new" search={{ template: undefined }}><Plus className="w-4 h-4 mr-1" /> Create your first plan</Link></Button>}
         </Card>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
