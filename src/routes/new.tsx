@@ -37,6 +37,9 @@ function NewPlan() {
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
   const [templateTab, setTemplateTab] = useState<string>("pdf");
+  const [smart, setSmart] = useState(true);
+  const [scanning, setScanning] = useState(false);
+  const [suggested, setSuggested] = useState<number | null>(null);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -48,12 +51,29 @@ function NewPlan() {
     setDays(t.days);
     setTitle(t.title);
     setTemplateTab("topic");
+    setSmart(false);
   }, [search.template]);
+
+  // Smart split: how many days + which pages per day, based on content weight.
+  const planSplit = (pages: ParsedPage[]) => {
+    const d = smart ? suggestDays(pages) : days;
+    const chunks = smart ? smartChunkPages(pages, d) : chunkPages(pages.length, d);
+    return { days: d, chunks };
+  };
 
   const onFile = async (f: File) => {
     setFile(f);
     setTitle(f.name.replace(/\.pdf$/i, ""));
     setPageCount(null);
+    setSuggested(null);
+    setScanning(true);
+    try {
+      const pages = await parsePdf(f);
+      setPageCount(pages.length);
+      setSuggested(suggestDays(pages));
+    } catch {
+      /* fall back to parsing at create time */
+    } finally { setScanning(false); }
   };
 
   const createFromPdf = async () => {
