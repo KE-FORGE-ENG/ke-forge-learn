@@ -1,13 +1,31 @@
-import * as pdfjs from "pdfjs-dist";
-// Use bundled worker
-// @ts-ignore
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-
-pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
-
 export type ParsedPage = { page: number; text: string };
 
+type PdfJs = typeof import("pdfjs-dist");
+
+let pdfJsPromise: Promise<PdfJs> | undefined;
+
+// pdfjs-dist reads browser-only globals such as DOMMatrix while its module is
+// evaluated. Loading it lazily keeps those globals out of TanStack Start SSR.
+async function getPdfJs(): Promise<PdfJs> {
+  if (typeof window === "undefined") {
+    throw new Error("PDF processing is only available in the browser");
+  }
+
+  if (!pdfJsPromise) {
+    pdfJsPromise = Promise.all([
+      import("pdfjs-dist"),
+      import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+    ]).then(([pdfjs, worker]) => {
+      pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+      return pdfjs;
+    });
+  }
+
+  return pdfJsPromise;
+}
+
 export async function parsePdf(file: File): Promise<ParsedPage[]> {
+  const pdfjs = await getPdfJs();
   const buf = await file.arrayBuffer();
   const doc = await pdfjs.getDocument({ data: buf }).promise;
   const pages: ParsedPage[] = [];
@@ -24,18 +42,23 @@ export async function parsePdf(file: File): Promise<ParsedPage[]> {
 const docCache = new Map<string, Promise<any>>();
 
 export async function loadPdfFromUrl(url: string) {
-  if (!docCache.has(url)) {
-    docCache.set(
-      url,
-      (async () => {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to download PDF");
-        const buf = await res.arrayBuffer();
-        return pdfjs.getDocument({ data: buf }).promise;
-      })(),
-    );
+  const cached = docCache.get(url);
+  if (cached) return cached;
+
+  const loading = (async () => {
+    const pdfjs = await getPdfJs();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to download PDF");
+    const buf = await res.arrayBuffer();
+    return pdfjs.getDocument({ data: buf }).promise;
+  })();
+  docCache.set(url, loading);
+  try {
+    return await loading;
+  } catch (error) {
+    docCache.delete(url);
+    throw error;
   }
-  return docCache.get(url)!;
 }
 
 // Render a single PDF page to a PNG data URL.
@@ -55,6 +78,7 @@ export async function renderPdfPageImage(url: string, pageNumber: number, scale 
 // Detect whether a PDF page contains any raster/inline images.
 export async function pageHasImages(url: string, pageNumber: number): Promise<boolean> {
   try {
+    const pdfjs = await getPdfJs();
     const doc = await loadPdfFromUrl(url);
     const page = await doc.getPage(pageNumber);
     const ops = await page.getOperatorList();
