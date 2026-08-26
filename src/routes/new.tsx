@@ -335,7 +335,10 @@ function NewPlan() {
               {days === 4 && "Adds reviews and classification recap."}
               {days === 5 && "Intense mode: micro-topics, aggressive follow-ups, daily reviews."}
             </p>
+              </>
+            )}
           </div>
+
 
           <Button
             disabled={busy || (!file && !topic.trim() && images.length === 0 && batchFiles.length === 0)}
