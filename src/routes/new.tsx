@@ -95,13 +95,13 @@ function NewPlan() {
       }).select().single();
       if (dErr) throw dErr;
 
-      const chunks = chunkPages(pages.length, days);
+      const split = planSplit(pages);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
-        user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
+        user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
       }).select().single();
       if (pErr) throw pErr;
 
-      toast.success(`Plan ready! ${pages.length} pages over ${days} days.`);
+      toast.success(`Plan ready! ${pages.length} pages over ${split.days} days.`);
       nav({ to: "/learn/$planId", params: { planId: plan.id } });
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
@@ -124,9 +124,9 @@ function NewPlan() {
           storage_path: path, pages, page_count: pages.length,
         }).select().single();
         if (dErr) throw dErr;
-        const chunks = chunkPages(pages.length, days);
+        const split = planSplit(pages);
         const { error: pErr } = await supabase.from("learning_plans").insert({
-          user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
+          user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
         });
         if (pErr) throw pErr;
         setBatchProgress({ done: i + 1, total: batchFiles.length });
@@ -192,9 +192,9 @@ function NewPlan() {
         source_type: "images", pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
-      const chunks = chunkPages(pages.length, days);
+      const split = planSplit(pages);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
-        user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
+        user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
       }).select().single();
       if (pErr) throw pErr;
       toast.success(`Plan ready from ${pages.length} note${pages.length > 1 ? "s" : ""}!`);
@@ -304,6 +304,25 @@ function NewPlan() {
           </Tabs>
 
           <div className="mt-8 space-y-3">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Label>Smart split</Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Let the app decide the duration and split pages by content, not page count.
+                </p>
+              </div>
+              <Switch checked={smart} onCheckedChange={setSmart} />
+            </div>
+            {smart ? (
+              <p className="text-xs text-muted-foreground">
+                {scanning
+                  ? "Scanning document…"
+                  : suggested
+                    ? `Recommended: ${suggested} ${suggested === 1 ? "day" : "days"} based on content volume.`
+                    : "Duration is chosen automatically once the content is read."}
+              </p>
+            ) : (
+              <>
             <div className="flex items-center justify-between">
               <Label>Learning duration</Label>
               <span className="text-sm font-semibold text-primary">{days} {days === 1 ? "day" : "days"}</span>
