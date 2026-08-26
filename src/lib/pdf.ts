@@ -109,23 +109,88 @@ export function chunkPages(totalPages: number, days: number) {
 }
 
 // --- Smart content splitting -------------------------------------------------
-// Weighs each page by how much real content it carries, then splits the document
-// into day-chunks of roughly equal workload (instead of equal page counts).
+// Weighs each page by how much real *study effort* it carries (text, formulas,
+// tables, figures), then splits the document into day-chunks of roughly equal
+// workload. An AI pass (see planSplitWithAi) can refine this using the outline.
 
-const HEADING_RE = /(^|\n)\s*(chapter|section|unit|topic|part|lesson)\b/i;
+const HEADING_KEYWORDS = /^(chapter|section|unit|topic|part|lesson|module|appendix|introduction|conclusion|summary|exercises?|references)\b/i;
+const NUMBERED_HEADING = /^\d+(\.\d+)*\s+\S/;
+const TOC_RE = /(table of contents|^contents$)/i;
 
-export function pageWeight(text: string) {
-  const clean = (text || "").replace(/\s+/g, " ").trim();
-  const words = clean ? clean.split(" ").length : 0;
-  // A near-empty page still costs a little (likely a diagram/figure page).
-  return Math.max(words, 40);
+export type PageFeatures = {
+  page: number;
+  words: number;
+  formulas: number;
+  tableRows: number;
+  heading: string | null;
+  isToc: boolean;
+  sparse: boolean;
+};
+
+function lines(text: string) {
+  return (text || "")
+    .split(/\r?\n|(?<=\.)\s{3,}/)
+    .map((l) => l.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
 }
 
-export function suggestDays(pages: ParsedPage[], min = 1, max = 5) {
-  const total = pages.reduce((s, p) => s + pageWeight(p.text), 0);
-  // ~1200 words of study material per day feels like a solid session.
-  const est = Math.round(total / 1200);
-  return Math.min(max, Math.max(min, est || 1));
+export function detectHeading(text: string): string | null {
+  for (const line of lines(text).slice(0, 6)) {
+    if (line.length > 90) continue;
+    const words = line.split(" ").length;
+    if (HEADING_KEYWORDS.test(line)) return line;
+    if (NUMBERED_HEADING.test(line) && words <= 12) return line;
+    // Short standalone ALL-CAPS or Title Case line = very likely a heading.
+    if (words <= 10 && /[A-Za-z]/.test(line) && line === line.toUpperCase()) return line;
+  }
+  return null;
+}
+
+export function pageFeatures(p: ParsedPage): PageFeatures {
+  const text = p.text || "";
+  const clean = text.replace(/\s+/g, " ").trim();
+  const words = clean ? clean.split(" ").length : 0;
+  // Math / formula density: operators, sub/superscripts, greek letters, equations.
+  const formulas = (text.match(/[=±×÷∑∫√∞≈≠≤≥∂ΔΩαβγθλμσπ]|\^\d|_\{?\d/g) || []).length;
+  // Rough table detection: lines with 3+ numeric/short columns separated by gaps.
+  const tableRows = lines(text).filter((l) => (l.match(/\s{2,}|\t/g) || []).length >= 2 && /\d/.test(l)).length;
+  return {
+    page: p.page,
+    words,
+    formulas,
+    tableRows,
+    heading: detectHeading(text),
+    isToc: TOC_RE.test(clean.slice(0, 200)),
+    sparse: words < 40,
+  };
+}
+
+// Effort in "word equivalents": formulas and tables cost far more than prose,
+// and a near-empty page is usually a diagram that still needs studying.
+export function pageWeight(textOrPage: string | ParsedPage) {
+  const p: ParsedPage = typeof textOrPage === "string" ? { page: 0, text: textOrPage } : textOrPage;
+  const f = pageFeatures(p);
+  if (f.isToc) return 20; // contents/index pages carry almost no study load
+  const base = f.words + f.formulas * 25 + f.tableRows * 18;
+  // Diagram-heavy / sparse page: still a real chunk of study time.
+  return Math.max(base, f.sparse ? 120 : 60);
+}
+
+// Reading + processing time estimate, in minutes.
+export function estimateMinutes(pages: ParsedPage[]) {
+  const total = pages.reduce((s, p) => s + pageWeight(p), 0);
+  return total / 160; // ~160 effort-words per minute of active study
+}
+
+// Day cap scales with the document instead of a hard 5.
+export function maxDaysFor(pages: ParsedPage[]) {
+  return Math.min(30, Math.max(5, Math.ceil(pages.length / 3)));
+}
+
+export function suggestDays(pages: ParsedPage[], minutesPerDay = 45, min = 1, max?: number) {
+  const cap = max ?? maxDaysFor(pages);
+  const est = Math.round(estimateMinutes(pages) / minutesPerDay);
+  return Math.min(cap, Math.max(min, est || 1));
 }
 
 export function smartChunkPages(pages: ParsedPage[], days: number) {
@@ -133,7 +198,7 @@ export function smartChunkPages(pages: ParsedPage[], days: number) {
   if (n === 0) return chunkPages(1, days);
   if (days >= n) return chunkPages(n, days);
 
-  const weights = pages.map((p) => pageWeight(p.text));
+  const weights = pages.map((p) => pageWeight(p));
   const total = weights.reduce((a, b) => a + b, 0);
   const target = total / days;
 
@@ -144,8 +209,8 @@ export function smartChunkPages(pages: ParsedPage[], days: number) {
     acc += weights[i];
     const remainingDays = days - chunks.length;
     const remainingPages = n - i - 1;
-    const startsNewSection = i + 1 < n && HEADING_RE.test(pages[i + 1]?.text ?? "");
-    const full = acc >= target * 0.85;
+    const startsNewSection = i + 1 < n && !!detectHeading(pages[i + 1]?.text ?? "");
+    const full = acc >= target * 0.75;
     const mustClose = remainingPages < remainingDays; // keep at least 1 page per remaining day
 
     if (
@@ -165,3 +230,20 @@ export function smartChunkPages(pages: ParsedPage[], days: number) {
   }
   return chunks;
 }
+
+// Compact per-page outline sent to the AI planner (keeps tokens small).
+export function buildOutline(pages: ParsedPage[]) {
+  return pages.map((p) => {
+    const f = pageFeatures(p);
+    return {
+      page: p.page,
+      words: f.words,
+      formulas: f.formulas,
+      tables: f.tableRows,
+      toc: f.isToc,
+      heading: f.heading ?? undefined,
+      snippet: (p.text || "").replace(/\s+/g, " ").trim().slice(0, 180),
+    };
+  });
+}
+
