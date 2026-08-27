@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { parsePdf, chunkPages, smartChunkPages, suggestDays, type ParsedPage } from "@/lib/pdf";
+import { parsePdf, chunkPages, smartChunkPages, suggestDays, maxDaysFor, buildOutline, type ParsedPage } from "@/lib/pdf";
 import { Switch } from "@/components/ui/switch";
 import { callAi } from "@/lib/api";
 import { TEMPLATES } from "@/lib/templates";
@@ -40,6 +40,7 @@ function NewPlan() {
   const [smart, setSmart] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [suggested, setSuggested] = useState<number | null>(null);
+  const [minutesPerDay, setMinutesPerDay] = useState(45);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -54,11 +55,51 @@ function NewPlan() {
     setSmart(false);
   }, [search.template]);
 
-  // Smart split: how many days + which pages per day, based on content weight.
-  const planSplit = (pages: ParsedPage[]) => {
-    const d = smart ? suggestDays(pages) : days;
-    const chunks = smart ? smartChunkPages(pages, d) : chunkPages(pages.length, d);
-    return { days: d, chunks };
+  // Validate an AI-produced split: contiguous, in-order, covers every page once.
+  const normalizeChunks = (raw: any[], total: number) => {
+    if (!Array.isArray(raw) || raw.length === 0) return null;
+    const sorted = raw
+      .map((c) => ({ startPage: Number(c.startPage), endPage: Number(c.endPage), title: c.title, focus: c.focus }))
+      .filter((c) => Number.isFinite(c.startPage) && Number.isFinite(c.endPage))
+      .sort((a, b) => a.startPage - b.startPage);
+    if (sorted.length === 0) return null;
+    let cursor = 1;
+    const out: any[] = [];
+    for (const c of sorted) {
+      const start = cursor;
+      const end = Math.max(start, Math.min(total, Math.round(c.endPage)));
+      if (start > total) break;
+      out.push({ day: out.length + 1, startPage: start, endPage: end, title: c.title, focus: c.focus });
+      cursor = end + 1;
+      if (cursor > total) break;
+    }
+    if (out.length === 0) return null;
+    out[out.length - 1].endPage = total; // guarantee full coverage
+    return out;
+  };
+
+  // Smart split: AI reads the document outline and picks topic-aligned day chunks.
+  // Falls back to the content-weight heuristic if the AI is unavailable.
+  const planSplit = async (pages: ParsedPage[], docTitle?: string) => {
+    if (!smart) return { days, chunks: chunkPages(pages.length, days), ai: false };
+    const cap = maxDaysFor(pages);
+    const heuristicDays = suggestDays(pages, minutesPerDay, 1, cap);
+    if (pages.length > 1) {
+      try {
+        const res = await callAi("plan_split", {
+          outline: buildOutline(pages),
+          totalPages: pages.length,
+          minutesPerDay,
+          maxDays: cap,
+          docTitle,
+        });
+        const chunks = normalizeChunks(res?.chunks ?? [], pages.length);
+        if (chunks) return { days: chunks.length, chunks, ai: true, rationale: res?.rationale as string | undefined };
+      } catch {
+        /* fall through to heuristic */
+      }
+    }
+    return { days: heuristicDays, chunks: smartChunkPages(pages, heuristicDays), ai: false };
   };
 
   const onFile = async (f: File) => {
@@ -70,7 +111,7 @@ function NewPlan() {
     try {
       const pages = await parsePdf(f);
       setPageCount(pages.length);
-      setSuggested(suggestDays(pages));
+      setSuggested(suggestDays(pages, minutesPerDay, 1, maxDaysFor(pages)));
     } catch {
       /* fall back to parsing at create time */
     } finally { setScanning(false); }
@@ -95,7 +136,7 @@ function NewPlan() {
       }).select().single();
       if (dErr) throw dErr;
 
-      const split = planSplit(pages);
+      const split = await planSplit(pages, title || file?.name);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
       }).select().single();
@@ -124,7 +165,7 @@ function NewPlan() {
           storage_path: path, pages, page_count: pages.length,
         }).select().single();
         if (dErr) throw dErr;
-        const split = planSplit(pages);
+        const split = await planSplit(pages, title || file?.name);
         const { error: pErr } = await supabase.from("learning_plans").insert({
           user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
         });
@@ -192,7 +233,7 @@ function NewPlan() {
         source_type: "images", pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
-      const split = planSplit(pages);
+      const split = await planSplit(pages, title || file?.name);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
       }).select().single();
