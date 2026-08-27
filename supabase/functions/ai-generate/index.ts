@@ -453,7 +453,60 @@ Be accurate. Never invent facts.`;
     }
 
 
+    if (action === "plan_split") {
+      const { outline, totalPages, minutesPerDay = 45, maxDays = 14, docTitle } = payload;
+      const planTool = {
+        type: "function",
+        function: {
+          name: "emit_plan",
+          description: "Emit a study plan splitting a document into day chunks by topic boundaries",
+          parameters: {
+            type: "object",
+            properties: {
+              days: { type: "integer", description: "Total number of study days (1..maxDays)." },
+              rationale: { type: "string", description: "One short sentence explaining the chosen duration." },
+              chunks: {
+                type: "array",
+                description: "Contiguous, non-overlapping page ranges covering EVERY page from 1 to totalPages, in order.",
+                items: {
+                  type: "object",
+                  properties: {
+                    day: { type: "integer" },
+                    startPage: { type: "integer" },
+                    endPage: { type: "integer" },
+                    title: { type: "string", description: "Short topic title for that day (2-6 words)." },
+                    focus: { type: "string", description: "One sentence on what the student should master that day." },
+                  },
+                  required: ["day", "startPage", "endPage", "title"],
+                },
+              },
+            },
+            required: ["days", "chunks"],
+          },
+        },
+      };
+      const sys = `You are an expert study planner. You are given a page-by-page outline of a document (word counts, formula/table density, detected headings, and text snippets).
+Split it into study days so that:
+- Days break at REAL topic/chapter boundaries, never mid-concept.
+- Workload per day is balanced by DIFFICULTY, not page count: formula-heavy, table-heavy, or diagram pages take much longer per page than prose. Table-of-contents, title, and reference pages are near-zero effort.
+- Aim for roughly ${minutesPerDay} minutes of active study per day (~160 effort-words/minute).
+- Use between 1 and ${maxDays} days. Never exceed ${maxDays}.
+- Chunks MUST be contiguous and cover pages 1..${totalPages} exactly once, in ascending order.`;
+      const data = await callAI({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: `DOCUMENT: ${docTitle || "Untitled"}\nTOTAL PAGES: ${totalPages}\n\nOUTLINE (JSON):\n${JSON.stringify(outline).slice(0, 40000)}\n\nProduce the day plan.` },
+        ],
+        tools: [planTool],
+        tool_choice: { type: "function", function: { name: "emit_plan" } },
+      });
+      const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
+      return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     if (action === "youtube_keypoints") {
+
       const { videoTitle, videoDescription, channel, contextText } = payload;
       if (!videoTitle) throw new Error("videoTitle required");
       const ytTool = {
