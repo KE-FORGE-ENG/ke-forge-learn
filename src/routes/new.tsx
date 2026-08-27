@@ -121,7 +121,7 @@ function NewPlan() {
     if (!file || !user) return;
     setBusy(true);
     try {
-      toast.message("Reading PDF…");
+      toast.message(smart ? "Reading PDF and planning your study days…" : "Reading PDF…");
       const pages = await parsePdf(file);
       setPageCount(pages.length);
 
@@ -165,7 +165,7 @@ function NewPlan() {
           storage_path: path, pages, page_count: pages.length,
         }).select().single();
         if (dErr) throw dErr;
-        const split = await planSplit(pages, title || file?.name);
+        const split = await planSplit(pages, f.name.replace(/\.pdf$/i, ""));
         const { error: pErr } = await supabase.from("learning_plans").insert({
           user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
         });
@@ -233,7 +233,7 @@ function NewPlan() {
         source_type: "images", pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
-      const split = await planSplit(pages, title || file?.name);
+      const split = await planSplit(pages, title || "Notes");
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
       }).select().single();
@@ -355,13 +355,20 @@ function NewPlan() {
               <Switch checked={smart} onCheckedChange={setSmart} />
             </div>
             {smart ? (
-              <p className="text-xs text-muted-foreground">
-                {scanning
-                  ? "Scanning document…"
-                  : suggested
-                    ? `Recommended: ${suggested} ${suggested === 1 ? "day" : "days"} based on content volume.`
-                    : "Duration is chosen automatically once the content is read."}
-              </p>
+              <>
+                <p className="text-xs text-muted-foreground">
+                  {scanning
+                    ? "Scanning document…"
+                    : suggested
+                      ? `Estimated ${suggested} ${suggested === 1 ? "day" : "days"} — the AI planner refines this and breaks days at real topic boundaries when you create the plan.`
+                      : "The AI planner reads the document outline and chooses the duration and topic-aligned day splits."}
+                </p>
+                <div className="flex items-center justify-between pt-2">
+                  <Label>Study time per day</Label>
+                  <span className="text-sm font-semibold text-primary">{minutesPerDay} min</span>
+                </div>
+                <Slider min={15} max={120} step={15} value={[minutesPerDay]} onValueChange={(v) => setMinutesPerDay(v[0])} />
+              </>
             ) : (
               <>
             <div className="flex items-center justify-between">
