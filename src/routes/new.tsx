@@ -41,18 +41,7 @@ function NewPlan() {
   const [scanning, setScanning] = useState(false);
   const [suggested, setSuggested] = useState<number | null>(null);
   const [minutesPerDay, setMinutesPerDay] = useState(45);
-  // AI proposal shown before the plan is created.
-  const [analyzing, setAnalyzing] = useState(false);
-  const [proposal, setProposal] = useState<null | {
-    kind: "pdf" | "images" | "topic";
-    pages: ParsedPage[];
-    days: number;
-    chunks: any[];
-    rationale?: string;
-    ai: boolean;
-  }>(null);
-  const [overrideOpen, setOverrideOpen] = useState(false);
-  const [overrideDays, setOverrideDays] = useState(3);
+
 
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
