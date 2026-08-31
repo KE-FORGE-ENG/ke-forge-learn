@@ -501,19 +501,73 @@ function NewPlan() {
           </div>
 
 
-          <Button
-            disabled={busy || (!file && !topic.trim() && images.length === 0 && batchFiles.length === 0)}
-            onClick={() => {
-              if (templateTab === "batch" && batchFiles.length > 0) return createBatch();
-              if (images.length > 0) return createFromImages();
-              if (file) return createFromPdf();
-              return createFromTopic();
-            }}
-            className="w-full mt-6 shadow-[var(--shadow-glow)]"
-            size="lg"
-          >
-            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building plan…</> : (templateTab === "batch" && batchFiles.length > 0 ? `Create ${batchFiles.length} plans` : "Create plan")}
-          </Button>
+          {proposal && (
+            <Card className="mt-6 p-4 bg-muted/40 border-primary/30">
+              <p className="text-sm font-semibold">
+                {proposal.ai ? "AI recommendation" : "Recommended plan"}: {proposal.days} {proposal.days === 1 ? "day" : "days"}
+              </p>
+              {proposal.rationale && <p className="text-xs text-muted-foreground mt-1">{proposal.rationale}</p>}
+              {proposal.chunks.some((c: any) => c?.title) && (
+                <ul className="mt-3 space-y-1 text-xs">
+                  {proposal.chunks.slice(0, 8).map((c: any, i: number) => (
+                    <li key={i} className="truncate">
+                      <span className="font-medium">Day {i + 1}:</span> {c.title || `Pages ${c.startPage}–${c.endPage}`}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                <Button disabled={busy} onClick={() => commitProposal()} className="flex-1">
+                  {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building…</> : "Continue"}
+                </Button>
+                <Button variant="outline" disabled={busy} onClick={() => setOverrideOpen((v) => !v)} className="flex-1">
+                  Choose my own days
+                </Button>
+              </div>
+              {overrideOpen && (
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Learn it in</Label>
+                    <span className="text-sm font-semibold text-primary">{overrideDays} {overrideDays === 1 ? "day" : "days"}</span>
+                  </div>
+                  <Slider min={1} max={5} step={1} value={[overrideDays]} onValueChange={(v) => setOverrideDays(v[0])} />
+                  <p className="text-xs text-muted-foreground">
+                    Smart split will rebalance the content by difficulty so the whole {proposal.kind === "topic" ? "topic" : "document"} is covered in {overrideDays} {overrideDays === 1 ? "day" : "days"}.
+                  </p>
+                  <Button disabled={busy} onClick={() => commitProposal(overrideDays)} className="w-full">
+                    Use {overrideDays} {overrideDays === 1 ? "day" : "days"}
+                  </Button>
+                </div>
+              )}
+              <Button variant="ghost" size="sm" disabled={busy} onClick={() => setProposal(null)} className="mt-2 w-full">
+                Start over
+              </Button>
+            </Card>
+          )}
+
+          {!proposal && (
+            <Button
+              disabled={busy || analyzing || (!file && !topic.trim() && images.length === 0 && batchFiles.length === 0)}
+              onClick={() => {
+                if (templateTab === "batch" && batchFiles.length > 0) return createBatch();
+                if (smart) return analyze();
+                if (images.length > 0) return createFromImages();
+                if (file) return createFromPdf();
+                return createFromTopic();
+              }}
+              className="w-full mt-6 shadow-[var(--shadow-glow)]"
+              size="lg"
+            >
+              {analyzing
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> AI is reading your content…</>
+                : busy
+                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building plan…</>
+                  : templateTab === "batch" && batchFiles.length > 0
+                    ? `Create ${batchFiles.length} plans`
+                    : smart ? "Analyse & recommend days" : "Create plan"}
+            </Button>
+          )}
+
         </Card>
       </div>
     </AppShell>
