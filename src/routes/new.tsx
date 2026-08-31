@@ -41,6 +41,19 @@ function NewPlan() {
   const [scanning, setScanning] = useState(false);
   const [suggested, setSuggested] = useState<number | null>(null);
   const [minutesPerDay, setMinutesPerDay] = useState(45);
+  // AI proposal shown before the plan is created.
+  const [analyzing, setAnalyzing] = useState(false);
+  const [proposal, setProposal] = useState<null | {
+    kind: "pdf" | "images" | "topic";
+    pages: ParsedPage[];
+    days: number;
+    chunks: any[];
+    rationale?: string;
+    ai: boolean;
+  }>(null);
+  const [overrideOpen, setOverrideOpen] = useState(false);
+  const [overrideDays, setOverrideDays] = useState(3);
+
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -99,14 +112,33 @@ function NewPlan() {
         /* fall through to heuristic */
       }
     }
+    if (pages.length === 1) {
+      // Single-page / topic input: let the AI judge breadth & complexity.
+      try {
+        const res = await callAi("plan_split", {
+          outline: buildOutline(pages),
+          totalPages: 1,
+          minutesPerDay,
+          maxDays: 5,
+          docTitle,
+        });
+        const d = Math.min(5, Math.max(1, Number(res?.days) || 0));
+        if (d) return { days: d, chunks: chunkPages(1, d), ai: true, rationale: res?.rationale as string | undefined };
+      } catch { /* heuristic below */ }
+    }
     return { days: heuristicDays, chunks: smartChunkPages(pages, heuristicDays), ai: false };
   };
+
+  // Re-split the same content for a user-chosen number of days (1–5).
+  const resplit = (pages: ParsedPage[], n: number) =>
+    pages.length > 1 ? smartChunkPages(pages, n) : chunkPages(pages.length || 1, n);
 
   const onFile = async (f: File) => {
     setFile(f);
     setTitle(f.name.replace(/\.pdf$/i, ""));
     setPageCount(null);
     setSuggested(null);
+    setProposal(null);
     setScanning(true);
     try {
       const pages = await parsePdf(f);
@@ -117,11 +149,92 @@ function NewPlan() {
     } finally { setScanning(false); }
   };
 
+  // Step 1 (smart split on): read the content, let the AI propose a duration.
+  const analyze = async () => {
+    if (!user) return;
+    setAnalyzing(true);
+    try {
+      let pages: ParsedPage[] = [];
+      let kind: "pdf" | "images" | "topic" = "topic";
+      if (file) {
+        kind = "pdf";
+        toast.message("Reading your PDF and studying its scope…");
+        pages = await parsePdf(file);
+        setPageCount(pages.length);
+      } else if (images.length > 0) {
+        kind = "images";
+        toast.message(`Reading ${images.length} image${images.length > 1 ? "s" : ""}…`);
+        for (let i = 0; i < images.length; i++) {
+          const res = await callAi("ocr_image", { imageDataUrl: images[i].dataUrl });
+          const text = (res.text || "").trim();
+          if (text) pages.push({ page: pages.length + 1, text });
+          setOcrPreview((prev) => prev + (prev ? "\n\n" : "") + text.slice(0, 200) + "…");
+        }
+        if (pages.length === 0) throw new Error("No readable text found in images");
+      } else {
+        if (!topic.trim()) return;
+        toast.message("Assessing how broad this topic is…");
+        pages = [{ page: 1, text: topic }];
+      }
+      const split = await planSplit(pages, title || file?.name || topic.slice(0, 60));
+      setOverrideDays(Math.min(5, Math.max(1, split.days)));
+      setOverrideOpen(false);
+      setProposal({ kind, pages, days: split.days, chunks: split.chunks, rationale: (split as any).rationale, ai: split.ai });
+    } catch (e: any) {
+      toast.error(e.message ?? "Could not analyse the content");
+    } finally { setAnalyzing(false); }
+  };
+
+  // Step 2: persist the accepted (or user-adjusted) plan.
+  const commitProposal = async (chosenDays?: number) => {
+    if (!proposal || !user) return;
+    setBusy(true);
+    try {
+      const useDays = chosenDays ?? proposal.days;
+      const chunks = chosenDays && chosenDays !== proposal.days ? resplit(proposal.pages, chosenDays) : proposal.chunks;
+      const pages = proposal.pages;
+      let docTitle = title;
+      let storage_path: string | undefined;
+      let source_type = "topic";
+
+      if (proposal.kind === "pdf" && file) {
+        source_type = "pdf";
+        docTitle = title || file.name;
+        const path = `${user.id}/${Date.now()}-${file.name}`;
+        const { error: upErr } = await supabase.storage.from("pdfs").upload(path, file);
+        if (upErr) throw upErr;
+        storage_path = path;
+      } else if (proposal.kind === "images") {
+        source_type = "images";
+        docTitle = title || `Notes ${new Date().toLocaleDateString()}`;
+      } else {
+        docTitle = title || topic.slice(0, 60);
+      }
+
+      const { data: doc, error: dErr } = await supabase.from("documents").insert({
+        user_id: user.id, title: docTitle, source_type,
+        ...(storage_path ? { storage_path } : {}),
+        pages, page_count: pages.length,
+      }).select().single();
+      if (dErr) throw dErr;
+
+      const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
+        user_id: user.id, document_id: doc.id, days: useDays, page_chunks: chunks,
+      }).select().single();
+      if (pErr) throw pErr;
+
+      toast.success(`Plan ready — ${useDays} ${useDays === 1 ? "day" : "days"}.`);
+      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally { setBusy(false); }
+  };
+
   const createFromPdf = async () => {
     if (!file || !user) return;
     setBusy(true);
     try {
-      toast.message(smart ? "Reading PDF and planning your study days…" : "Reading PDF…");
+      toast.message("Reading PDF…");
       const pages = await parsePdf(file);
       setPageCount(pages.length);
 
@@ -136,13 +249,12 @@ function NewPlan() {
       }).select().single();
       if (dErr) throw dErr;
 
-      const split = await planSplit(pages, title || file?.name);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
-        user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
+        user_id: user.id, document_id: doc.id, days, page_chunks: chunkPages(pages.length, days),
       }).select().single();
       if (pErr) throw pErr;
 
-      toast.success(`Plan ready! ${pages.length} pages over ${split.days} days.`);
+      toast.success(`Plan ready! ${pages.length} pages over ${days} days.`);
       nav({ to: "/learn/$planId", params: { planId: plan.id } });
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
@@ -213,6 +325,7 @@ function NewPlan() {
       arr.push({ name: f.name, dataUrl });
     }
     setImages([...images, ...arr]);
+    setProposal(null);
   };
 
   const createFromImages = async () => {
@@ -233,9 +346,8 @@ function NewPlan() {
         source_type: "images", pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
-      const split = await planSplit(pages, title || "Notes");
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
-        user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
+        user_id: user.id, document_id: doc.id, days, page_chunks: chunkPages(pages.length, days),
       }).select().single();
       if (pErr) throw pErr;
       toast.success(`Plan ready from ${pages.length} note${pages.length > 1 ? "s" : ""}!`);
@@ -246,6 +358,7 @@ function NewPlan() {
   };
 
   if (!user) return null;
+
 
   return (
     <AppShell>
@@ -339,7 +452,7 @@ function NewPlan() {
               </div>
               <div className="space-y-2">
                 <Label>Describe the topic</Label>
-                <Textarea rows={6} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Paste notes or describe what you want to learn…" />
+                <Textarea rows={6} value={topic} onChange={(e) => { setTopic(e.target.value); setProposal(null); }} placeholder="Paste notes or describe what you want to learn…" />
               </div>
             </TabsContent>
           </Tabs>
@@ -388,19 +501,73 @@ function NewPlan() {
           </div>
 
 
-          <Button
-            disabled={busy || (!file && !topic.trim() && images.length === 0 && batchFiles.length === 0)}
-            onClick={() => {
-              if (templateTab === "batch" && batchFiles.length > 0) return createBatch();
-              if (images.length > 0) return createFromImages();
-              if (file) return createFromPdf();
-              return createFromTopic();
-            }}
-            className="w-full mt-6 shadow-[var(--shadow-glow)]"
-            size="lg"
-          >
-            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building plan…</> : (templateTab === "batch" && batchFiles.length > 0 ? `Create ${batchFiles.length} plans` : "Create plan")}
-          </Button>
+          {proposal && (
+            <Card className="mt-6 p-4 bg-muted/40 border-primary/30">
+              <p className="text-sm font-semibold">
+                {proposal.ai ? "AI recommendation" : "Recommended plan"}: {proposal.days} {proposal.days === 1 ? "day" : "days"}
+              </p>
+              {proposal.rationale && <p className="text-xs text-muted-foreground mt-1">{proposal.rationale}</p>}
+              {proposal.chunks.some((c: any) => c?.title) && (
+                <ul className="mt-3 space-y-1 text-xs">
+                  {proposal.chunks.slice(0, 8).map((c: any, i: number) => (
+                    <li key={i} className="truncate">
+                      <span className="font-medium">Day {i + 1}:</span> {c.title || `Pages ${c.startPage}–${c.endPage}`}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                <Button disabled={busy} onClick={() => commitProposal()} className="flex-1">
+                  {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building…</> : "Continue"}
+                </Button>
+                <Button variant="outline" disabled={busy} onClick={() => setOverrideOpen((v) => !v)} className="flex-1">
+                  Choose my own days
+                </Button>
+              </div>
+              {overrideOpen && (
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Learn it in</Label>
+                    <span className="text-sm font-semibold text-primary">{overrideDays} {overrideDays === 1 ? "day" : "days"}</span>
+                  </div>
+                  <Slider min={1} max={5} step={1} value={[overrideDays]} onValueChange={(v) => setOverrideDays(v[0])} />
+                  <p className="text-xs text-muted-foreground">
+                    Smart split will rebalance the content by difficulty so the whole {proposal.kind === "topic" ? "topic" : "document"} is covered in {overrideDays} {overrideDays === 1 ? "day" : "days"}.
+                  </p>
+                  <Button disabled={busy} onClick={() => commitProposal(overrideDays)} className="w-full">
+                    Use {overrideDays} {overrideDays === 1 ? "day" : "days"}
+                  </Button>
+                </div>
+              )}
+              <Button variant="ghost" size="sm" disabled={busy} onClick={() => setProposal(null)} className="mt-2 w-full">
+                Start over
+              </Button>
+            </Card>
+          )}
+
+          {!proposal && (
+            <Button
+              disabled={busy || analyzing || (!file && !topic.trim() && images.length === 0 && batchFiles.length === 0)}
+              onClick={() => {
+                if (templateTab === "batch" && batchFiles.length > 0) return createBatch();
+                if (smart) return analyze();
+                if (images.length > 0) return createFromImages();
+                if (file) return createFromPdf();
+                return createFromTopic();
+              }}
+              className="w-full mt-6 shadow-[var(--shadow-glow)]"
+              size="lg"
+            >
+              {analyzing
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> AI is reading your content…</>
+                : busy
+                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building plan…</>
+                  : templateTab === "batch" && batchFiles.length > 0
+                    ? `Create ${batchFiles.length} plans`
+                    : smart ? "Analyse & recommend days" : "Create plan"}
+            </Button>
+          )}
+
         </Card>
       </div>
     </AppShell>
