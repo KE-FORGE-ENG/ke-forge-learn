@@ -41,18 +41,7 @@ function NewPlan() {
   const [scanning, setScanning] = useState(false);
   const [suggested, setSuggested] = useState<number | null>(null);
   const [minutesPerDay, setMinutesPerDay] = useState(45);
-  // AI proposal shown before the plan is created.
-  const [analyzing, setAnalyzing] = useState(false);
-  const [proposal, setProposal] = useState<null | {
-    kind: "pdf" | "images" | "topic";
-    pages: ParsedPage[];
-    days: number;
-    chunks: any[];
-    rationale?: string;
-    ai: boolean;
-  }>(null);
-  const [overrideOpen, setOverrideOpen] = useState(false);
-  const [overrideDays, setOverrideDays] = useState(3);
+
 
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
@@ -129,16 +118,11 @@ function NewPlan() {
     return { days: heuristicDays, chunks: smartChunkPages(pages, heuristicDays), ai: false };
   };
 
-  // Re-split the same content for a user-chosen number of days (1–5).
-  const resplit = (pages: ParsedPage[], n: number) =>
-    pages.length > 1 ? smartChunkPages(pages, n) : chunkPages(pages.length || 1, n);
-
   const onFile = async (f: File) => {
     setFile(f);
     setTitle(f.name.replace(/\.pdf$/i, ""));
     setPageCount(null);
     setSuggested(null);
-    setProposal(null);
     setScanning(true);
     try {
       const pages = await parsePdf(f);
@@ -149,94 +133,14 @@ function NewPlan() {
     } finally { setScanning(false); }
   };
 
-  // Step 1 (smart split on): read the content, let the AI propose a duration.
-  const analyze = async () => {
-    if (!user) return;
-    setAnalyzing(true);
-    try {
-      let pages: ParsedPage[] = [];
-      let kind: "pdf" | "images" | "topic" = "topic";
-      if (file) {
-        kind = "pdf";
-        toast.message("Reading your PDF and studying its scope…");
-        pages = await parsePdf(file);
-        setPageCount(pages.length);
-      } else if (images.length > 0) {
-        kind = "images";
-        toast.message(`Reading ${images.length} image${images.length > 1 ? "s" : ""}…`);
-        for (let i = 0; i < images.length; i++) {
-          const res = await callAi("ocr_image", { imageDataUrl: images[i].dataUrl });
-          const text = (res.text || "").trim();
-          if (text) pages.push({ page: pages.length + 1, text });
-          setOcrPreview((prev) => prev + (prev ? "\n\n" : "") + text.slice(0, 200) + "…");
-        }
-        if (pages.length === 0) throw new Error("No readable text found in images");
-      } else {
-        if (!topic.trim()) return;
-        toast.message("Assessing how broad this topic is…");
-        pages = [{ page: 1, text: topic }];
-      }
-      const split = await planSplit(pages, title || file?.name || topic.slice(0, 60));
-      setOverrideDays(Math.min(5, Math.max(1, split.days)));
-      setOverrideOpen(false);
-      setProposal({ kind, pages, days: split.days, chunks: split.chunks, rationale: (split as any).rationale, ai: split.ai });
-    } catch (e: any) {
-      toast.error(e.message ?? "Could not analyse the content");
-    } finally { setAnalyzing(false); }
-  };
-
-  // Step 2: persist the accepted (or user-adjusted) plan.
-  const commitProposal = async (chosenDays?: number) => {
-    if (!proposal || !user) return;
-    setBusy(true);
-    try {
-      const useDays = chosenDays ?? proposal.days;
-      const chunks = chosenDays && chosenDays !== proposal.days ? resplit(proposal.pages, chosenDays) : proposal.chunks;
-      const pages = proposal.pages;
-      let docTitle = title;
-      let storage_path: string | undefined;
-      let source_type = "topic";
-
-      if (proposal.kind === "pdf" && file) {
-        source_type = "pdf";
-        docTitle = title || file.name;
-        const path = `${user.id}/${Date.now()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from("pdfs").upload(path, file);
-        if (upErr) throw upErr;
-        storage_path = path;
-      } else if (proposal.kind === "images") {
-        source_type = "images";
-        docTitle = title || `Notes ${new Date().toLocaleDateString()}`;
-      } else {
-        docTitle = title || topic.slice(0, 60);
-      }
-
-      const { data: doc, error: dErr } = await supabase.from("documents").insert({
-        user_id: user.id, title: docTitle, source_type,
-        ...(storage_path ? { storage_path } : {}),
-        pages, page_count: pages.length,
-      }).select().single();
-      if (dErr) throw dErr;
-
-      const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
-        user_id: user.id, document_id: doc.id, days: useDays, page_chunks: chunks,
-      }).select().single();
-      if (pErr) throw pErr;
-
-      toast.success(`Plan ready — ${useDays} ${useDays === 1 ? "day" : "days"}.`);
-      nav({ to: "/learn/$planId", params: { planId: plan.id } });
-    } catch (e: any) {
-      toast.error(e.message ?? "Failed");
-    } finally { setBusy(false); }
-  };
-
   const createFromPdf = async () => {
     if (!file || !user) return;
     setBusy(true);
     try {
-      toast.message("Reading PDF…");
+      toast.message(smart ? "Reading PDF and planning the split…" : "Reading PDF…");
       const pages = await parsePdf(file);
       setPageCount(pages.length);
+      const split = await planSplit(pages, title || file.name);
 
       // Upload to storage
       const path = `${user.id}/${Date.now()}-${file.name}`;
@@ -250,11 +154,11 @@ function NewPlan() {
       if (dErr) throw dErr;
 
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
-        user_id: user.id, document_id: doc.id, days, page_chunks: chunkPages(pages.length, days),
+        user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
       }).select().single();
       if (pErr) throw pErr;
 
-      toast.success(`Plan ready! ${pages.length} pages over ${days} days.`);
+      toast.success(`Plan ready! ${pages.length} pages over ${split.days} ${split.days === 1 ? "day" : "days"}.`);
       nav({ to: "/learn/$planId", params: { planId: plan.id } });
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
