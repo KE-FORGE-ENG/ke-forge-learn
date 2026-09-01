@@ -360,6 +360,34 @@ Be accurate. Never invent facts.`;
       return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "youtube_deep_lesson") {
+      const { videoTitle, channel, mainTopic, overview, subTopics, covered, contextText, step } = payload;
+      const n = Number(step) || 1;
+      const sys = `You are a university lecturer running a continuous deep-dive study session for a student who watched a YouTube video and now wants to go much deeper into the FIELD/SUBJECT the video is about.
+There is no fixed day plan — you teach in a progressive sequence of lessons, each one going deeper than the last.
+Lesson ${n}: build directly on what has already been taught (listed below) and go one level deeper — more rigour, more terminology, more mechanism, more exam-grade specifics.
+Teach thoroughly in a lecturer voice (multi-paragraph). Extract exact keywords with precise definitions, testable facts, worked examples, and likely exam questions with model answers. End with a recap. Never invent fake numbers, citations or names.`;
+      const userMsg = `VIDEO: ${videoTitle || ""} (${channel || "unknown channel"})
+FIELD / MAIN TOPIC: ${mainTopic || videoTitle || ""}
+OVERVIEW: ${(overview || "").slice(0, 1500)}
+SUB-TOPICS FROM THE VIDEO: ${(subTopics || []).join("; ").slice(0, 2000)}
+ALREADY TAUGHT IN THIS DEEP DIVE (do not repeat, go deeper): ${(covered || []).join(" | ").slice(0, 3000) || "nothing yet — start with the foundations of this field"}
+${contextText ? `STUDENT CONTEXT: ${String(contextText).slice(0, 1500)}` : ""}
+
+Produce lesson ${n} of this deep dive.`;
+      const data = await callAI({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: userMsg },
+        ],
+        tools: [deepTool],
+        tool_choice: { type: "function", function: { name: "emit_deep_lesson" } },
+      });
+      const args = JSON.parse(data.choices[0].message.tool_calls[0].function.arguments);
+      return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     if (action === "ocr_image" || action === "describe_image") {
       const { imageDataUrl, prompt } = payload;
       if (!imageDataUrl) throw new Error("imageDataUrl required");
