@@ -525,6 +525,48 @@ export type Database = {
           },
         ]
       }
+      youtube_studies: {
+        Row: {
+          channel: string | null
+          context_text: string | null
+          created_at: string
+          id: string
+          keypoints: Json
+          lessons: Json
+          title: string
+          updated_at: string
+          user_id: string
+          video_id: string
+          video_url: string | null
+        }
+        Insert: {
+          channel?: string | null
+          context_text?: string | null
+          created_at?: string
+          id?: string
+          keypoints: Json
+          lessons?: Json
+          title: string
+          updated_at?: string
+          user_id: string
+          video_id: string
+          video_url?: string | null
+        }
+        Update: {
+          channel?: string | null
+          context_text?: string | null
+          created_at?: string
+          id?: string
+          keypoints?: Json
+          lessons?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
