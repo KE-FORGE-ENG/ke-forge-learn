@@ -229,7 +229,7 @@ function NewPlan() {
       arr.push({ name: f.name, dataUrl });
     }
     setImages([...images, ...arr]);
-    setProposal(null);
+
   };
 
   const createFromImages = async () => {
@@ -356,7 +356,7 @@ function NewPlan() {
               </div>
               <div className="space-y-2">
                 <Label>Describe the topic</Label>
-                <Textarea rows={6} value={topic} onChange={(e) => { setTopic(e.target.value); setProposal(null); }} placeholder="Paste notes or describe what you want to learn…" />
+                <Textarea rows={6} value={topic} onChange={(e) => { setTopic(e.target.value); }} placeholder="Paste notes or describe what you want to learn…" />
               </div>
             </TabsContent>
           </Tabs>
