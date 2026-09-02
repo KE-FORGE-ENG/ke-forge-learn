@@ -172,6 +172,53 @@ export type Database = {
         }
         Relationships: []
       }
+      document_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          page_number: number
+          section_title: string | null
+          token_estimate: number
+          user_id: string
+        }
+        Insert: {
+          chunk_index?: number
+          content: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          page_number?: number
+          section_title?: string | null
+          token_estimate?: number
+          user_id: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          page_number?: number
+          section_title?: string | null
+          token_estimate?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           created_at: string
@@ -575,6 +622,23 @@ export type Database = {
       is_group_member: {
         Args: { _group: string; _user: string }
         Returns: boolean
+      }
+      match_document_chunks: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+          query_text?: string
+          target_document_id: string
+        }
+        Returns: {
+          content: string
+          id: string
+          keyword_rank: number
+          page_number: number
+          section_title: string
+          similarity: number
+        }[]
       }
     }
     Enums: {
