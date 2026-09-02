@@ -29,14 +29,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <Button variant="ghost" size="sm" aria-label="Menu"><Menu className="w-4 h-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem asChild><Link to="/dashboard"><LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link to="/analytics"><BarChart3 className="w-4 h-4 mr-2" /> Analytics</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link to="/templates"><Layout className="w-4 h-4 mr-2" /> Templates</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link to="/groups"><Users className="w-4 h-4 mr-2" /> Study groups</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link to="/notes"><StickyNote className="w-4 h-4 mr-2" /> Notes</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link to="/youtube-tool"><Youtube className="w-4 h-4 mr-2" /> YouTube key points</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/dashboard" preload="render"><LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/analytics" preload="render"><BarChart3 className="w-4 h-4 mr-2" /> Analytics</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/templates" preload="render"><Layout className="w-4 h-4 mr-2" /> Templates</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/groups" preload="render"><Users className="w-4 h-4 mr-2" /> Study groups</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/notes" preload="render"><StickyNote className="w-4 h-4 mr-2" /> Notes</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/youtube-tool" preload="render"><Youtube className="w-4 h-4 mr-2" /> YouTube key points</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild><Link to="/settings"><SettingsIcon className="w-4 h-4 mr-2" /> Settings</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/settings" preload="render"><SettingsIcon className="w-4 h-4 mr-2" /> Settings</Link></DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}

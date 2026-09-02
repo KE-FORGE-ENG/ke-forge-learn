@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
@@ -16,23 +17,24 @@ type Plan = { id: string; document_id: string; days: number; current_day: number
 function Dashboard() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
-  const [docs, setDocs] = useState<Doc[]>([]);
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [q, setQ] = useState("");
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
+  const { data } = useQuery({
+    queryKey: ["dashboard", user?.id],
+    enabled: !!user,
+    staleTime: 60_000,
+    queryFn: async () => {
       const [{ data: d }, { data: p }] = await Promise.all([
         supabase.from("documents").select("id,title,source_type,page_count,created_at").order("created_at", { ascending: false }),
         supabase.from("learning_plans").select("id,document_id,days,current_day").order("created_at", { ascending: false }),
       ]);
-      setDocs((d ?? []) as Doc[]);
-      setPlans((p ?? []) as Plan[]);
-    })();
-  }, [user]);
+      return { docs: (d ?? []) as Doc[], plans: (p ?? []) as Plan[] };
+    },
+  });
+  const docs = data?.docs ?? [];
+  const plans = data?.plans ?? [];
 
   const ql = q.trim().toLowerCase();
   const filteredDocs = useMemo(() => !ql ? docs : docs.filter((d) => d.title.toLowerCase().includes(ql)), [docs, ql]);
