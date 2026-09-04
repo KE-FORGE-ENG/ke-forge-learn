@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
     const { data: u } = await supa.auth.getUser();
     if (!u.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const { message, planId, day, sourceText, history = [] } = await req.json();
+    const { message, planId, day, sourceText, ragContext, history = [] } = await req.json();
 
     // Load adaptive profile
     const { data: prof } = await supa.from("learning_profiles").select("profile").eq("user_id", u.user.id).maybeSingle();
