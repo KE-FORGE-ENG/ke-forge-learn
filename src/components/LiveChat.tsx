@@ -47,14 +47,32 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
     setMessages((m) => [...m, { role: "user", content: msg }]);
     setBusy(true);
     try {
+      // Retrieve the most relevant passages from the user's own document first,
+      // so the tutor answers from the material and can cite page numbers.
+      let ragContext = "";
+      let pages: number[] = [];
+      if (planId) {
+        try {
+          const r: any = await runSearch({ data: { planId, query: msg, matchCount: 5 } });
+          const matches = (r?.matches ?? []) as any[];
+          pages = Array.from(new Set(matches.map((c) => c.page_number))).sort((a, b) => a - b);
+          ragContext = matches
+            .map((c) => `[Page ${c.page_number}${c.section_title ? ` — ${c.section_title}` : ""}]\n${c.content}`)
+            .join("\n\n---\n\n")
+            .slice(0, 12000);
+        } catch (e) {
+          console.error("[rag] retrieval failed", e);
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("tutor-chat", {
-        body: { message: msg, planId, day, sourceText, history: messages },
+        body: { message: msg, planId, day, sourceText, ragContext, history: messages },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const answer = (data as any).answer as string;
       const sources = ((data as any).sources ?? []) as string[];
-      setMessages((m) => [...m, { role: "assistant", content: answer, sources }]);
+      setMessages((m) => [...m, { role: "assistant", content: answer, sources, pages }]);
       speak(answer);
 
     } catch (e: any) {
