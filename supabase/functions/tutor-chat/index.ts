@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
     const { data: u } = await supa.auth.getUser();
     if (!u.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const { message, planId, day, sourceText, history = [] } = await req.json();
+    const { message, planId, day, sourceText, ragContext, history = [] } = await req.json();
 
     // Load adaptive profile
     const { data: prof } = await supa.from("learning_profiles").select("profile").eq("user_id", u.user.id).maybeSingle();
@@ -123,6 +123,7 @@ You have real TOOLS available:
 - web_search(queries) — use when the student asks for current facts, definitions, real-world examples, or things not in the source. Cite briefly.
 - youtube_search(q) — use when the student asks for videos, visual explanations, or "show me a video".
 Only call a tool when it genuinely helps. Never call the same tool twice with the same args. After tools return, weave the findings into a normal tutor answer.
+${ragContext ? `RETRIEVED PASSAGES from the student's own document (most relevant first). Ground your answer in these first, and cite the page inline like [Page 12] right after any fact taken from them. If they don't contain the answer, say so plainly before using general knowledge or tools.\n${String(ragContext).slice(0, 12000)}\n` : ""}
 ${sourceText ? `SOURCE (Day ${day} excerpt):\n${String(sourceText).slice(0, 8000)}` : ""}`;
 
     const messages: any[] = [

@@ -13,9 +13,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parsePdf, chunkPages, smartChunkPages, suggestDays, maxDaysFor, buildOutline, type ParsedPage } from "@/lib/pdf";
 import { Switch } from "@/components/ui/switch";
 import { callAi } from "@/lib/api";
+import { ingestDocument } from "@/lib/rag.functions";
 import { TEMPLATES } from "@/lib/templates";
 import { Upload, Loader2, Camera, X, FileStack } from "lucide-react";
 import { toast } from "sonner";
+
+function indexDoc(documentId: string) {
+  // Fire-and-forget: build embeddings so the tutor can cite exact pages.
+  ingestDocument({ data: { documentId } }).catch((e) => console.error("[rag] ingest failed", e));
+}
 
 export const Route = createFileRoute("/new")({
   component: NewPlan,
@@ -152,6 +158,7 @@ function NewPlan() {
         storage_path: path, pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
+      indexDoc(doc.id);
 
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
@@ -181,6 +188,7 @@ function NewPlan() {
           storage_path: path, pages, page_count: pages.length,
         }).select().single();
         if (dErr) throw dErr;
+        indexDoc(doc.id);
         const split = await planSplit(pages, f.name.replace(/\.pdf$/i, ""));
         const { error: pErr } = await supabase.from("learning_plans").insert({
           user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
@@ -206,6 +214,7 @@ function NewPlan() {
         pages, page_count: 1,
       }).select().single();
       if (dErr) throw dErr;
+      indexDoc(doc.id);
       const chunks = chunkPages(1, days);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
@@ -250,6 +259,7 @@ function NewPlan() {
         source_type: "images", pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
+      indexDoc(doc.id);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days, page_chunks: chunkPages(pages.length, days),
       }).select().single();

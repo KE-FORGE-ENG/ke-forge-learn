@@ -15,6 +15,8 @@ import { planToIcs, downloadIcs } from "@/lib/ics";
 
 import { toast } from "sonner";
 import { LiveChat } from "@/components/LiveChat";
+import { useServerFn } from "@tanstack/react-start";
+import { documentIndexStatus, ingestDocument } from "@/lib/rag.functions";
 import { AudioLecture } from "@/components/AudioLecture";
 import { YoutubeKeypointsButton } from "@/components/YoutubeKeypoints";
 
@@ -31,6 +33,8 @@ function Learn() {
   const { planId } = Route.useParams();
   const { user, loading } = useAuth();
   const nav = useNavigate();
+  const checkIndex = useServerFn(documentIndexStatus);
+  const runIngest = useServerFn(ingestDocument);
   const [plan, setPlan] = useState<any>(null);
   const [doc, setDoc] = useState<any>(null);
   const [day, setDay] = useState(1);
@@ -56,6 +60,13 @@ function Learn() {
       setDay(p.current_day);
       const { data: d } = await supabase.from("documents").select("*").eq("id", p.document_id).single();
       setDoc(d);
+      // Backfill search index for documents created before the upgrade.
+      if (d?.id) {
+        try {
+          const st: any = await checkIndex({ data: { documentId: d.id } });
+          if (!st?.chunks) await runIngest({ data: { documentId: d.id } });
+        } catch (e) { console.error("[rag] backfill failed", e); }
+      }
     })();
   }, [user, planId]);
 

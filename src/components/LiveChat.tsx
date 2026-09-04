@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { searchDocument } from "@/lib/rag.functions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, MicOff, Send, Volume2, VolumeX, Sparkles, Brain, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
-type Msg = { role: "user" | "assistant"; content: string; sources?: string[] };
+type Msg = { role: "user" | "assistant"; content: string; sources?: string[]; pages?: number[] };
 
 export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: number; sourceText?: string }) {
   const [messages, setMessages] = useState<Msg[]>([
@@ -17,6 +19,7 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
   const [listening, setListening] = useState(false);
   const [speakOn, setSpeakOn] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const runSearch = useServerFn(searchDocument);
   const recRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -45,14 +48,32 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
     setMessages((m) => [...m, { role: "user", content: msg }]);
     setBusy(true);
     try {
+      // Retrieve the most relevant passages from the user's own document first,
+      // so the tutor answers from the material and can cite page numbers.
+      let ragContext = "";
+      let pages: number[] = [];
+      if (planId) {
+        try {
+          const r: any = await runSearch({ data: { planId, query: msg, matchCount: 5 } });
+          const matches = (r?.matches ?? []) as any[];
+          pages = Array.from(new Set(matches.map((c) => c.page_number))).sort((a, b) => a - b);
+          ragContext = matches
+            .map((c) => `[Page ${c.page_number}${c.section_title ? ` — ${c.section_title}` : ""}]\n${c.content}`)
+            .join("\n\n---\n\n")
+            .slice(0, 12000);
+        } catch (e) {
+          console.error("[rag] retrieval failed", e);
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("tutor-chat", {
-        body: { message: msg, planId, day, sourceText, history: messages },
+        body: { message: msg, planId, day, sourceText, ragContext, history: messages },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const answer = (data as any).answer as string;
       const sources = ((data as any).sources ?? []) as string[];
-      setMessages((m) => [...m, { role: "assistant", content: answer, sources }]);
+      setMessages((m) => [...m, { role: "assistant", content: answer, sources, pages }]);
       speak(answer);
 
     } catch (e: any) {
@@ -97,6 +118,15 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
               <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1">
                 <ReactMarkdown>{m.content}</ReactMarkdown>
               </div>
+              {m.pages && m.pages.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {m.pages.slice(0, 6).map((p) => (
+                    <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-background/60 border">
+                      Page {p}
+                    </span>
+                  ))}
+                </div>
+              )}
               {m.sources && m.sources.length > 0 && (
                 <div className="mt-1 text-[10px] opacity-70">
                   {m.sources.slice(0, 4).map((s, j) => (
