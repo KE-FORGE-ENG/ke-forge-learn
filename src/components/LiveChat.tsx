@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { searchDocument } from "@/lib/rag.functions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, MicOff, Send, Volume2, VolumeX, Sparkles, Brain, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
-type Msg = { role: "user" | "assistant"; content: string; sources?: string[] };
+type Msg = { role: "user" | "assistant"; content: string; sources?: string[]; pages?: number[] };
 
 export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: number; sourceText?: string }) {
   const [messages, setMessages] = useState<Msg[]>([
