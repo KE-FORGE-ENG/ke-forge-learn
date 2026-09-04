@@ -19,6 +19,7 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
   const [listening, setListening] = useState(false);
   const [speakOn, setSpeakOn] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const runSearch = useServerFn(searchDocument);
   const recRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -117,6 +118,15 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
               <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1">
                 <ReactMarkdown>{m.content}</ReactMarkdown>
               </div>
+              {m.pages && m.pages.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {m.pages.slice(0, 6).map((p) => (
+                    <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-background/60 border">
+                      Page {p}
+                    </span>
+                  ))}
+                </div>
+              )}
               {m.sources && m.sources.length > 0 && (
                 <div className="mt-1 text-[10px] opacity-70">
                   {m.sources.slice(0, 4).map((s, j) => (
