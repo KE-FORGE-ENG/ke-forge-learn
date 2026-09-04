@@ -189,7 +189,6 @@ function NewPlan() {
         }).select().single();
         if (dErr) throw dErr;
         indexDoc(doc.id);
-      indexDoc(doc.id);
         const split = await planSplit(pages, f.name.replace(/\.pdf$/i, ""));
         const { error: pErr } = await supabase.from("learning_plans").insert({
           user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
