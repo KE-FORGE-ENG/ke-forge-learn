@@ -32,7 +32,7 @@ function paginate(text: string, perPage = 2500): ParsedPage[] {
 }
 
 async function readDocx(file: File): Promise<string> {
-  const mammoth = await import("mammoth/mammoth.browser");
+  const mammoth = await import(/* @vite-ignore */ "mammoth/mammoth.browser" as any);
   const buf = await file.arrayBuffer();
   const res = await (mammoth as any).extractRawText({ arrayBuffer: buf });
   return res.value as string;
