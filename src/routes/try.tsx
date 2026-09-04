@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { parsePdf } from "@/lib/pdf";
+import { parseAnyFile } from "@/lib/files";
 import { callAi, youtubeSearchDirect } from "@/lib/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -72,7 +72,7 @@ function TryPage() {
     if (!file) return;
     setBusy(true); setLesson(null); setStatus("Reading PDF…");
     try {
-      const pages = await parsePdf(file);
+      const pages = await parseAnyFile(file);
       const combined = pages.map((p) => `--- Page ${p.page} ---\n${p.text}`).join("\n\n");
       const trimmed = combined.slice(0, 18000);
       setSourceText(trimmed);
@@ -132,7 +132,7 @@ function TryPage() {
 
             <TabsContent value="pdf" className="mt-4 space-y-3">
               <label className="block border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 transition">
-                <input type="file" accept="application/pdf" className="hidden"
+                <input type="file" className="hidden"
                   onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
                 <Upload className="w-7 h-7 mx-auto text-muted-foreground" />
                 <p className="mt-2 text-sm font-medium">{file ? file.name : "Click to choose a PDF"}</p>
