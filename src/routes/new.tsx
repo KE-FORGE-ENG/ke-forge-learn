@@ -47,7 +47,7 @@ function NewPlan() {
   const [scanning, setScanning] = useState(false);
   const [suggested, setSuggested] = useState<number | null>(null);
   const [minutesPerDay, setMinutesPerDay] = useState(45);
-
+  useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
   // Remember the user's Smart Split choice across sessions instead of
   // resetting it to ON every time a new plan is started.
