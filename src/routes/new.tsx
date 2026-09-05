@@ -43,7 +43,7 @@ function NewPlan() {
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
   const [templateTab, setTemplateTab] = useState<string>("pdf");
-  const [smart, setSmart] = useState(true);
+  const [smart, setSmartState] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [suggested, setSuggested] = useState<number | null>(null);
   const [minutesPerDay, setMinutesPerDay] = useState(45);
