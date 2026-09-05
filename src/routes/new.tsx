@@ -49,8 +49,16 @@ function NewPlan() {
   const [minutesPerDay, setMinutesPerDay] = useState(45);
 
 
-
-  useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
+  // Remember the user's Smart Split choice across sessions instead of
+  // resetting it to ON every time a new plan is started.
+  useEffect(() => {
+    const saved = window.localStorage.getItem("ke-smart-split");
+    if (saved !== null) setSmartState(saved === "1");
+  }, []);
+  const setSmart = (v: boolean) => {
+    setSmartState(v);
+    try { window.localStorage.setItem("ke-smart-split", v ? "1" : "0"); } catch { /* ignore */ }
+  };
 
   useEffect(() => {
     if (!search.template) return;
