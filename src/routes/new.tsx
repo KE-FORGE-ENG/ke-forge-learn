@@ -10,10 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { chunkPages, smartChunkPages, suggestDays, maxDaysFor, buildOutline, type ParsedPage } from "@/lib/pdf";
+import { parsePdf, chunkPages, smartChunkPages, suggestDays, maxDaysFor, buildOutline, type ParsedPage } from "@/lib/pdf";
 import { Switch } from "@/components/ui/switch";
 import { callAi } from "@/lib/api";
-import { parseAnyFile, fileTitle } from "@/lib/files";
 import { ingestDocument } from "@/lib/rag.functions";
 import { TEMPLATES } from "@/lib/templates";
 import { Upload, Loader2, Camera, X, FileStack } from "lucide-react";
@@ -127,12 +126,12 @@ function NewPlan() {
 
   const onFile = async (f: File) => {
     setFile(f);
-    setTitle(fileTitle(f.name));
+    setTitle(f.name.replace(/\.pdf$/i, ""));
     setPageCount(null);
     setSuggested(null);
     setScanning(true);
     try {
-      const pages = await parseAnyFile(f);
+      const pages = await parsePdf(f);
       setPageCount(pages.length);
       setSuggested(suggestDays(pages, minutesPerDay, 1, maxDaysFor(pages)));
     } catch {
@@ -144,8 +143,8 @@ function NewPlan() {
     if (!file || !user) return;
     setBusy(true);
     try {
-      toast.message(smart ? "Reading file and planning the split…" : "Reading file…");
-      const pages = await parseAnyFile(file);
+      toast.message(smart ? "Reading PDF and planning the split…" : "Reading PDF…");
+      const pages = await parsePdf(file);
       setPageCount(pages.length);
       const split = await planSplit(pages, title || file.name);
 
@@ -180,17 +179,17 @@ function NewPlan() {
     try {
       for (let i = 0; i < batchFiles.length; i++) {
         const f = batchFiles[i];
-        const pages = await parseAnyFile(f);
+        const pages = await parsePdf(f);
         const path = `${user.id}/${Date.now()}-${i}-${f.name}`;
         const { error: upErr } = await supabase.storage.from("pdfs").upload(path, f);
         if (upErr) throw upErr;
         const { data: doc, error: dErr } = await supabase.from("documents").insert({
-          user_id: user.id, title: fileTitle(f.name), source_type: "pdf",
+          user_id: user.id, title: f.name.replace(/\.pdf$/i, ""), source_type: "pdf",
           storage_path: path, pages, page_count: pages.length,
         }).select().single();
         if (dErr) throw dErr;
         indexDoc(doc.id);
-        const split = await planSplit(pages, fileTitle(f.name));
+        const split = await planSplit(pages, f.name.replace(/\.pdf$/i, ""));
         const { error: pErr } = await supabase.from("learning_plans").insert({
           user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
         });
@@ -291,9 +290,9 @@ function NewPlan() {
             </TabsList>
             <TabsContent value="pdf" className="mt-6 space-y-4">
               <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
-                <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
+                <input type="file" accept="application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
                 <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-sm font-medium">{file ? file.name : "Click to choose a file"}</p>
+                <p className="mt-2 text-sm font-medium">{file ? file.name : "Click to choose a PDF"}</p>
                 {pageCount && <p className="text-xs text-muted-foreground mt-1">{pageCount} pages</p>}
               </label>
               <div className="space-y-2">
@@ -303,9 +302,9 @@ function NewPlan() {
             </TabsContent>
             <TabsContent value="batch" className="mt-6 space-y-4">
               <label className="block border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition">
-                <input type="file" multiple className="hidden" onChange={(e) => { if (e.target.files) setBatchFiles(Array.from(e.target.files)); }} />
+                <input type="file" accept="application/pdf" multiple className="hidden" onChange={(e) => { if (e.target.files) setBatchFiles(Array.from(e.target.files)); }} />
                 <FileStack className="w-8 h-8 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-sm font-medium">{batchFiles.length ? `${batchFiles.length} files selected` : "Choose multiple files"}</p>
+                <p className="mt-2 text-sm font-medium">{batchFiles.length ? `${batchFiles.length} PDFs selected` : "Choose multiple PDFs"}</p>
                 <p className="text-xs text-muted-foreground mt-1">One plan per file — uses the duration below for all.</p>
               </label>
               {batchFiles.length > 0 && (

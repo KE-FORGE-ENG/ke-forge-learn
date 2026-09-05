@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { callAi } from "@/lib/api";
-import { parseAnyFile } from "@/lib/files";
+import { parsePdf } from "@/lib/pdf";
 import {
   Loader2, ChevronLeft, ChevronRight, Globe, Brain, Sparkles, BookOpen, Camera, FileText,
   Pause, Play, ExternalLink, Upload, X, Image as ImageIcon,
@@ -75,7 +75,7 @@ function StandaloneDeepLearn() {
     setParsing(true);
     setLesson(null);
     try {
-      const pages = await parseAnyFile(file);
+      const pages = await parsePdf(file);
       setPdfPages(pages);
       setPdfName(file.name);
       setPage(1);
@@ -227,7 +227,7 @@ function StandaloneDeepLearn() {
                 <p className="text-sm mb-3">Upload a PDF to learn page by page</p>
                 <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground cursor-pointer text-sm font-medium">
                   <Upload className="w-4 h-4" /> Choose PDF
-                  <input type="file" className="hidden"
+                  <input type="file" accept="application/pdf" className="hidden"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePdf(f); e.target.value = ""; }} />
                 </label>
               </>
