@@ -209,6 +209,18 @@ function Learn() {
     toast.success("Day complete! 🎉");
   };
 
+  if (loadError) return (
+    <AppShell>
+      <div className="py-20 text-center space-y-4">
+        <p className="text-sm text-muted-foreground">{loadError}</p>
+        <div className="flex items-center justify-center gap-2">
+          <Button variant="outline" onClick={() => window.location.reload()}>Try again</Button>
+          <Button asChild><Link to="/dashboard">Back to dashboard</Link></Button>
+        </div>
+      </div>
+    </AppShell>
+  );
+
   if (!user || !plan || !doc) return <AppShell><div className="py-20 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div></AppShell>;
 
   return (
