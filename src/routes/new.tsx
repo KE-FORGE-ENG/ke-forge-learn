@@ -189,7 +189,7 @@ function NewPlan() {
       if (pErr) throw pErr;
 
       toast.success(`Plan ready! ${pages.length} pages over ${split.days} ${split.days === 1 ? "day" : "days"}.`);
-      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+      goToPlan(plan.id);
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally { setBusy(false); }
@@ -244,7 +244,7 @@ function NewPlan() {
       }).select().single();
       if (pErr) throw pErr;
       toast.success("Plan created!");
-      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+      goToPlan(plan.id);
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally { setBusy(false); }
@@ -288,7 +288,7 @@ function NewPlan() {
       }).select().single();
       if (pErr) throw pErr;
       toast.success(`Plan ready from ${pages.length} note${pages.length > 1 ? "s" : ""}!`);
-      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+      goToPlan(plan.id);
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally { setBusy(false); }
