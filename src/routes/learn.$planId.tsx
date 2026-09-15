@@ -47,6 +47,7 @@ function Learn() {
   const [webSources, setWebSources] = useState<string[]>([]);
   const [imgOn, setImgOn] = useState(false);
   const [refImages, setRefImages] = useState<{ url: string; thumbnail: string; title: string; source: string; author?: string }[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
