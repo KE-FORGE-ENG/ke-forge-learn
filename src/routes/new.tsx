@@ -49,6 +49,21 @@ function NewPlan() {
   const [minutesPerDay, setMinutesPerDay] = useState(45);
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
+  // Open the freshly created plan. If client-side routing doesn't take effect
+  // (e.g. inside an embedded preview frame), fall back to a full page load so
+  // the user is never left staring at a success toast with nothing happening.
+  const goToPlan = async (planId: string) => {
+    const target = `/learn/${planId}`;
+    try {
+      await nav({ to: "/learn/$planId", params: { planId } });
+    } catch { /* fall through to hard navigation */ }
+    setTimeout(() => {
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith(target)) {
+        window.location.assign(target);
+      }
+    }, 600);
+  };
+
   // Remember the user's Smart Split choice across sessions instead of
   // resetting it to ON every time a new plan is started.
   useEffect(() => {
