@@ -54,8 +54,9 @@ function Learn() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: p } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
-      if (!p) return;
+      setLoadError(null);
+      const { data: p, error } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
+      if (!p) { setLoadError(error?.message ?? "We couldn't open this plan."); return; }
       setPlan(p);
       setDay(p.current_day);
       const { data: d } = await supabase.from("documents").select("*").eq("id", p.document_id).single();
