@@ -47,6 +47,7 @@ function Learn() {
   const [webSources, setWebSources] = useState<string[]>([]);
   const [imgOn, setImgOn] = useState(false);
   const [refImages, setRefImages] = useState<{ url: string; thumbnail: string; title: string; source: string; author?: string }[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
@@ -54,8 +55,9 @@ function Learn() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: p } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
-      if (!p) return;
+      setLoadError(null);
+      const { data: p, error } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
+      if (!p) { setLoadError(error?.message ?? "We couldn't open this plan."); return; }
       setPlan(p);
       setDay(p.current_day);
       const { data: d } = await supabase.from("documents").select("*").eq("id", p.document_id).single();
@@ -206,6 +208,18 @@ function Learn() {
     setCompleted(true);
     toast.success("Day complete! 🎉");
   };
+
+  if (loadError) return (
+    <AppShell>
+      <div className="py-20 text-center space-y-4">
+        <p className="text-sm text-muted-foreground">{loadError}</p>
+        <div className="flex items-center justify-center gap-2">
+          <Button variant="outline" onClick={() => window.location.reload()}>Try again</Button>
+          <Button asChild><Link to="/dashboard">Back to dashboard</Link></Button>
+        </div>
+      </div>
+    </AppShell>
+  );
 
   if (!user || !plan || !doc) return <AppShell><div className="py-20 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div></AppShell>;
 

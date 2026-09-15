@@ -49,6 +49,21 @@ function NewPlan() {
   const [minutesPerDay, setMinutesPerDay] = useState(45);
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
+  // Open the freshly created plan. If client-side routing doesn't take effect
+  // (e.g. inside an embedded preview frame), fall back to a full page load so
+  // the user is never left staring at a success toast with nothing happening.
+  const goToPlan = async (planId: string) => {
+    const target = `/learn/${planId}`;
+    try {
+      await nav({ to: "/learn/$planId", params: { planId } });
+    } catch { /* fall through to hard navigation */ }
+    setTimeout(() => {
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith(target)) {
+        window.location.assign(target);
+      }
+    }, 600);
+  };
+
   // Remember the user's Smart Split choice across sessions instead of
   // resetting it to ON every time a new plan is started.
   useEffect(() => {
@@ -174,7 +189,7 @@ function NewPlan() {
       if (pErr) throw pErr;
 
       toast.success(`Plan ready! ${pages.length} pages over ${split.days} ${split.days === 1 ? "day" : "days"}.`);
-      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+      goToPlan(plan.id);
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally { setBusy(false); }
@@ -229,7 +244,7 @@ function NewPlan() {
       }).select().single();
       if (pErr) throw pErr;
       toast.success("Plan created!");
-      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+      goToPlan(plan.id);
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally { setBusy(false); }
@@ -273,7 +288,7 @@ function NewPlan() {
       }).select().single();
       if (pErr) throw pErr;
       toast.success(`Plan ready from ${pages.length} note${pages.length > 1 ? "s" : ""}!`);
-      nav({ to: "/learn/$planId", params: { planId: plan.id } });
+      goToPlan(plan.id);
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally { setBusy(false); }
