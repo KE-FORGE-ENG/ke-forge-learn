@@ -75,9 +75,14 @@ function Dashboard() {
               <p className="text-xs sm:text-sm text-muted-foreground">Teach yourself from any PDF, topic, or lecture notes — page by page with optional web search.</p>
             </div>
           </div>
-          <Button asChild size="lg" className="w-full sm:w-auto flex-shrink-0">
-            <Link to="/deeplearn"><Brain className="w-4 h-4 mr-1" /> Start deep learn</Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto flex-shrink-0">
+            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+              <Link to="/adaptive">Adaptive learn</Link>
+            </Button>
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <Link to="/deeplearn"><Brain className="w-4 h-4 mr-1" /> Start deep learn</Link>
+            </Button>
+          </div>
         </div>
       </Card>
 

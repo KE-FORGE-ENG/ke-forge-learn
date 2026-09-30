@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      adaptive_sessions: {
+        Row: {
+          analysis: Json
+          answers: Json
+          chunks: Json
+          created_at: string
+          id: string
+          mode: string
+          progress: Json
+          source_text: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json
+          answers?: Json
+          chunks?: Json
+          created_at?: string
+          id?: string
+          mode?: string
+          progress?: Json
+          source_text?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis?: Json
+          answers?: Json
+          chunks?: Json
+          created_at?: string
+          id?: string
+          mode?: string
+          progress?: Json
+          source_text?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           color: string
