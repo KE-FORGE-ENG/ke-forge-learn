@@ -31,6 +31,7 @@ import { Route as GroupsIdRouteImport } from './routes/groups.$id'
 import { Route as FlashcardsPlanIdRouteImport } from './routes/flashcards.$planId'
 import { Route as DeeplearnPlanIdRouteImport } from './routes/deeplearn.$planId'
 import { Route as CertificatePlanIdRouteImport } from './routes/certificate.$planId'
+import { Route as AdaptiveSessionIdRouteImport } from './routes/adaptive.$sessionId'
 import { Route as QuizPlanIdDayRouteImport } from './routes/quiz.$planId.$day'
 
 const YoutubeToolRoute = YoutubeToolRouteImport.update({
@@ -143,6 +144,11 @@ const CertificatePlanIdRoute = CertificatePlanIdRouteImport.update({
   path: '/certificate/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdaptiveSessionIdRoute = AdaptiveSessionIdRouteImport.update({
+  id: '/$sessionId',
+  path: '/$sessionId',
+  getParentRoute: () => AdaptiveRoute,
+} as any)
 const QuizPlanIdDayRoute = QuizPlanIdDayRouteImport.update({
   id: '/quiz/$planId/$day',
   path: '/quiz/$planId/$day',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
+  '/adaptive/$sessionId': typeof AdaptiveSessionIdRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
   '/flashcards/$planId': typeof FlashcardsPlanIdRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
+  '/adaptive/$sessionId': typeof AdaptiveSessionIdRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
   '/flashcards/$planId': typeof FlashcardsPlanIdRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
+  '/adaptive/$sessionId': typeof AdaptiveSessionIdRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
   '/flashcards/$planId': typeof FlashcardsPlanIdRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/try'
     | '/youtube-tool'
+    | '/adaptive/$sessionId'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
     | '/flashcards/$planId'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/try'
     | '/youtube-tool'
+    | '/adaptive/$sessionId'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
     | '/flashcards/$planId'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/try'
     | '/youtube-tool'
+    | '/adaptive/$sessionId'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
     | '/flashcards/$planId'
@@ -478,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CertificatePlanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adaptive/$sessionId': {
+      id: '/adaptive/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/adaptive/$sessionId'
+      preLoaderRoute: typeof AdaptiveSessionIdRouteImport
+      parentRoute: typeof AdaptiveRoute
+    }
     '/quiz/$planId/$day': {
       id: '/quiz/$planId/$day'
       path: '/quiz/$planId/$day'
@@ -489,10 +508,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdaptiveRouteChildren {
+  AdaptiveSessionIdRoute: typeof AdaptiveSessionIdRoute
   AdaptiveIndexRoute: typeof AdaptiveIndexRoute
 }
 
 const AdaptiveRouteChildren: AdaptiveRouteChildren = {
+  AdaptiveSessionIdRoute: AdaptiveSessionIdRoute,
   AdaptiveIndexRoute: AdaptiveIndexRoute,
 }
 
