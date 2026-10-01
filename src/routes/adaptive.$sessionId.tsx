@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LessonVisual } from "@/components/RichVisual";
-import { nextChunk } from "@/lib/adaptive.functions";
+import { nextChunk, critiqueTeachBack } from "@/lib/adaptive.functions";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ArrowLeft, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -41,6 +42,20 @@ function Player() {
   const [prereqDone, setPrereqDone] = useState(false);
   const [adjust, setAdjust] = useState<Adjust>("same");
   const shownAt = useRef(Date.now());
+  const critique = useServerFn(critiqueTeachBack);
+  const [teach, setTeach] = useState("");
+  const [fb, setFb] = useState<any>(null);
+  const [fbBusy, setFbBusy] = useState(false);
+  const runTeach = async () => {
+    if (!chunk) return;
+    setFbBusy(true);
+    try {
+      const r = await critique({ data: { concept: chunk.title ?? "", lesson: String(chunk.body ?? "").slice(0, 8000), explanation: teach } });
+      if (!r.ok) { toast.error(r.error); return; }
+      setFb(r.data);
+      save({ progress: { ...progress, teach: { ...(progress.teach ?? {}), [idx]: r.data.score } } });
+    } finally { setFbBusy(false); }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -68,7 +83,9 @@ function Player() {
     const vals = Object.values(results);
     const wrong = vals.filter((v) => !v).length;
     const lost = progress.lost ?? 0;
-    const score = wrong * 1 + lost * 1.5 - (progress.easy ?? 0);
+    const times = Object.values(progress.times ?? {}).map(Number);
+    const slow = times.filter((t) => t > (s?.mode === "C" ? 600 : 300)).length;
+    const score = wrong * 1 + lost * 1.5 + slow * 0.5 + (progress.backs ?? 0) * 0.3 - (progress.easy ?? 0);
     return score >= 3 ? "heavy" : score <= 0 ? "light" : "balanced";
   })();
 
@@ -79,7 +96,7 @@ function Player() {
       if (!r.ok) { toast.error(r.error); return; }
       setS((prev: any) => ({ ...prev, chunks: [...(prev.chunks ?? []), r.data] }));
       setIdx(chunks.length);
-      setPicked(null);
+      setPicked(null); setTeach(""); setFb(null);
       shownAt.current = Date.now();
     } finally { setBusy(false); }
   };
@@ -91,6 +108,7 @@ function Player() {
     const times = { ...(progress.times ?? {}), [idx]: Math.round((Date.now() - shownAt.current) / 1000) };
     save({ progress: { ...progress, results: { ...results, [idx]: ok }, times } });
     if (!ok) setAdjust("simpler");
+    else if (load === "light" && adjust === "same") setAdjust("harder");
   };
 
   const signal = (kind: "lost" | "easy") => {
@@ -134,7 +152,13 @@ function Player() {
         </Card>
 
         {load === "heavy" && (
-          <Card className="p-3 border-destructive/40 text-sm">This is getting heavy. Take a short break, or review earlier chunks before moving on.</Card>
+          <Card className="p-3 border-destructive/40 text-sm space-y-2">
+            <p>This is getting heavy. Take a short break, or review earlier chunks before moving on.</p>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => { setIdx(0); setPicked(null); }}>Recap from start</Button>
+              <Button size="sm" variant="outline" onClick={() => { setAdjust("simpler"); save({ progress: { ...progress, lost: 0, backs: 0, times: {} } }); toast.message("Break taken — next lesson will be lighter."); }}>I took a break</Button>
+            </div>
+          </Card>
         )}
 
         {!prereqDone && (
@@ -156,7 +180,7 @@ function Player() {
         {chunk && (
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Chunk {idx + 1} of {chunks.length}</span><span className="capitalize">{chunk.difficulty}</span>
+              <span>Chunk {idx + 1} of {chunks.length}</span><span className="capitalize">{chunk.difficulty} · pace: {adjust}</span>
             </div>
             <h2 className="text-lg font-semibold">{chunk.title}</h2>
             <div className="prose prose-sm dark:prose-invert max-w-none [&_table]:block [&_table]:overflow-x-auto">
@@ -182,6 +206,25 @@ function Player() {
                   );
                 })}
                 {(picked !== null || results[idx] !== undefined) && <p className="text-xs text-muted-foreground">{chunk.check.explanation}</p>}
+              </div>
+            )}
+
+            {s.mode === "C" && (
+              <div className="space-y-2 pt-2 border-t border-border">
+                <p className="font-medium text-sm">Teach it back</p>
+                <Textarea rows={4} value={teach} onChange={(e) => setTeach(e.target.value)} placeholder="Explain this idea in your own words…" />
+                <Button size="sm" disabled={fbBusy || teach.trim().length < 10} onClick={runTeach}>
+                  {fbBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Get feedback"}
+                </Button>
+                {fb && (
+                  <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1">
+                    <p className="font-semibold">Score: {fb.score}/10</p>
+                    {fb.strengths.length > 0 && <p><b>Strengths:</b> {fb.strengths.join("; ")}</p>}
+                    {fb.gaps.length > 0 && <p><b>Gaps:</b> {fb.gaps.join("; ")}</p>}
+                    {fb.misconceptions.length > 0 && <p><b>Misconceptions:</b> {fb.misconceptions.join("; ")}</p>}
+                    {fb.betterVersion && <p className="text-muted-foreground"><b>Model answer:</b> {fb.betterVersion}</p>}
+                  </div>
+                )}
               </div>
             )}
 
