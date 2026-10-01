@@ -66,3 +66,20 @@ Mermaid must be valid (use flowchart TD, quote labels with special chars).`,
     await context.supabase.from("adaptive_sessions").update({ chunks: [...chunks, chunk] as any }).eq("id", s.id);
     return chunk;
   }));
+
+export const critiqueTeachBack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ concept: z.string().max(500), lesson: z.string().max(8000), explanation: z.string().min(10).max(4000) }).parse(d))
+  .handler(async ({ data }) => wrap(async () => {
+    const res = await aiJson(
+      `You are a kind but rigorous tutor grading a learner's "teach it back" explanation. Return JSON: {"score":number 0-10,"strengths":[string],"gaps":[string],"misconceptions":[string],"betterVersion":string (short model explanation)}`,
+      `Concept: ${data.concept}\nLesson:\n${data.lesson}\n\nLearner's explanation:\n${data.explanation}`,
+    );
+    return {
+      score: Math.max(0, Math.min(10, Number(res.score) || 0)),
+      strengths: Array.isArray(res.strengths) ? res.strengths.map(String) : [],
+      gaps: Array.isArray(res.gaps) ? res.gaps.map(String) : [],
+      misconceptions: Array.isArray(res.misconceptions) ? res.misconceptions.map(String) : [],
+      betterVersion: String(res.betterVersion ?? ""),
+    };
+  }));

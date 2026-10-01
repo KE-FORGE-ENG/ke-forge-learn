@@ -7,6 +7,7 @@ export function MermaidDiagram({ code }: { code: string }) {
   const [svg, setSvg] = useState<string>("");
   const [err, setErr] = useState(false);
   const [tick, setTick] = useState(0);
+  const [zoom, setZoom] = useState(1);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -28,7 +29,24 @@ export function MermaidDiagram({ code }: { code: string }) {
     </div>
   );
   if (!svg) return <div className="h-32 rounded-lg bg-muted/40 animate-pulse" />;
-  return <div className="overflow-x-auto rounded-lg border border-border bg-card p-3 [&_svg]:mx-auto [&_svg]:max-w-full" dangerouslySetInnerHTML={{ __html: svg }} />;
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+    const a = document.createElement("a"); a.href = url; a.download = "diagram.svg"; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  return (
+    <div className="rounded-lg border border-border bg-card p-3 space-y-2">
+      <div className="flex justify-end gap-1">
+        <Button size="sm" variant="ghost" onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))}>−</Button>
+        <Button size="sm" variant="ghost" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</Button>
+        <Button size="sm" variant="ghost" onClick={() => setZoom((z) => Math.min(3, z + 0.25))}>+</Button>
+        <Button size="sm" variant="outline" onClick={download}>Download</Button>
+      </div>
+      <div className="overflow-auto max-h-[70vh]">
+        <div style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: `${100 / zoom}%` }} className="[&_svg]:mx-auto [&_svg]:max-w-full" dangerouslySetInnerHTML={{ __html: svg }} />
+      </div>
+    </div>
+  );
 }
 
 const COLORS = ["var(--primary)", "var(--accent)", "var(--chart-3, #888)", "var(--chart-4, #aaa)", "var(--chart-5, #666)"];
