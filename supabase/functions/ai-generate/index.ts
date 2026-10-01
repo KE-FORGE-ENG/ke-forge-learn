@@ -57,7 +57,14 @@ class AiGatewayError extends Error {
 
 const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
+let STYLE = "";
 async function callAI(body: any) {
+  if (STYLE && Array.isArray(body.messages)) {
+    const i = body.messages.findIndex((m: any) => m.role === "system");
+    body = i >= 0
+      ? { ...body, messages: body.messages.map((m: any, j: number) => j === i && typeof m.content === "string" ? { ...m, content: `${m.content}\n\n${STYLE}` } : m) }
+      : { ...body, messages: [{ role: "system", content: STYLE }, ...body.messages] };
+  }
   const primary = body.model || "google/gemini-2.5-flash";
   const models = [...new Set([primary, "google/gemini-2.5-flash-lite"])] as string[];
   let lastErr = "";
@@ -246,7 +253,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
-    const { action, payload } = await req.json();
+    const { action, payload, style } = await req.json();
+    STYLE = typeof style === "string" ? style.slice(0, 1200) : "";
 
     if (action === "generate_day") {
       const { day, days, sourceText, lostCount = 0, simplified = false, webContext = "" } = payload;
