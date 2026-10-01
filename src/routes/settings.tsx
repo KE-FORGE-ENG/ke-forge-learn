@@ -10,10 +10,45 @@ import { Slider } from "@/components/ui/slider";
 import { loadA11y, saveA11y, defaultA11y, type A11ySettings } from "@/lib/accessibility";
 import { exportUserBackup } from "@/lib/backup";
 import { ensurePermission, sendTestNotification } from "@/lib/reminders";
-import { Accessibility, Download, RotateCcw, Loader2, Bell } from "lucide-react";
+import { Accessibility, Download, RotateCcw, Loader2, Bell, Globe2 } from "lucide-react";
+import { useLearningPreferences } from "@/lib/preferences";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
+
+function Choice({ active, onClick, title, desc }: { active: boolean; onClick: () => void; title: string; desc: string }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={active}
+      className={`text-left rounded-lg border p-3 transition-colors ${active ? "border-primary bg-primary/10" : "border-border hover:bg-muted"}`}>
+      <div className="font-medium text-sm">{title}</div>
+      <div className="text-xs text-muted-foreground mt-1">{desc}</div>
+    </button>
+  );
+}
+
+function LearningStyleCard() {
+  const { prefs, update } = useLearningPreferences();
+  return (
+    <Card className="p-5 mt-6">
+      <div className="flex items-center gap-2 mb-1">
+        <Globe2 className="w-5 h-5 text-primary" />
+        <h2 className="font-semibold">Learning style & regional context</h2>
+      </div>
+      <p className="text-sm text-muted-foreground mb-4">Changes how the AI explains things in lessons, quizzes and chat. Facts stay the same.</p>
+      <Label className="mb-2 block">Examples & context</Label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
+        <Choice active={prefs.region === "global"} onClick={() => update({ region: "global" })} title="🌐 Global standard" desc="Neutral, international textbook examples." />
+        <Choice active={prefs.region === "nigerian"} onClick={() => update({ region: "nigerian" })} title="🇳🇬 Nigerian & West African" desc="Market, danfo, inverter and WAEC/JAMB style examples." />
+      </div>
+      <Label className="mb-2 block">Explanation level</Label>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <Choice active={prefs.complexity === "simple"} onClick={() => update({ complexity: "simple" })} title="🟢 Simple & clear" desc="Plain words, short steps." />
+        <Choice active={prefs.complexity === "standard"} onClick={() => update({ complexity: "standard" })} title="🔵 Standard academic" desc="Balanced school/university tone." />
+        <Choice active={prefs.complexity === "scholar"} onClick={() => update({ complexity: "scholar" })} title="🟣 Scholar" desc="Big grammar, formal academic language." />
+      </div>
+    </Card>
+  );
+}
 
 function Settings() {
   const { user, loading } = useAuth();
@@ -125,6 +160,8 @@ function Settings() {
           )}
         </div>
       </Card>
+
+      <LearningStyleCard />
 
       <Card className="p-5 mt-6">
         <div className="flex items-center gap-2 mb-4">

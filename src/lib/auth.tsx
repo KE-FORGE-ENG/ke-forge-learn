@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { syncPrefsFromUser } from "@/lib/preferences";
 
 type Ctx = {
   user: User | null;
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       setUser(s?.user ?? null);
+      syncPrefsFromUser(s?.user?.user_metadata);
       if (s?.user) {
         setTimeout(async () => {
           const { data } = await supabase.from("profiles").select("username").eq("id", s.user.id).maybeSingle();

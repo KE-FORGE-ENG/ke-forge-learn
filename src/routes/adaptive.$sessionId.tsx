@@ -1,3 +1,4 @@
+import { styleDirective } from "@/lib/preferences";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -50,7 +51,7 @@ function Player() {
     if (!chunk) return;
     setFbBusy(true);
     try {
-      const r = await critique({ data: { concept: chunk.title ?? "", lesson: String(chunk.body ?? "").slice(0, 8000), explanation: teach } });
+      const r = await critique({ data: { concept: chunk.title ?? "", lesson: String(chunk.body ?? "").slice(0, 8000), explanation: teach, style: styleDirective() } });
       if (!r.ok) { toast.error(r.error); return; }
       setFb(r.data);
       save({ progress: { ...progress, teach: { ...(progress.teach ?? {}), [idx]: r.data.score } } });
@@ -92,7 +93,7 @@ function Player() {
   const generate = async (conceptId?: string, adj: Adjust = adjust) => {
     setBusy(true);
     try {
-      const r = await fetchNext({ data: { sessionId, conceptId, adjust: adj } });
+      const r = await fetchNext({ data: { sessionId, conceptId, adjust: adj, style: styleDirective() } });
       if (!r.ok) { toast.error(r.error); return; }
       setS((prev: any) => ({ ...prev, chunks: [...(prev.chunks ?? []), r.data] }));
       setIdx(chunks.length);

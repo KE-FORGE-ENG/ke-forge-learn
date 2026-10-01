@@ -1,3 +1,4 @@
+import { styleDirective } from "@/lib/preferences";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -93,7 +94,7 @@ function AdaptiveHome() {
   const runAnalysis = async () => {
     setBusy(true);
     try {
-      const r = await analyze({ data: { text: text.trim() } });
+      const r = await analyze({ data: { text: text.trim(), style: styleDirective() } });
       if (!r.ok) { toast.error(r.error); return; }
       setAnalysis(r.data); setStep(0); setAnswers({}); setMode(null);
     } finally { setBusy(false); }

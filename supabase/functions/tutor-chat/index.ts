@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
     const { data: u } = await supa.auth.getUser();
     if (!u.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const { message, planId, day, sourceText, ragContext, history = [] } = await req.json();
+    const { message, planId, day, sourceText, ragContext, history = [], style = "" } = await req.json();
 
     // Load adaptive profile
     const { data: prof } = await supa.from("learning_profiles").select("profile").eq("user_id", u.user.id).maybeSingle();
@@ -116,6 +116,7 @@ Deno.serve(async (req) => {
     const sys = `You are an adaptive AI tutor in a live chat. Respond clearly, concisely, with markdown.
 You adjust to this student's learning pattern.
 CURRENT LEARNER PROFILE: ${JSON.stringify(profile)}
+${String(style).slice(0, 1200)}
 Adapt: if level=beginner or pace=slow, simplify, use analogies & step-by-step. If advanced/fast, push depth, ask probing questions.
 Stick to the SOURCE when relevant; otherwise answer normally but truthfully.
 
