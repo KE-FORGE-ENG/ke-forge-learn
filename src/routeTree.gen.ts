@@ -9,79 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdaptiveRouteImport } from './routes/adaptive'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as GroupsRouteImport } from './routes/groups'
-import { Route as NewRouteImport } from './routes/new'
-import { Route as NotesRouteImport } from './routes/notes'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as TemplatesRouteImport } from './routes/templates'
-import { Route as TryRouteImport } from './routes/try'
 import { Route as YoutubeToolRouteImport } from './routes/youtube-tool'
-import { Route as AdaptiveIndexRouteImport } from './routes/adaptive.index'
-import { Route as AdaptiveSessionIdRouteImport } from './routes/adaptive.$sessionId'
-import { Route as CertificatePlanIdRouteImport } from './routes/certificate.$planId'
-import { Route as DeeplearnIndexRouteImport } from './routes/deeplearn.index'
-import { Route as DeeplearnPlanIdRouteImport } from './routes/deeplearn.$planId'
-import { Route as FlashcardsPlanIdRouteImport } from './routes/flashcards.$planId'
+import { Route as TryRouteImport } from './routes/try'
+import { Route as TemplatesRouteImport } from './routes/templates'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as NotesRouteImport } from './routes/notes'
+import { Route as NewRouteImport } from './routes/new'
+import { Route as GroupsRouteImport } from './routes/groups'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AdaptiveRouteImport } from './routes/adaptive'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as GroupsIndexRouteImport } from './routes/groups.index'
-import { Route as GroupsIdRouteImport } from './routes/groups.$id'
-import { Route as LearnPlanIdRouteImport } from './routes/learn.$planId'
-import { Route as MindmapPlanIdRouteImport } from './routes/mindmap.$planId'
+import { Route as DeeplearnIndexRouteImport } from './routes/deeplearn.index'
+import { Route as AdaptiveIndexRouteImport } from './routes/adaptive.index'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
+import { Route as MindmapPlanIdRouteImport } from './routes/mindmap.$planId'
+import { Route as LearnPlanIdRouteImport } from './routes/learn.$planId'
+import { Route as GroupsIdRouteImport } from './routes/groups.$id'
+import { Route as FlashcardsPlanIdRouteImport } from './routes/flashcards.$planId'
+import { Route as DeeplearnPlanIdRouteImport } from './routes/deeplearn.$planId'
+import { Route as CertificatePlanIdRouteImport } from './routes/certificate.$planId'
+import { Route as AdaptiveSessionIdRouteImport } from './routes/adaptive.$sessionId'
 import { Route as QuizPlanIdDayRouteImport } from './routes/quiz.$planId.$day'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdaptiveRoute = AdaptiveRouteImport.update({
-  id: '/adaptive',
-  path: '/adaptive',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyticsRoute = AnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GroupsRoute = GroupsRouteImport.update({
-  id: '/groups',
-  path: '/groups',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewRoute = NewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotesRoute = NotesRouteImport.update({
-  id: '/notes',
-  path: '/notes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TemplatesRoute = TemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
+const YoutubeToolRoute = YoutubeToolRouteImport.update({
+  id: '/youtube-tool',
+  path: '/youtube-tool',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TryRoute = TryRouteImport.update({
@@ -89,39 +44,54 @@ const TryRoute = TryRouteImport.update({
   path: '/try',
   getParentRoute: () => rootRouteImport,
 } as any)
-const YoutubeToolRoute = YoutubeToolRouteImport.update({
-  id: '/youtube-tool',
-  path: '/youtube-tool',
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdaptiveIndexRoute = AdaptiveIndexRouteImport.update({
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotesRoute = NotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewRoute = NewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsRoute = GroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdaptiveRoute = AdaptiveRouteImport.update({
+  id: '/adaptive',
+  path: '/adaptive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdaptiveRoute,
-} as any)
-const AdaptiveSessionIdRoute = AdaptiveSessionIdRouteImport.update({
-  id: '/$sessionId',
-  path: '/$sessionId',
-  getParentRoute: () => AdaptiveRoute,
-} as any)
-const CertificatePlanIdRoute = CertificatePlanIdRouteImport.update({
-  id: '/certificate/$planId',
-  path: '/certificate/$planId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DeeplearnIndexRoute = DeeplearnIndexRouteImport.update({
-  id: '/deeplearn/',
-  path: '/deeplearn/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DeeplearnPlanIdRoute = DeeplearnPlanIdRouteImport.update({
-  id: '/deeplearn/$planId',
-  path: '/deeplearn/$planId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FlashcardsPlanIdRoute = FlashcardsPlanIdRouteImport.update({
-  id: '/flashcards/$planId',
-  path: '/flashcards/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GroupsIndexRoute = GroupsIndexRouteImport.update({
@@ -129,14 +99,19 @@ const GroupsIndexRoute = GroupsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => GroupsRoute,
 } as any)
-const GroupsIdRoute = GroupsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => GroupsRoute,
+const DeeplearnIndexRoute = DeeplearnIndexRouteImport.update({
+  id: '/deeplearn/',
+  path: '/deeplearn/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const LearnPlanIdRoute = LearnPlanIdRouteImport.update({
-  id: '/learn/$planId',
-  path: '/learn/$planId',
+const AdaptiveIndexRoute = AdaptiveIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdaptiveRoute,
+} as any)
+const SharedTokenRoute = SharedTokenRouteImport.update({
+  id: '/shared/$token',
+  path: '/shared/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MindmapPlanIdRoute = MindmapPlanIdRouteImport.update({
@@ -144,10 +119,35 @@ const MindmapPlanIdRoute = MindmapPlanIdRouteImport.update({
   path: '/mindmap/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SharedTokenRoute = SharedTokenRouteImport.update({
-  id: '/shared/$token',
-  path: '/shared/$token',
+const LearnPlanIdRoute = LearnPlanIdRouteImport.update({
+  id: '/learn/$planId',
+  path: '/learn/$planId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsIdRoute = GroupsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => GroupsRoute,
+} as any)
+const FlashcardsPlanIdRoute = FlashcardsPlanIdRouteImport.update({
+  id: '/flashcards/$planId',
+  path: '/flashcards/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeeplearnPlanIdRoute = DeeplearnPlanIdRouteImport.update({
+  id: '/deeplearn/$planId',
+  path: '/deeplearn/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CertificatePlanIdRoute = CertificatePlanIdRouteImport.update({
+  id: '/certificate/$planId',
+  path: '/certificate/$planId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdaptiveSessionIdRoute = AdaptiveSessionIdRouteImport.update({
+  id: '/$sessionId',
+  path: '/$sessionId',
+  getParentRoute: () => AdaptiveRoute,
 } as any)
 const QuizPlanIdDayRoute = QuizPlanIdDayRouteImport.update({
   id: '/quiz/$planId/$day',
@@ -336,74 +336,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/adaptive': {
-      id: '/adaptive'
-      path: '/adaptive'
-      fullPath: '/adaptive'
-      preLoaderRoute: typeof AdaptiveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analytics': {
-      id: '/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/groups': {
-      id: '/groups'
-      path: '/groups'
-      fullPath: '/groups'
-      preLoaderRoute: typeof GroupsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/new': {
-      id: '/new'
-      path: '/new'
-      fullPath: '/new'
-      preLoaderRoute: typeof NewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notes': {
-      id: '/notes'
-      path: '/notes'
-      fullPath: '/notes'
-      preLoaderRoute: typeof NotesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates': {
-      id: '/templates'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof TemplatesRouteImport
+    '/youtube-tool': {
+      id: '/youtube-tool'
+      path: '/youtube-tool'
+      fullPath: '/youtube-tool'
+      preLoaderRoute: typeof YoutubeToolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/try': {
@@ -413,53 +350,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/youtube-tool': {
-      id: '/youtube-tool'
-      path: '/youtube-tool'
-      fullPath: '/youtube-tool'
-      preLoaderRoute: typeof YoutubeToolRouteImport
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/adaptive/': {
-      id: '/adaptive/'
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notes': {
+      id: '/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof NotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new': {
+      id: '/new'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof NewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/groups': {
+      id: '/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof GroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adaptive': {
+      id: '/adaptive'
+      path: '/adaptive'
+      fullPath: '/adaptive'
+      preLoaderRoute: typeof AdaptiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
       path: '/'
-      fullPath: '/adaptive/'
-      preLoaderRoute: typeof AdaptiveIndexRouteImport
-      parentRoute: typeof AdaptiveRoute
-    }
-    '/adaptive/$sessionId': {
-      id: '/adaptive/$sessionId'
-      path: '/$sessionId'
-      fullPath: '/adaptive/$sessionId'
-      preLoaderRoute: typeof AdaptiveSessionIdRouteImport
-      parentRoute: typeof AdaptiveRoute
-    }
-    '/certificate/$planId': {
-      id: '/certificate/$planId'
-      path: '/certificate/$planId'
-      fullPath: '/certificate/$planId'
-      preLoaderRoute: typeof CertificatePlanIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/deeplearn/': {
-      id: '/deeplearn/'
-      path: '/deeplearn'
-      fullPath: '/deeplearn/'
-      preLoaderRoute: typeof DeeplearnIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/deeplearn/$planId': {
-      id: '/deeplearn/$planId'
-      path: '/deeplearn/$planId'
-      fullPath: '/deeplearn/$planId'
-      preLoaderRoute: typeof DeeplearnPlanIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/flashcards/$planId': {
-      id: '/flashcards/$planId'
-      path: '/flashcards/$planId'
-      fullPath: '/flashcards/$planId'
-      preLoaderRoute: typeof FlashcardsPlanIdRouteImport
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/groups/': {
@@ -469,18 +427,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsIndexRouteImport
       parentRoute: typeof GroupsRoute
     }
-    '/groups/$id': {
-      id: '/groups/$id'
-      path: '/$id'
-      fullPath: '/groups/$id'
-      preLoaderRoute: typeof GroupsIdRouteImport
-      parentRoute: typeof GroupsRoute
+    '/deeplearn/': {
+      id: '/deeplearn/'
+      path: '/deeplearn'
+      fullPath: '/deeplearn/'
+      preLoaderRoute: typeof DeeplearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/learn/$planId': {
-      id: '/learn/$planId'
-      path: '/learn/$planId'
-      fullPath: '/learn/$planId'
-      preLoaderRoute: typeof LearnPlanIdRouteImport
+    '/adaptive/': {
+      id: '/adaptive/'
+      path: '/'
+      fullPath: '/adaptive/'
+      preLoaderRoute: typeof AdaptiveIndexRouteImport
+      parentRoute: typeof AdaptiveRoute
+    }
+    '/shared/$token': {
+      id: '/shared/$token'
+      path: '/shared/$token'
+      fullPath: '/shared/$token'
+      preLoaderRoute: typeof SharedTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mindmap/$planId': {
@@ -490,12 +455,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MindmapPlanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/shared/$token': {
-      id: '/shared/$token'
-      path: '/shared/$token'
-      fullPath: '/shared/$token'
-      preLoaderRoute: typeof SharedTokenRouteImport
+    '/learn/$planId': {
+      id: '/learn/$planId'
+      path: '/learn/$planId'
+      fullPath: '/learn/$planId'
+      preLoaderRoute: typeof LearnPlanIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/groups/$id': {
+      id: '/groups/$id'
+      path: '/$id'
+      fullPath: '/groups/$id'
+      preLoaderRoute: typeof GroupsIdRouteImport
+      parentRoute: typeof GroupsRoute
+    }
+    '/flashcards/$planId': {
+      id: '/flashcards/$planId'
+      path: '/flashcards/$planId'
+      fullPath: '/flashcards/$planId'
+      preLoaderRoute: typeof FlashcardsPlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deeplearn/$planId': {
+      id: '/deeplearn/$planId'
+      path: '/deeplearn/$planId'
+      fullPath: '/deeplearn/$planId'
+      preLoaderRoute: typeof DeeplearnPlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/certificate/$planId': {
+      id: '/certificate/$planId'
+      path: '/certificate/$planId'
+      fullPath: '/certificate/$planId'
+      preLoaderRoute: typeof CertificatePlanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adaptive/$sessionId': {
+      id: '/adaptive/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/adaptive/$sessionId'
+      preLoaderRoute: typeof AdaptiveSessionIdRouteImport
+      parentRoute: typeof AdaptiveRoute
     }
     '/quiz/$planId/$day': {
       id: '/quiz/$planId/$day'
