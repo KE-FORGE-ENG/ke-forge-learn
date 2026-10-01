@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { styleDirective } from "@/lib/preferences";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { searchDocument } from "@/lib/rag.functions";
@@ -67,7 +68,7 @@ export function LiveChat({ planId, day, sourceText }: { planId?: string; day?: n
       }
 
       const { data, error } = await supabase.functions.invoke("tutor-chat", {
-        body: { message: msg, planId, day, sourceText, ragContext, history: messages },
+        body: { message: msg, planId, day, sourceText, ragContext, history: messages, style: styleDirective() },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);

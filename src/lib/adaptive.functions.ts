@@ -10,14 +10,15 @@ const wrap = async <T,>(fn: () => Promise<T>): Promise<{ ok: true; data: T } | {
 
 export const analyzeMaterial = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ text: z.string().min(3).max(60000) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ text: z.string().min(3).max(60000), style: z.string().max(1200).optional() }).parse(d))
   .handler(async ({ data }) => wrap(async () => {
     const res = await aiJson(
       `You analyze study material for an adaptive tutor. Return JSON:
 {"topic":string,"summary":string (2-3 sentences),"complexity":"beginner"|"intermediate"|"advanced",
 "prerequisites":[{"name":string,"why":string}] (3-5),
 "keyConcepts":[{"id":string (short slug),"name":string,"description":string}] (5-10),
-"dependencies":[{"from":concept id,"to":concept id}] (from must be learned before to)}`,
+"dependencies":[{"from":concept id,"to":concept id}] (from must be learned before to)}
+${data.style ?? ""}`,
       data.text.slice(0, 40000),
     );
     return {
@@ -42,6 +43,7 @@ export const nextChunk = createServerFn({ method: "POST" })
     sessionId: z.string().uuid(),
     conceptId: z.string().optional(),
     adjust: z.enum(["simpler", "same", "harder"]).default("same"),
+    style: z.string().max(1200).optional(),
   }).parse(d))
   .handler(async ({ data, context }) => wrap(async () => {
     const { data: s, error } = await context.supabase.from("adaptive_sessions").select("*").eq("id", data.sessionId).maybeSingle();
@@ -59,7 +61,8 @@ Return JSON: {"title":string,"body":markdown string,"analogy":string|null,"goDee
 "visual":{"type":"mermaid"|"chart"|"none","code":string (mermaid source, only if mermaid),"chart":{"kind":"bar"|"line"|"pie","title":string,"data":[{"name":string,"value":number}]} (only if chart)},
 "check":{"question":string,"options":[string,string,string,string],"answerIndex":number,"explanation":string},
 "difficulty":"easy"|"medium"|"hard"}
-Mermaid must be valid (use flowchart TD, quote labels with special chars).`,
+Mermaid must be valid (use flowchart TD, quote labels with special chars).
+${data.style ?? ""}`,
       `Topic: ${a.topic}\nConcept to teach: ${target?.name} — ${target?.description}\nAlready covered: ${chunks.map((c) => c.title).join("; ") || "nothing"}\nSource material excerpt:\n${String(s.source_text).slice(0, 15000)}`,
     );
     const chunk = { ...res, conceptId: target?.id ?? `c${chunks.length}`, mode: s.mode, createdAt: new Date().toISOString() };
@@ -69,10 +72,11 @@ Mermaid must be valid (use flowchart TD, quote labels with special chars).`,
 
 export const critiqueTeachBack = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ concept: z.string().max(500), lesson: z.string().max(8000), explanation: z.string().min(10).max(4000) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ concept: z.string().max(500), lesson: z.string().max(8000), explanation: z.string().min(10).max(4000), style: z.string().max(1200).optional() }).parse(d))
   .handler(async ({ data }) => wrap(async () => {
     const res = await aiJson(
-      `You are a kind but rigorous tutor grading a learner's "teach it back" explanation. Return JSON: {"score":number 0-10,"strengths":[string],"gaps":[string],"misconceptions":[string],"betterVersion":string (short model explanation)}`,
+      `You are a kind but rigorous tutor grading a learner's "teach it back" explanation. Return JSON: {"score":number 0-10,"strengths":[string],"gaps":[string],"misconceptions":[string],"betterVersion":string (short model explanation)}
+${data.style ?? ""}`,
       `Concept: ${data.concept}\nLesson:\n${data.lesson}\n\nLearner's explanation:\n${data.explanation}`,
     );
     return {

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { styleDirective } from "@/lib/preferences";
 
 function friendlyAiError(message: string, code?: string) {
   if (code === "rate_limited" || message.includes("429") || message.toLowerCase().includes("rate_limited")) {
@@ -12,7 +13,7 @@ function friendlyAiError(message: string, code?: string) {
 
 export async function callAi(action: string, payload: any) {
   const { data, error } = await supabase.functions.invoke("ai-generate", {
-    body: { action, payload },
+    body: { action, payload, style: styleDirective() },
   });
   if (error) {
     const response = (error as any).context;
