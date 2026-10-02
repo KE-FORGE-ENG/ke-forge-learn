@@ -48,18 +48,26 @@ function LearningStyleCard() {
       </div>
       <Label className="mt-5 mb-2 block">Teaching language</Label>
       <p className="text-xs text-muted-foreground mb-3">Lessons, quizzes and the tutor chat will speak this language.</p>
-      <div className="space-y-3">
-        {LANGUAGE_GROUPS.map((g) => (
-          <div key={g.country}>
-            <div className="text-xs font-medium text-muted-foreground mb-1">{g.flag} {g.country}</div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {g.langs.map((l) => (
-                <Choice key={l.id} active={prefs.language === l.id} onClick={() => update({ language: l.id })} title={l.label} desc={l.native} />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      <details className="group rounded-lg border border-border">
+        <summary className="flex items-center justify-between gap-3 p-3 cursor-pointer list-none">
+          <span className="min-w-0 truncate font-medium text-sm">
+            {(() => { const g = LANGUAGE_GROUPS.find((g) => g.langs.some((l) => l.id === prefs.language)); const l = g?.langs.find((l) => l.id === prefs.language); return `${g?.flag ?? "🌐"} ${l?.label ?? "English"} · ${l?.native ?? ""}`; })()}
+          </span>
+          <span className="shrink-0 text-xs text-primary group-open:rotate-180 transition-transform">▼</span>
+        </summary>
+        <div className="space-y-2 p-3 pt-0">
+          {LANGUAGE_GROUPS.map((g) => (
+            <details key={g.country} open={g.langs.some((l) => l.id === prefs.language)} className="rounded-md border border-border">
+              <summary className="p-2.5 cursor-pointer text-sm font-medium">{g.flag} {g.country}</summary>
+              <div className="grid grid-cols-1 gap-2 p-2.5 pt-0">
+                {g.langs.map((l) => (
+                  <Choice key={l.id} active={prefs.language === l.id} onClick={() => update({ language: l.id })} title={l.label} desc={l.native} />
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
+      </details>
     </Card>
   );
 }

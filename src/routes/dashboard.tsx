@@ -50,15 +50,30 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Your library</h1>
-          <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
-        </div>
-        <Button asChild size="lg" className="shadow-[var(--shadow-glow)] w-full sm:w-auto">
-          <Link to="/new" search={{ template: undefined }}><Plus className="w-4 h-4 mr-1" /> New plan</Link>
-        </Button>
+      <div className="mb-5">
+        <h1 className="text-2xl sm:text-3xl font-bold">Your library</h1>
+        <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
       </div>
+
+      <Card className="p-5 mb-4 bg-[image:var(--gradient-soft)] border-primary/30">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="rounded-lg bg-primary/15 p-2.5 shrink-0"><Calendar className="w-5 h-5 text-primary" /></div>
+            <div className="min-w-0">
+              <h2 className="font-semibold text-base sm:text-lg">Structured Study Plan</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">Upload a PDF or type a topic — AI splits it into daily lessons, quizzes and flashcards.</p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+              <Link to="/new" search={{ template: undefined }}>Browse templates</Link>
+            </Button>
+            <Button asChild size="lg" className="w-full sm:w-auto shadow-[var(--shadow-glow)]">
+              <Link to="/new" search={{ template: undefined }}><Plus className="w-4 h-4 mr-1" /> Create study plan</Link>
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       <div className="relative mb-6">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
