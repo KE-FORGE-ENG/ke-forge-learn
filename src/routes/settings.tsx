@@ -11,7 +11,7 @@ import { loadA11y, saveA11y, defaultA11y, type A11ySettings } from "@/lib/access
 import { exportUserBackup } from "@/lib/backup";
 import { ensurePermission, sendTestNotification } from "@/lib/reminders";
 import { Accessibility, Download, RotateCcw, Loader2, Bell, Globe2 } from "lucide-react";
-import { useLearningPreferences } from "@/lib/preferences";
+import { useLearningPreferences, LANGUAGE_GROUPS } from "@/lib/preferences";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
@@ -45,6 +45,20 @@ function LearningStyleCard() {
         <Choice active={prefs.complexity === "simple"} onClick={() => update({ complexity: "simple" })} title="🟢 Simple & clear" desc="Plain words, short steps." />
         <Choice active={prefs.complexity === "standard"} onClick={() => update({ complexity: "standard" })} title="🔵 Standard academic" desc="Balanced school/university tone." />
         <Choice active={prefs.complexity === "scholar"} onClick={() => update({ complexity: "scholar" })} title="🟣 Scholar" desc="Big grammar, formal academic language." />
+      </div>
+      <Label className="mt-5 mb-2 block">Teaching language</Label>
+      <p className="text-xs text-muted-foreground mb-3">Lessons, quizzes and the tutor chat will speak this language.</p>
+      <div className="space-y-3">
+        {LANGUAGE_GROUPS.map((g) => (
+          <div key={g.country}>
+            <div className="text-xs font-medium text-muted-foreground mb-1">{g.flag} {g.country}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {g.langs.map((l) => (
+                <Choice key={l.id} active={prefs.language === l.id} onClick={() => update({ language: l.id })} title={l.label} desc={l.native} />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </Card>
   );
