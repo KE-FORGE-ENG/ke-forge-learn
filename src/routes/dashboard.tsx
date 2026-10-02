@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { langFlag, docLang, languageInfo } from "@/lib/preferences";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -111,6 +112,7 @@ function Dashboard() {
                 <Card key={p.id} className="p-3 sm:p-4 min-w-0 overflow-hidden hover:shadow-[var(--shadow-card)] transition">
                   <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3 flex-shrink-0" /> Day {p.current_day}/{p.days}</div>
                   <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{doc?.title ?? "Plan"}</h3>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{langFlag(docLang(p.document_id))} {languageInfo(docLang(p.document_id)).label}</div>
                   <div className="flex flex-col gap-1.5 mt-3">
                     <Button asChild size="sm" className="w-full h-8 text-xs">
                       <Link to="/learn/$planId" params={{ planId: p.id }}>Continue</Link>
@@ -138,7 +140,7 @@ function Dashboard() {
             <Card key={d.id} className="p-3 sm:p-5 min-w-0 overflow-hidden">
               <div className="text-[10px] sm:text-xs text-muted-foreground uppercase truncate">{d.source_type}</div>
               <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{d.title}</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">{d.page_count} pages</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{d.page_count} pages · {langFlag(docLang(d.id))} {languageInfo(docLang(d.id)).label}</p>
             </Card>
           ))}
         </div>
