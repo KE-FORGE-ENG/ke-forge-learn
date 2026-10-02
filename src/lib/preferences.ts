@@ -87,3 +87,15 @@ export function useLearningPreferences() {
   const update = (patch: Partial<LearningPrefs>) => { const n = { ...prefs, ...patch }; setPrefs(n); void savePrefs(n); };
   return { prefs, update };
 }
+
+// Per-document language tags (stored locally; untagged docs fall back to current preference)
+const DLK = "ke-forge-doc-langs";
+export const langFlag = (id: Language) => LANGUAGE_GROUPS.find((g) => g.langs.some((l) => l.id === id))?.flag ?? "🌐";
+export function tagDocLang(docId: string) {
+  if (typeof window === "undefined") return;
+  try { const m = JSON.parse(localStorage.getItem(DLK) || "{}"); m[docId] = loadPrefs().language; localStorage.setItem(DLK, JSON.stringify(m)); } catch {}
+}
+export function docLang(docId?: string | null): Language {
+  if (typeof window === "undefined") return defaultPrefs.language;
+  try { const m = JSON.parse(localStorage.getItem(DLK) || "{}"); return (docId && m[docId]) || loadPrefs().language; } catch { return loadPrefs().language; }
+}

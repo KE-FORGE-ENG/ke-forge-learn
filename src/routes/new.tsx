@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { tagDocLang } from "@/lib/preferences";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -181,7 +182,7 @@ function NewPlan() {
         storage_path: path, pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
-      indexDoc(doc.id);
+      indexDoc(doc.id); tagDocLang(doc.id);
 
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
@@ -211,7 +212,7 @@ function NewPlan() {
           storage_path: path, pages, page_count: pages.length,
         }).select().single();
         if (dErr) throw dErr;
-        indexDoc(doc.id);
+        indexDoc(doc.id); tagDocLang(doc.id);
         const split = await planSplit(pages, f.name.replace(/\.pdf$/i, ""));
         const { error: pErr } = await supabase.from("learning_plans").insert({
           user_id: user.id, document_id: doc.id, days: split.days, page_chunks: split.chunks,
@@ -237,7 +238,7 @@ function NewPlan() {
         pages, page_count: 1,
       }).select().single();
       if (dErr) throw dErr;
-      indexDoc(doc.id);
+      indexDoc(doc.id); tagDocLang(doc.id);
       const chunks = chunkPages(1, days);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days, page_chunks: chunks,
@@ -282,7 +283,7 @@ function NewPlan() {
         source_type: "images", pages, page_count: pages.length,
       }).select().single();
       if (dErr) throw dErr;
-      indexDoc(doc.id);
+      indexDoc(doc.id); tagDocLang(doc.id);
       const { data: plan, error: pErr } = await supabase.from("learning_plans").insert({
         user_id: user.id, document_id: doc.id, days, page_chunks: chunkPages(pages.length, days),
       }).select().single();

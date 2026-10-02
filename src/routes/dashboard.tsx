@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { langFlag, docLang, languageInfo } from "@/lib/preferences";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -50,15 +51,30 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Your library</h1>
-          <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
-        </div>
-        <Button asChild size="lg" className="shadow-[var(--shadow-glow)] w-full sm:w-auto">
-          <Link to="/new" search={{ template: undefined }}><Plus className="w-4 h-4 mr-1" /> New plan</Link>
-        </Button>
+      <div className="mb-5">
+        <h1 className="text-2xl sm:text-3xl font-bold">Your library</h1>
+        <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
       </div>
+
+      <Card className="p-5 mb-4 bg-[image:var(--gradient-soft)] border-primary/30">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="rounded-lg bg-primary/15 p-2.5 shrink-0"><Calendar className="w-5 h-5 text-primary" /></div>
+            <div className="min-w-0">
+              <h2 className="font-semibold text-base sm:text-lg">Structured Study Plan</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">Upload a PDF or type a topic — AI splits it into daily lessons, quizzes and flashcards.</p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+              <Link to="/new" search={{ template: undefined }}>Browse templates</Link>
+            </Button>
+            <Button asChild size="lg" className="w-full sm:w-auto shadow-[var(--shadow-glow)]">
+              <Link to="/new" search={{ template: undefined }}><Plus className="w-4 h-4 mr-1" /> Create study plan</Link>
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       <div className="relative mb-6">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -96,6 +112,7 @@ function Dashboard() {
                 <Card key={p.id} className="p-3 sm:p-4 min-w-0 overflow-hidden hover:shadow-[var(--shadow-card)] transition">
                   <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3 flex-shrink-0" /> Day {p.current_day}/{p.days}</div>
                   <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{doc?.title ?? "Plan"}</h3>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{langFlag(docLang(p.document_id))} {languageInfo(docLang(p.document_id)).label}</div>
                   <div className="flex flex-col gap-1.5 mt-3">
                     <Button asChild size="sm" className="w-full h-8 text-xs">
                       <Link to="/learn/$planId" params={{ planId: p.id }}>Continue</Link>
@@ -123,7 +140,7 @@ function Dashboard() {
             <Card key={d.id} className="p-3 sm:p-5 min-w-0 overflow-hidden">
               <div className="text-[10px] sm:text-xs text-muted-foreground uppercase truncate">{d.source_type}</div>
               <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{d.title}</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">{d.page_count} pages</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{d.page_count} pages · {langFlag(docLang(d.id))} {languageInfo(docLang(d.id)).label}</p>
             </Card>
           ))}
         </div>

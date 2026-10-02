@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { langFlag, docLang, languageInfo } from "@/lib/preferences";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -229,6 +230,7 @@ function Learn() {
         <div>
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Back to dashboard</Link>
           <h1 className="text-2xl font-bold mt-1 truncate max-w-xl">{doc.title}</h1>
+          <span className="inline-flex items-center gap-1 mt-1 text-xs rounded-full border border-border px-2 py-0.5 text-muted-foreground">{langFlag(docLang(doc.id))} {languageInfo(docLang(doc.id)).label}</span>
         </div>
         <div className="flex items-center gap-2">
           {chunks.map((c) => (
