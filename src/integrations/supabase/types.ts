@@ -418,6 +418,54 @@ export type Database = {
           },
         ]
       }
+      group_shared_plans: {
+        Row: {
+          author_name: string
+          created_at: string
+          days: number
+          group_id: string
+          id: string
+          plan_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          author_name?: string
+          created_at?: string
+          days?: number
+          group_id: string
+          id?: string
+          plan_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          created_at?: string
+          days?: number
+          group_id?: string
+          id?: string
+          plan_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_shared_plans_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_shared_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "learning_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_plans: {
         Row: {
           created_at: string
