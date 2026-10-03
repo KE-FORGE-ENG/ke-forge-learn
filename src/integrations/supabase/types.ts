@@ -134,6 +134,56 @@ export type Database = {
         }
         Relationships: []
       }
+      community_publications: {
+        Row: {
+          author_name: string
+          created_at: string
+          days: number
+          description: string | null
+          fork_count: number
+          id: string
+          language: string
+          plan_id: string
+          subject: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          author_name?: string
+          created_at?: string
+          days?: number
+          description?: string | null
+          fork_count?: number
+          id?: string
+          language?: string
+          plan_id: string
+          subject?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          created_at?: string
+          days?: number
+          description?: string | null
+          fork_count?: number
+          id?: string
+          language?: string
+          plan_id?: string
+          subject?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_publications_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: true
+            referencedRelation: "learning_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_sessions: {
         Row: {
           completed: boolean
@@ -661,6 +711,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_fork: { Args: { _pub: string }; Returns: undefined }
       is_group_member: {
         Args: { _group: string; _user: string }
         Returns: boolean
