@@ -8,7 +8,9 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FileText, Plus, Sparkles, Calendar, Brain, Search } from "lucide-react";
+import { FileText, Plus, Sparkles, Calendar, Brain, Search, Share2 } from "lucide-react";
+import { toast } from "sonner";
+import { SUBJECTS, publishPlan } from "@/lib/community";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -16,7 +18,7 @@ type Doc = { id: string; title: string; source_type: string; page_count: number;
 type Plan = { id: string; document_id: string; days: number; current_day: number };
 
 function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading, username } = useAuth();
   const nav = useNavigate();
   const [q, setQ] = useState("");
 
@@ -120,6 +122,15 @@ function Dashboard() {
                     <Button asChild size="sm" variant="outline" className="w-full h-8 text-xs">
                       <Link to="/deeplearn/$planId" params={{ planId: p.id }}><Brain className="w-3 h-3 mr-1" /> Deep learn</Link>
                     </Button>
+                    <Button size="sm" variant="ghost" className="w-full h-8 text-xs" onClick={async () => {
+                      const subject = window.prompt(`Subject (${SUBJECTS.join(", ")})`, "General");
+                      if (!subject) return;
+                      const description = window.prompt("Short description for other learners", "") ?? "";
+                      try {
+                        await publishPlan({ planId: p.id, userId: user.id, title: doc?.title ?? "Study plan", subject, language: docLang(p.document_id), description, author: username ?? "learner", days: p.days });
+                        toast.success("Published to Community Commons");
+                      } catch (e: any) { toast.error(e.message ?? "Publish failed"); }
+                    }}><Share2 className="w-3 h-3 mr-1" /> Publish</Button>
                   </div>
                 </Card>
               );

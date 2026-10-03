@@ -32,6 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuItem asChild><Link to="/dashboard" preload="render"><LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/analytics" preload="render"><BarChart3 className="w-4 h-4 mr-2" /> Analytics</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/templates" preload="render"><Layout className="w-4 h-4 mr-2" /> Templates</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/community" preload="render"><Users className="w-4 h-4 mr-2" /> Community Commons</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/groups" preload="render"><Users className="w-4 h-4 mr-2" /> Study groups</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/notes" preload="render"><StickyNote className="w-4 h-4 mr-2" /> Notes</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/youtube-tool" preload="render"><Youtube className="w-4 h-4 mr-2" /> YouTube key points</Link></DropdownMenuItem>
