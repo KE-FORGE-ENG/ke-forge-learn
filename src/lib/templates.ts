@@ -63,4 +63,40 @@ export const TEMPLATES: Template[] = [
     prompt:
       "Create a 4-day skill-building plan with a small hands-on exercise each day. Day 1 motivation & vocabulary, Day 2 core moves, Day 3 combining moves on a small project, Day 4 review & next-steps.",
   },
+  {
+    id: "exam-sprint",
+    emoji: "🎯",
+    title: "Standardized Exam Sprint (3 days)",
+    days: 3,
+    description: "JAMB, WAEC, SAT-style drills: high-yield topics, formulas and past-question traps.",
+    prompt:
+      "Create a 3-day standardized exam sprint: Day 1 high-yield topics and must-know formulas, Day 2 past-question style practice with worked solutions, Day 3 common traps, timing strategy and a mock test.",
+  },
+  {
+    id: "research-paper",
+    emoji: "📄",
+    title: "Research Paper Breakdown (4 days)",
+    days: 4,
+    description: "Understand methods, findings and critique of any paper or thesis.",
+    prompt:
+      "Create a 4-day research paper breakdown: Day 1 context and research question, Day 2 methodology explained simply, Day 3 results and what they mean, Day 4 critique, limitations and defense-style questions.",
+  },
+  {
+    id: "coding-algorithms",
+    emoji: "💻",
+    title: "Coding & Algorithms (5 days)",
+    days: 5,
+    description: "Data structures, problem patterns and edge cases with practice problems.",
+    prompt:
+      "Create a 5-day coding plan: Day 1 core data structures, Day 2 two-pointer and sliding window, Day 3 recursion and trees, Day 4 dynamic programming, Day 5 edge cases and mixed practice problems with solutions.",
+  },
+  {
+    id: "case-study",
+    emoji: "📊",
+    title: "Business Case Study (3 days)",
+    days: 3,
+    description: "Problem framing, SWOT, financial impact and a strategy pitch.",
+    prompt:
+      "Create a 3-day business case study plan: Day 1 problem identification and stakeholders, Day 2 SWOT and financial/operational analysis, Day 3 strategic recommendations and pitch practice.",
+  },
 ];

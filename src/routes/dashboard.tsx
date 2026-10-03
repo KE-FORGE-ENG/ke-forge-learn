@@ -66,8 +66,8 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-              <Link to="/new" search={{ template: undefined }}>Browse templates</Link>
+            <Button asChild size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white">
+              <Link to="/templates">Browse templates</Link>
             </Button>
             <Button asChild size="lg" className="w-full sm:w-auto shadow-[var(--shadow-glow)]">
               <Link to="/new" search={{ template: undefined }}><Plus className="w-4 h-4 mr-1" /> Create study plan</Link>
@@ -92,7 +92,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto flex-shrink-0">
-            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+            <Button asChild size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white">
               <Link to="/adaptive">Adaptive learn</Link>
             </Button>
             <Button asChild size="lg" className="w-full sm:w-auto">
