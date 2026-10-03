@@ -17,6 +17,7 @@ import { Route as NotesRouteImport } from './routes/notes'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AdaptiveRouteImport } from './routes/adaptive'
@@ -72,6 +73,11 @@ const GroupsRoute = GroupsRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/adaptive': typeof AdaptiveRouteWithChildren
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
+  '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
+  '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/adaptive': typeof AdaptiveRouteWithChildren
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
+  '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/groups': typeof GroupsRouteWithChildren
   '/new': typeof NewRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/adaptive'
     | '/analytics'
     | '/auth'
+    | '/community'
     | '/dashboard'
     | '/groups'
     | '/new'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/auth'
+    | '/community'
     | '/dashboard'
     | '/new'
     | '/notes'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/adaptive'
     | '/analytics'
     | '/auth'
+    | '/community'
     | '/dashboard'
     | '/groups'
     | '/new'
@@ -316,6 +328,7 @@ export interface RootRouteChildren {
   AdaptiveRoute: typeof AdaptiveRouteWithChildren
   AnalyticsRoute: typeof AnalyticsRoute
   AuthRoute: typeof AuthRoute
+  CommunityRoute: typeof CommunityRoute
   DashboardRoute: typeof DashboardRoute
   GroupsRoute: typeof GroupsRouteWithChildren
   NewRoute: typeof NewRoute
@@ -390,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -539,6 +559,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdaptiveRoute: AdaptiveRouteWithChildren,
   AnalyticsRoute: AnalyticsRoute,
   AuthRoute: AuthRoute,
+  CommunityRoute: CommunityRoute,
   DashboardRoute: DashboardRoute,
   GroupsRoute: GroupsRouteWithChildren,
   NewRoute: NewRoute,
