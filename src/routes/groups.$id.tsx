@@ -26,6 +26,7 @@ function GroupDetail() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [selectedPlan, setSelectedPlan] = useState("");
   const [busy, setBusy] = useState(false);
+  const [copying, setCopying] = useState<string | null>(null);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
 
@@ -81,6 +82,28 @@ function GroupDetail() {
     const { error } = await supabase.from("group_shared_plans").delete().eq("id", item.id);
     if (error) toast.error(error.message); else { toast.success("Removed from locker"); await load(); }
   };
+  const copyShared = async (item: SharedPlan) => {
+    if (!user) return;
+    setCopying(item.id);
+    try {
+      const { data: plan, error: planError } = await supabase.from("learning_plans").select("document_id,days,page_chunks").eq("id", item.plan_id).maybeSingle();
+      if (planError || !plan) throw new Error("This shared plan is unavailable.");
+      const { data: doc, error: docError } = await supabase.from("documents").select("title,source_type,pages,page_count").eq("id", plan.document_id).maybeSingle();
+      if (docError || !doc) throw new Error("The source material is unavailable.");
+      const { data: newDoc, error: newDocError } = await supabase.from("documents").insert({ ...doc, user_id: user.id, storage_path: null }).select("id").single();
+      if (newDocError) throw newDocError;
+      const { data: newPlan, error: newPlanError } = await supabase.from("learning_plans").insert({ user_id: user.id, document_id: newDoc.id, days: plan.days, page_chunks: plan.page_chunks }).select("id").single();
+      if (newPlanError) throw newPlanError;
+      const { data: cards } = await supabase.from("flashcards").select("front,back,day").eq("plan_id", item.plan_id).limit(500);
+      if (cards?.length) {
+        const { error } = await supabase.from("flashcards").insert(cards.map((card) => ({ ...card, user_id: user.id, plan_id: newPlan.id })));
+        if (error) throw error;
+      }
+      toast.success("Copied into your library");
+      nav({ to: "/learn/$planId", params: { planId: newPlan.id } });
+    } catch (e: any) { toast.error(e.message ?? "Could not copy plan"); }
+    finally { setCopying(null); }
+  };
   const copyCode = async () => {
     if (!group) return;
     await navigator.clipboard.writeText(group.join_code);
@@ -111,7 +134,7 @@ function GroupDetail() {
         {sharedPlans.length ? <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {sharedPlans.map((item) => <Card key={item.id} className="p-4 flex flex-col">
             <h3 className="font-semibold line-clamp-2">{item.title}</h3><p className="text-xs text-muted-foreground mt-1">{item.days} days · shared by @{item.author_name}</p>
-            <div className="flex gap-2 mt-3"><Button asChild size="sm" className="flex-1"><Link to="/learn/$planId" params={{ planId: item.plan_id }}>Open plan</Link></Button>
+            <div className="flex gap-2 mt-3"><Button size="sm" className="flex-1" disabled={copying === item.id} onClick={() => void copyShared(item)}>{copying === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Copy to my library"}</Button>
               {item.user_id === user.id && <Button variant="outline" size="icon" aria-label="Remove from locker" title="Remove from locker" onClick={() => void removeShared(item)}><Trash2 className="w-4 h-4" /></Button>}</div>
           </Card>)}
         </div> : <Card className="p-6 text-center text-sm text-muted-foreground">No shared plans yet.</Card>}
