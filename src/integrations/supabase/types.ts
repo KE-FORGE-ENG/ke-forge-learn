@@ -389,6 +389,50 @@ export type Database = {
         }
         Relationships: []
       }
+      group_challenge_scores: {
+        Row: {
+          correct_count: number
+          created_at: string
+          duration_seconds: number
+          group_id: string
+          id: string
+          plan_title: string
+          question_count: number
+          score_pct: number
+          user_id: string
+        }
+        Insert: {
+          correct_count: number
+          created_at?: string
+          duration_seconds?: number
+          group_id: string
+          id?: string
+          plan_title: string
+          question_count: number
+          score_pct: number
+          user_id: string
+        }
+        Update: {
+          correct_count?: number
+          created_at?: string
+          duration_seconds?: number
+          group_id?: string
+          id?: string
+          plan_title?: string
+          question_count?: number
+          score_pct?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_challenge_scores_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           group_id: string
