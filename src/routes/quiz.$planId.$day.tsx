@@ -23,6 +23,7 @@ type Q = {
   keywords?: string[];
   explanation: string;
 };
+type GroupOption = { id: string; name: string };
 
 function gradeAnswer(q: Q, userA: string): boolean {
   const a = (userA ?? "").trim().toLowerCase();
@@ -53,9 +54,24 @@ function Quiz() {
   const [busy, setBusy] = useState(false);
   const [started, setStarted] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [groupOptions, setGroupOptions] = useState<GroupOption[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [planTitle, setPlanTitle] = useState("Study plan");
+  const [sharing, setSharing] = useState(false);
+  const [sharedScore, setSharedScore] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/auth" }); }, [user, loading, nav]);
+  useEffect(() => {
+    if (!user) return;
+    void (async () => {
+      const { data: memberships } = await supabase.from("group_members").select("group_id").eq("user_id", user.id);
+      const ids = (memberships ?? []).map((m) => m.group_id);
+      if (!ids.length) { setGroupOptions([]); return; }
+      const { data: groups } = await supabase.from("study_groups").select("id,name").in("id", ids);
+      setGroupOptions((groups ?? []) as GroupOption[]);
+    })();
+  }, [user]);
 
   const maxCount = mode === "cbt" ? 60 : mode === "test" ? 30 : 30;
   useEffect(() => { if (count > maxCount) setCount(maxCount); }, [mode, maxCount, count]);
@@ -70,6 +86,7 @@ function Quiz() {
     try {
       const { data: plan } = await supabase.from("learning_plans").select("*").eq("id", planId).single();
       const { data: doc } = await supabase.from("documents").select("*").eq("id", plan!.document_id).single();
+      setPlanTitle(doc?.title ?? "Study plan");
       const chunks = (plan!.page_chunks as any[]);
       const upTo = chunks.find((c) => c.day === dayN)?.endPage ?? doc!.page_count;
       const pages = (doc!.pages as { page: number; text: string }[]).filter((p) => p.page <= upTo);
@@ -125,6 +142,21 @@ function Quiz() {
     await supabase.from("user_interactions").insert({
       user_id: user.id, plan_id: planId, day: dayN, kind: "quiz_score", payload: { score: pct, mode },
     });
+  };
+
+  const shareResult = async () => {
+    if (!user || !selectedGroup || !questions || !submitted || mode !== "cbt") return;
+    setSharing(true);
+    const correctCount = questions.reduce((s, q, i) => s + (gradeAnswer(q, answers[i] ?? "") ? 1 : 0), 0);
+    const pct = Math.round((correctCount / questions.length) * 100);
+    const duration = useTimer ? Math.max(0, timerMin * 60 - secondsLeft) : 0;
+    const { error } = await supabase.from("group_challenge_scores").insert({
+      group_id: selectedGroup, user_id: user.id, plan_title: planTitle,
+      score_pct: pct, correct_count: correctCount, question_count: questions.length, duration_seconds: duration,
+    });
+    if (error) toast.error(error.message);
+    else { setSharedScore(true); toast.success("CBT result shared with your group"); }
+    setSharing(false);
   };
 
   const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
@@ -288,6 +320,16 @@ function Quiz() {
                     <Button onClick={() => generate(true)} variant="outline"><RefreshCcw className="w-4 h-4 mr-1" /> New questions</Button>
                     <Button asChild><Link to="/learn/$planId" params={{ planId }}>Back to lesson</Link></Button>
                   </div>
+                  {mode === "cbt" && groupOptions.length > 0 && <div className="max-w-md mx-auto mt-5 pt-4 border-t border-border text-left">
+                    <Label htmlFor="share-group" className="block">Share result with a study group</Label>
+                    <p className="text-xs text-muted-foreground mt-1">Only your score and question count are shared — never your answers.</p>
+                    <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                      <select id="share-group" aria-label="Study group for CBT result" className="flex-1 h-10 rounded-md border border-input bg-background px-3 text-sm" value={selectedGroup} onChange={(e) => setSelectedGroup(e.target.value)}>
+                        <option value="">Choose a group</option>{groupOptions.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                      </select>
+                      <Button onClick={() => void shareResult()} disabled={sharing || sharedScore || !selectedGroup}>{sharedScore ? "Shared" : sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Share score"}</Button>
+                    </div>
+                  </div>}
                 </Card>
               )}
             </div>
