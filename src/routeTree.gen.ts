@@ -16,12 +16,14 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as GroupsRouteImport } from './routes/groups'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as NotesRouteImport } from './routes/notes'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as TryRouteImport } from './routes/try'
 import { Route as YoutubeToolRouteImport } from './routes/youtube-tool'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdaptiveIndexRouteImport } from './routes/adaptive.index'
 import { Route as AdaptiveSessionIdRouteImport } from './routes/adaptive.$sessionId'
 import { Route as CertificatePlanIdRouteImport } from './routes/certificate.$planId'
@@ -33,6 +35,7 @@ import { Route as GroupsIdRouteImport } from './routes/groups.$id'
 import { Route as LearnPlanIdRouteImport } from './routes/learn.$planId'
 import { Route as MindmapPlanIdRouteImport } from './routes/mindmap.$planId'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as QuizPlanIdDayRouteImport } from './routes/quiz.$planId.$day'
 
 const IndexRoute = IndexRouteImport.update({
@@ -70,6 +73,11 @@ const GroupsRoute = GroupsRouteImport.update({
   path: '/groups',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewRoute = NewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -100,6 +108,12 @@ const YoutubeToolRoute = YoutubeToolRouteImport.update({
   path: '/youtube-tool',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdaptiveIndexRoute = AdaptiveIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -155,6 +169,11 @@ const SharedTokenRoute = SharedTokenRouteImport.update({
   path: '/shared/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizPlanIdDayRoute = QuizPlanIdDayRouteImport.update({
   id: '/quiz/$planId/$day',
   path: '/quiz/$planId/$day',
@@ -169,12 +188,14 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/groups': typeof GroupsRouteWithChildren
+  '/mcp': typeof McpRoute
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/adaptive/$sessionId': typeof AdaptiveSessionIdRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
@@ -186,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/adaptive/': typeof AdaptiveIndexRoute
   '/deeplearn/': typeof DeeplearnIndexRoute
   '/groups/': typeof GroupsIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesByTo {
@@ -194,12 +216,14 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
+  '/mcp': typeof McpRoute
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/adaptive/$sessionId': typeof AdaptiveSessionIdRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
@@ -211,6 +235,7 @@ export interface FileRoutesByTo {
   '/adaptive': typeof AdaptiveIndexRoute
   '/deeplearn': typeof DeeplearnIndexRoute
   '/groups': typeof GroupsIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRoutesById {
@@ -222,12 +247,14 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/groups': typeof GroupsRouteWithChildren
+  '/mcp': typeof McpRoute
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
   '/youtube-tool': typeof YoutubeToolRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/adaptive/$sessionId': typeof AdaptiveSessionIdRoute
   '/certificate/$planId': typeof CertificatePlanIdRoute
   '/deeplearn/$planId': typeof DeeplearnPlanIdRoute
@@ -239,6 +266,7 @@ export interface FileRoutesById {
   '/adaptive/': typeof AdaptiveIndexRoute
   '/deeplearn/': typeof DeeplearnIndexRoute
   '/groups/': typeof GroupsIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/quiz/$planId/$day': typeof QuizPlanIdDayRoute
 }
 export interface FileRouteTypes {
@@ -251,12 +279,14 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/groups'
+    | '/mcp'
     | '/new'
     | '/notes'
     | '/settings'
     | '/templates'
     | '/try'
     | '/youtube-tool'
+    | '/.well-known/oauth-protected-resource'
     | '/adaptive/$sessionId'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
@@ -268,6 +298,7 @@ export interface FileRouteTypes {
     | '/adaptive/'
     | '/deeplearn/'
     | '/groups/'
+    | '/.lovable/oauth/consent'
     | '/quiz/$planId/$day'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -276,12 +307,14 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community'
     | '/dashboard'
+    | '/mcp'
     | '/new'
     | '/notes'
     | '/settings'
     | '/templates'
     | '/try'
     | '/youtube-tool'
+    | '/.well-known/oauth-protected-resource'
     | '/adaptive/$sessionId'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
@@ -293,6 +326,7 @@ export interface FileRouteTypes {
     | '/adaptive'
     | '/deeplearn'
     | '/groups'
+    | '/.lovable/oauth/consent'
     | '/quiz/$planId/$day'
   id:
     | '__root__'
@@ -303,12 +337,14 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/groups'
+    | '/mcp'
     | '/new'
     | '/notes'
     | '/settings'
     | '/templates'
     | '/try'
     | '/youtube-tool'
+    | '/.well-known/oauth-protected-resource'
     | '/adaptive/$sessionId'
     | '/certificate/$planId'
     | '/deeplearn/$planId'
@@ -320,6 +356,7 @@ export interface FileRouteTypes {
     | '/adaptive/'
     | '/deeplearn/'
     | '/groups/'
+    | '/.lovable/oauth/consent'
     | '/quiz/$planId/$day'
   fileRoutesById: FileRoutesById
 }
@@ -331,12 +368,14 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   DashboardRoute: typeof DashboardRoute
   GroupsRoute: typeof GroupsRouteWithChildren
+  McpRoute: typeof McpRoute
   NewRoute: typeof NewRoute
   NotesRoute: typeof NotesRoute
   SettingsRoute: typeof SettingsRoute
   TemplatesRoute: typeof TemplatesRoute
   TryRoute: typeof TryRoute
   YoutubeToolRoute: typeof YoutubeToolRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   CertificatePlanIdRoute: typeof CertificatePlanIdRoute
   DeeplearnPlanIdRoute: typeof DeeplearnPlanIdRoute
   FlashcardsPlanIdRoute: typeof FlashcardsPlanIdRoute
@@ -344,6 +383,7 @@ export interface RootRouteChildren {
   MindmapPlanIdRoute: typeof MindmapPlanIdRoute
   SharedTokenRoute: typeof SharedTokenRoute
   DeeplearnIndexRoute: typeof DeeplearnIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   QuizPlanIdDayRoute: typeof QuizPlanIdDayRoute
 }
 
@@ -398,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/new': {
       id: '/new'
       path: '/new'
@@ -438,6 +485,13 @@ declare module '@tanstack/react-router' {
       path: '/youtube-tool'
       fullPath: '/youtube-tool'
       preLoaderRoute: typeof YoutubeToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/adaptive/': {
@@ -517,6 +571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SharedTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quiz/$planId/$day': {
       id: '/quiz/$planId/$day'
       path: '/quiz/$planId/$day'
@@ -562,12 +623,15 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   DashboardRoute: DashboardRoute,
   GroupsRoute: GroupsRouteWithChildren,
+  McpRoute: McpRoute,
   NewRoute: NewRoute,
   NotesRoute: NotesRoute,
   SettingsRoute: SettingsRoute,
   TemplatesRoute: TemplatesRoute,
   TryRoute: TryRoute,
   YoutubeToolRoute: YoutubeToolRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   CertificatePlanIdRoute: CertificatePlanIdRoute,
   DeeplearnPlanIdRoute: DeeplearnPlanIdRoute,
   FlashcardsPlanIdRoute: FlashcardsPlanIdRoute,
@@ -575,6 +639,7 @@ const rootRouteChildren: RootRouteChildren = {
   MindmapPlanIdRoute: MindmapPlanIdRoute,
   SharedTokenRoute: SharedTokenRoute,
   DeeplearnIndexRoute: DeeplearnIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   QuizPlanIdDayRoute: QuizPlanIdDayRoute,
 }
 export const routeTree = rootRouteImport

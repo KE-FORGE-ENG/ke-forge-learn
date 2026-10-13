@@ -8,19 +8,29 @@ import { Card } from "@/components/ui/card";
 import logoAsset from "@/assets/ke-forge-logo.png.asset.json";
 import { toast } from "sonner";
 import { lovable } from "@/integrations/lovable";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
-export const Route = createFileRoute("/auth")({ component: AuthPage });
+export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({ next: typeof s.next === "string" ? s.next : undefined }),
+  component: AuthPage,
+});
 
 function AuthPage() {
   const { user, signIn, signUp } = useAuth();
   const nav = useNavigate();
+  const { next: rawNext } = Route.useSearch();
+  const next = rawNext ? oauthReturnPath(rawNext) : null;
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (user) nav({ to: "/dashboard" }); }, [user, nav]);
+  useEffect(() => {
+    if (!user) return;
+    if (next && next !== "/") window.location.assign(next);
+    else nav({ to: "/dashboard" });
+  }, [user, nav, next]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +44,8 @@ function AuthPage() {
   };
 
   const googleSignIn = async () => {
-    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const redirect_uri = next && next !== "/" ? new URL(next, window.location.origin).href : window.location.origin;
+    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri });
     if (res.error) {
       const msg = res.error.message ?? "";
       // User closed the popup — don't show a scary error
