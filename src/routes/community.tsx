@@ -3,6 +3,9 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { fetchPublicProfiles, type PublicProfile } from "@/lib/profile";
+import { UserAvatar } from "@/components/UserAvatar";
+import { PlanCover } from "@/components/PlanCover";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,6 +43,12 @@ function Commons() {
       return (data ?? []) as Publication[];
     },
   });
+  const { data: authors } = useQuery({
+    queryKey: ["commons-authors", data.map((p) => p.user_id).join(",")],
+    enabled: data.length > 0,
+    queryFn: () => fetchPublicProfiles(data.map((p) => p.user_id)),
+  });
+  const author = (p: Publication): PublicProfile | undefined => authors?.get(p.user_id);
 
   const list = useMemo(() => data.filter((p) =>
     (subject === "All" || p.subject === subject) &&
@@ -80,17 +89,24 @@ function Commons() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {list.map((p) => (
-              <Card key={p.id} className="p-4 flex flex-col min-w-0">
+              <Card key={p.id} className="p-0 overflow-hidden flex flex-col min-w-0">
+                <PlanCover title={`${p.subject} ${p.title}`} className="h-28 border-b" />
+                <div className="p-4 flex flex-col flex-1 min-w-0">
                 <div className="flex items-center justify-between text-xs text-muted-foreground gap-2">
                   <span className="truncate">{p.subject}</span>
                   <span className="shrink-0">{langFlag(p.language as Language)} {languageInfo(p.language as Language).label}</span>
                 </div>
                 <h3 className="font-semibold mt-1 truncate">{p.title}</h3>
                 {p.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{p.description}</p>}
-                <div className="text-xs text-muted-foreground mt-2">@{p.author_name} · {p.days} days · <GitFork className="w-3 h-3 inline" /> {p.fork_count}</div>
-                <Button size="sm" className="mt-3" disabled={busy === p.id || p.user_id === user?.id} onClick={() => fork(p)}>
+                <div className="text-xs text-muted-foreground mt-3 flex items-center gap-2 min-w-0">
+                  <UserAvatar name={author(p)?.display_name || p.author_name} src={author(p)?.avatar_url} size={24} />
+                  <span className="truncate">{author(p)?.display_name || `@${p.author_name}`}</span>
+                  <span className="shrink-0">· {p.days} days · <GitFork className="w-3 h-3 inline" /> {p.fork_count}</span>
+                </div>
+                <Button size="sm" className="mt-auto pt-0 translate-y-0 mt-3" disabled={busy === p.id || p.user_id === user?.id} onClick={() => fork(p)}>
                   {busy === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <><GitFork className="w-4 h-4 mr-1" />{p.user_id === user?.id ? "Your publication" : "Fork to library"}</>}
                 </Button>
+                </div>
               </Card>
             ))}
           </div>

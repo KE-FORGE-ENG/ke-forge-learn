@@ -150,7 +150,7 @@ function GroupDetail() {
           <div className="flex items-center gap-2 font-semibold"><Trophy className="w-4 h-4 text-accent" /> Points leaderboard</div>
           <div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => void award(10)}><Plus className="w-3 h-3 mr-1" /> 10 points</Button><Button size="sm" variant="outline" onClick={() => void award(25)}><Plus className="w-3 h-3 mr-1" /> 25 points</Button></div>
         </div>
-        <ul className="divide-y">{members.map((m, i) => <li key={m.user_id} className="py-2 flex items-center justify-between text-sm"><span><span className={`inline-block w-7 text-center font-bold ${i === 0 ? "text-accent" : "text-muted-foreground"}`}>{i + 1}</span> <span className={m.user_id === user.id ? "font-semibold text-primary" : ""}>@{m.username}</span></span><span className="font-mono">{m.points} pts</span></li>)}{members.length === 0 && <li className="py-4 text-center text-xs text-muted-foreground">No members yet.</li>}</ul>
+        <ul className="divide-y">{members.map((m, i) => <li key={m.user_id} className="py-2 flex items-center justify-between text-sm"><span className="flex items-center gap-2"><span className={`inline-block w-7 text-center font-bold ${i === 0 ? "text-accent" : "text-muted-foreground"}`}>{i + 1}</span> <UserAvatar name={m.username} src={(m as any).avatar_url} size={24} /> <span className={m.user_id === user.id ? "font-semibold text-primary" : ""}>{m.username}</span></span><span className="font-mono">{m.points} pts</span></li>)}{members.length === 0 && <li className="py-4 text-center text-xs text-muted-foreground">No members yet.</li>}</ul>
       </Card>
 
       <section className="mt-7" aria-labelledby="challenges-title">
