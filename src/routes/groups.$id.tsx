@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { fetchPublicProfiles } from "@/lib/profile";
+import { UserAvatar } from "@/components/UserAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -44,9 +46,12 @@ function GroupDetail() {
     const ms = (m ?? []) as Member[];
     const ids = ms.map((x) => x.user_id);
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,username").in("id", ids);
-      const names = new Map((profs ?? []).map((p) => [p.id, p.username]));
-      ms.forEach((x) => { x.username = names.get(x.user_id) ?? `learner-${x.user_id.slice(0, 5)}`; });
+      const profs = await fetchPublicProfiles(ids);
+      ms.forEach((x) => {
+        const pr = profs.get(x.user_id);
+        x.username = pr?.display_name || pr?.username || `learner-${x.user_id.slice(0, 5)}`;
+        (x as any).avatar_url = pr?.avatar_url ?? null;
+      });
     }
     ms.sort((a, b) => b.points - a.points);
     setMembers(ms);
@@ -145,7 +150,7 @@ function GroupDetail() {
           <div className="flex items-center gap-2 font-semibold"><Trophy className="w-4 h-4 text-accent" /> Points leaderboard</div>
           <div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => void award(10)}><Plus className="w-3 h-3 mr-1" /> 10 points</Button><Button size="sm" variant="outline" onClick={() => void award(25)}><Plus className="w-3 h-3 mr-1" /> 25 points</Button></div>
         </div>
-        <ul className="divide-y">{members.map((m, i) => <li key={m.user_id} className="py-2 flex items-center justify-between text-sm"><span><span className={`inline-block w-7 text-center font-bold ${i === 0 ? "text-accent" : "text-muted-foreground"}`}>{i + 1}</span> <span className={m.user_id === user.id ? "font-semibold text-primary" : ""}>@{m.username}</span></span><span className="font-mono">{m.points} pts</span></li>)}{members.length === 0 && <li className="py-4 text-center text-xs text-muted-foreground">No members yet.</li>}</ul>
+        <ul className="divide-y">{members.map((m, i) => <li key={m.user_id} className="py-2 flex items-center justify-between text-sm"><span className="flex items-center gap-2"><span className={`inline-block w-7 text-center font-bold ${i === 0 ? "text-accent" : "text-muted-foreground"}`}>{i + 1}</span> <UserAvatar name={m.username} src={(m as any).avatar_url} size={24} /> <span className={m.user_id === user.id ? "font-semibold text-primary" : ""}>{m.username}</span></span><span className="font-mono">{m.points} pts</span></li>)}{members.length === 0 && <li className="py-4 text-center text-xs text-muted-foreground">No members yet.</li>}</ul>
       </Card>
 
       <section className="mt-7" aria-labelledby="challenges-title">

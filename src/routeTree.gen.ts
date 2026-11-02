@@ -19,6 +19,7 @@ import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as NotesRouteImport } from './routes/notes'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as TryRouteImport } from './routes/try'
@@ -86,6 +87,11 @@ const NewRoute = NewRouteImport.update({
 const NotesRoute = NotesRouteImport.update({
   id: '/notes',
   path: '/notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/new': typeof NewRoute
   '/notes': typeof NotesRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/try': typeof TryRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/new'
     | '/notes'
+    | '/profile'
     | '/settings'
     | '/templates'
     | '/try'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/new'
     | '/notes'
+    | '/profile'
     | '/settings'
     | '/templates'
     | '/try'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/new'
     | '/notes'
+    | '/profile'
     | '/settings'
     | '/templates'
     | '/try'
@@ -371,6 +383,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   NewRoute: typeof NewRoute
   NotesRoute: typeof NotesRoute
+  ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
   TemplatesRoute: typeof TemplatesRoute
   TryRoute: typeof TryRoute
@@ -457,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/notes'
       fullPath: '/notes'
       preLoaderRoute: typeof NotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -626,6 +646,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   NewRoute: NewRoute,
   NotesRoute: NotesRoute,
+  ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
   TemplatesRoute: TemplatesRoute,
   TryRoute: TryRoute,

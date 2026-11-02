@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { FileText, Plus, Sparkles, Calendar, Brain, Search, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { SUBJECTS, publishPlan } from "@/lib/community";
+import { quoteOfTheDay } from "@/lib/quotes";
+import { PlanCover } from "@/components/PlanCover";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -49,12 +51,24 @@ function Dashboard() {
     });
   }, [plans, docs, ql]);
 
+  const quote = quoteOfTheDay();
+  const [greeting, setGreeting] = useState("Welcome back");
+  useEffect(() => {
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening");
+  }, []);
+
   if (!user) return null;
 
   return (
     <AppShell>
-      <div className="mb-5">
-        <h1 className="text-2xl sm:text-3xl font-bold">Your library</h1>
+      <figure className="mb-6 border-l-2 border-primary pl-4 py-1">
+        <blockquote className="font-display italic text-base sm:text-lg text-foreground/90 leading-snug">“{quote.text}”</blockquote>
+        <figcaption className="text-xs text-muted-foreground mt-1.5 tracking-wide">— {quote.author}</figcaption>
+      </figure>
+      <div className="mb-6">
+        <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{greeting}</div>
+        <h1 className="text-3xl sm:text-4xl font-semibold mt-1">Your library</h1>
         <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
       </div>
 
@@ -111,7 +125,9 @@ function Dashboard() {
             {filteredPlans.map((p) => {
               const doc = docs.find((d) => d.id === p.document_id);
               return (
-                <Card key={p.id} className="p-3 sm:p-4 min-w-0 overflow-hidden hover:shadow-[var(--shadow-card)] transition">
+                <Card key={p.id} className="p-0 min-w-0 overflow-hidden hover:shadow-[var(--shadow-card)] transition">
+                  <PlanCover title={doc?.title} className="h-20 sm:h-28 border-b" />
+                  <div className="p-3 sm:p-4">
                   <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3 flex-shrink-0" /> Day {p.current_day}/{p.days}</div>
                   <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{doc?.title ?? "Plan"}</h3>
                   <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{langFlag(docLang(p.document_id))} {languageInfo(docLang(p.document_id)).label}</div>
@@ -132,6 +148,7 @@ function Dashboard() {
                       } catch (e: any) { toast.error(e.message ?? "Publish failed"); }
                     }}><Share2 className="w-3 h-3 mr-1" /> Publish</Button>
                   </div>
+                  </div>
                 </Card>
               );
             })}
@@ -148,10 +165,13 @@ function Dashboard() {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredDocs.map((d) => (
-            <Card key={d.id} className="p-3 sm:p-5 min-w-0 overflow-hidden">
+            <Card key={d.id} className="p-0 min-w-0 overflow-hidden">
+              <PlanCover title={d.title} className="h-16 sm:h-24 border-b" />
+              <div className="p-3 sm:p-4">
               <div className="text-[10px] sm:text-xs text-muted-foreground uppercase truncate">{d.source_type}</div>
               <h3 className="font-semibold mt-1 text-sm sm:text-base truncate">{d.title}</h3>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{d.page_count} pages · {langFlag(docLang(d.id))} {languageInfo(docLang(d.id)).label}</p>
+              </div>
             </Card>
           ))}
         </div>
