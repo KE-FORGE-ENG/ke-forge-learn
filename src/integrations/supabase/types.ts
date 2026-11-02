@@ -604,18 +604,33 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          country: string | null
           created_at: string
+          display_name: string | null
           id: string
+          institution: string | null
+          updated_at: string
           username: string
         }
         Insert: {
+          avatar_url?: string | null
+          country?: string | null
           created_at?: string
+          display_name?: string | null
           id: string
+          institution?: string | null
+          updated_at?: string
           username: string
         }
         Update: {
+          avatar_url?: string | null
+          country?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
+          institution?: string | null
+          updated_at?: string
           username?: string
         }
         Relationships: []
@@ -803,6 +818,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_profiles: {
+        Args: { _ids: string[] }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
       increment_fork: { Args: { _pub: string }; Returns: undefined }
       is_group_member: {
         Args: { _group: string; _user: string }
