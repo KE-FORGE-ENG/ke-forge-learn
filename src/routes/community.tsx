@@ -103,7 +103,7 @@ function Commons() {
                   <span className="truncate">{author(p)?.display_name || `@${p.author_name}`}</span>
                   <span className="shrink-0">· {p.days} days · <GitFork className="w-3 h-3 inline" /> {p.fork_count}</span>
                 </div>
-                <Button size="sm" className="mt-auto pt-0 translate-y-0 mt-3" disabled={busy === p.id || p.user_id === user?.id} onClick={() => fork(p)}>
+                <Button size="sm" className="mt-3" disabled={busy === p.id || p.user_id === user?.id} onClick={() => fork(p)}>
                   {busy === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <><GitFork className="w-4 h-4 mr-1" />{p.user_id === user?.id ? "Your publication" : "Fork to library"}</>}
                 </Button>
                 </div>
