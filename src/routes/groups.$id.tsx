@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { fetchPublicProfiles } from "@/lib/profile";
+import { UserAvatar } from "@/components/UserAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -44,9 +46,12 @@ function GroupDetail() {
     const ms = (m ?? []) as Member[];
     const ids = ms.map((x) => x.user_id);
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,username").in("id", ids);
-      const names = new Map((profs ?? []).map((p) => [p.id, p.username]));
-      ms.forEach((x) => { x.username = names.get(x.user_id) ?? `learner-${x.user_id.slice(0, 5)}`; });
+      const profs = await fetchPublicProfiles(ids);
+      ms.forEach((x) => {
+        const pr = profs.get(x.user_id);
+        x.username = pr?.display_name || pr?.username || `learner-${x.user_id.slice(0, 5)}`;
+        (x as any).avatar_url = pr?.avatar_url ?? null;
+      });
     }
     ms.sort((a, b) => b.points - a.points);
     setMembers(ms);
