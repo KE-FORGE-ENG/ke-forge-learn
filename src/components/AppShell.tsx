@@ -52,6 +52,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild><Link to="/profile" preload="render"><UserCircle className="w-4 h-4 mr-2" /> Profile</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/settings" preload="render"><SettingsIcon className="w-4 h-4 mr-2" /> Settings</Link></DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={async () => { await signOut(); nav({ to: "/" }); }}><LogOut className="w-4 h-4 mr-2" /> Sign out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -63,8 +65,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
             <ThemeToggle />
             <ReminderBell />
-            <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav({ to: "/" }); }}>
-              <LogOut className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Sign out</span>
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={async () => { await signOut(); nav({ to: "/" }); }}>
+              <LogOut className="w-4 h-4 mr-1" /> <span>Sign out</span>
             </Button>
           </div>
         </div>
