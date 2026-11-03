@@ -56,7 +56,7 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-      <div className="hidden lg:flex flex-col items-center justify-center bg-sidebar text-sidebar-foreground p-12 text-center">
+      <div className="hidden lg:flex flex-col items-center justify-center bg-primary text-primary-foreground p-12 text-center">
         <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-56 h-56 object-contain rounded-2xl" />
         <h2 className="font-display text-4xl font-semibold mt-8">KE-FORGE LEARN</h2>
         <p className="mt-3 opacity-75 italic font-display text-lg">Knowledge for a Brighter Tomorrow</p>
