@@ -25,21 +25,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background/85 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
-          <Link to="/dashboard" className="flex items-center gap-2 font-semibold min-w-0">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
+          <Link to="/dashboard" className="flex min-w-0 items-center gap-2 font-semibold">
             <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden flex-shrink-0">
               <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
             </div>
             <span className="min-w-0 leading-tight">
-              <span className="block font-display text-base sm:text-lg font-semibold tracking-tight truncate">KE-FORGE LEARN</span>
+              <span className="block font-display text-sm sm:text-base md:text-lg font-semibold tracking-tight truncate">KE-FORGE LEARN</span>
               <span className="hidden md:block text-[11px] text-muted-foreground font-normal">Knowledge for a Brighter Tomorrow</span>
             </span>
           </Link>
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" aria-label="Menu"><Menu className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Menu"><Menu className="w-4 h-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild><Link to="/dashboard" preload="render"><LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard</Link></DropdownMenuItem>
@@ -52,6 +52,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild><Link to="/profile" preload="render"><UserCircle className="w-4 h-4 mr-2" /> Profile</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/settings" preload="render"><SettingsIcon className="w-4 h-4 mr-2" /> Settings</Link></DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={async () => { await signOut(); nav({ to: "/" }); }}><LogOut className="w-4 h-4 mr-2" /> Sign out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -63,8 +65,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
             <ThemeToggle />
             <ReminderBell />
-            <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav({ to: "/" }); }}>
-              <LogOut className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Sign out</span>
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={async () => { await signOut(); nav({ to: "/" }); }}>
+              <LogOut className="w-4 h-4 mr-1" /> <span>Sign out</span>
             </Button>
           </div>
         </div>

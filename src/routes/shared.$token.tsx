@@ -50,11 +50,11 @@ function Shared() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-sm">
-            <div className="w-7 h-7 rounded bg-black grid place-items-center overflow-hidden">
+          <Link to="/" className="flex min-w-0 items-center gap-2 font-semibold text-sm">
+            <div className="w-7 h-7 shrink-0 rounded bg-black grid place-items-center overflow-hidden">
               <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
             </div>
-            KE-FORGE LEARN
+            <span className="font-display font-semibold tracking-tight whitespace-nowrap">KE-FORGE LEARN</span>
           </Link>
           <Button asChild size="sm" variant="outline"><Link to="/auth">Sign up free</Link></Button>
         </div>

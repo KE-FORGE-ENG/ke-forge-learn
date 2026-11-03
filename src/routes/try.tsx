@@ -102,7 +102,7 @@ function TryPage() {
             <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden flex-shrink-0">
               <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
             </div>
-            <span className="truncate hidden xs:inline">KE-FORGE LEARN</span>
+            <span className="min-w-0 font-display text-base sm:text-lg font-semibold tracking-tight whitespace-nowrap">KE-FORGE LEARN</span>
           </Link>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="hidden sm:inline-flex">Free trial</Badge>
