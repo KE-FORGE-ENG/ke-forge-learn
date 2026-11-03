@@ -35,11 +35,11 @@ function Index() {
 
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[image:var(--gradient-soft)] opacity-80" />
-        <div className="relative max-w-5xl mx-auto px-6 py-24 text-center">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-24 text-center">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-xs font-medium text-muted-foreground mb-6">
             <Sparkles className="w-3.5 h-3.5 text-primary" /> Adaptive AI tutoring
           </span>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground">
             Master any PDF in <span className="bg-clip-text text-transparent bg-[image:var(--gradient-hero)]">1 to 5 days</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
