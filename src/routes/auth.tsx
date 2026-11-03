@@ -55,8 +55,14 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center px-4 bg-[image:var(--gradient-soft)]">
-      <Card className="w-full max-w-md p-8 shadow-[var(--shadow-card)]">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+      <div className="hidden lg:flex flex-col items-center justify-center bg-sidebar text-sidebar-foreground p-12 text-center">
+        <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-56 h-56 object-contain rounded-2xl" />
+        <h2 className="font-display text-4xl font-semibold mt-8">KE-FORGE LEARN</h2>
+        <p className="mt-3 opacity-75 italic font-display text-lg">Knowledge for a Brighter Tomorrow</p>
+      </div>
+      <div className="grid place-items-center px-4 py-10">
+      <Card className="w-full max-w-md p-8">
         <Link to="/" className="flex items-center gap-2 font-semibold mb-6">
           <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden">
             <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
@@ -97,6 +103,7 @@ function AuthPage() {
           {mode === "signin" ? "No account? Sign up" : "Have an account? Sign in"}
         </button>
       </Card>
+      </div>
     </div>
   );
 }

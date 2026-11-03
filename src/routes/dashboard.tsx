@@ -72,6 +72,35 @@ function Dashboard() {
         <p className="text-sm text-muted-foreground mt-1">Pick up where you left off, or start something new.</p>
       </div>
 
+      {plans[0] && (() => {
+        const p = plans[0];
+        const doc = docs.find((d) => d.id === p.document_id);
+        const pct = Math.round(((p.current_day - 1) / Math.max(1, p.days)) * 100);
+        return (
+          <div className="grid lg:grid-cols-3 gap-4 mb-6">
+            <Card className="lg:col-span-2 p-0 overflow-hidden flex flex-col sm:flex-row">
+              <PlanCover title={doc?.title} className="h-36 sm:h-auto sm:w-56 shrink-0 border-b sm:border-b-0 sm:border-r" />
+              <div className="p-5 flex-1 min-w-0">
+                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Current sprint</div>
+                <h2 className="font-display text-2xl font-semibold mt-1 truncate">{doc?.title ?? "Study plan"}</h2>
+                <div className="text-sm text-muted-foreground mt-1">Day {p.current_day} of {p.days}</div>
+                <div className="h-1.5 bg-muted rounded-full mt-3 overflow-hidden"><div className="h-full bg-primary" style={{ width: `${pct}%` }} /></div>
+                <Button asChild className="mt-4"><Link to="/learn/$planId" params={{ planId: p.id }}>Resume Day {p.current_day}</Link></Button>
+              </div>
+            </Card>
+            <Card className="p-5">
+              <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Today's focus</div>
+              <ul className="mt-3 space-y-2 text-sm">
+                <li><Link className="hover:text-primary" to="/learn/$planId" params={{ planId: p.id }}>→ Read Day {p.current_day} lesson</Link></li>
+                <li><Link className="hover:text-primary" to="/quiz/$planId/$day" params={{ planId: p.id, day: String(p.current_day) }}>→ Take the Day {p.current_day} quiz</Link></li>
+                <li><Link className="hover:text-primary" to="/flashcards/$planId" params={{ planId: p.id }}>→ Review flashcards</Link></li>
+                <li><Link className="hover:text-primary" to="/deeplearn/$planId" params={{ planId: p.id }}>→ Deep learn session</Link></li>
+              </ul>
+            </Card>
+          </div>
+        );
+      })()}
+
       <Card className="p-5 mb-4 bg-[image:var(--gradient-soft)] border-primary/30">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
