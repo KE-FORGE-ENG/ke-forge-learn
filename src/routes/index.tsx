@@ -52,7 +52,7 @@ function Index() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-3 gap-6">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20 grid md:grid-cols-3 gap-6">
         {[
           { icon: BookOpen, title: "Page-by-page", desc: "We detect every page in your PDF and split it across the days you choose." },
           { icon: Target, title: "Adaptive intensity", desc: "Day 1 is foundational. Day 5 is intense — but never overwhelming." },
