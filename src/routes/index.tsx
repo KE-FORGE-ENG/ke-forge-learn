@@ -18,17 +18,17 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/60 backdrop-blur sticky top-0 z-10 bg-background/80">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold text-lg">
-            <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2 font-semibold">
+            <div className="w-9 h-9 shrink-0 rounded-lg bg-black grid place-items-center overflow-hidden">
               <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
             </div>
-            KE-FORGE LEARN
+            <span className="font-display text-base sm:text-lg font-semibold tracking-tight whitespace-nowrap">KE-FORGE LEARN</span>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <ThemeToggle />
-            <Button asChild variant="ghost"><Link to="/auth">Sign in</Link></Button>
-            <Button asChild><Link to="/try">Get started</Link></Button>
+            <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link to="/auth">Sign in</Link></Button>
+            <Button asChild className="h-9 px-3 sm:h-10 sm:px-4"><Link to="/try">Get started</Link></Button>
           </div>
         </div>
       </header>

@@ -63,11 +63,11 @@ function AuthPage() {
       </div>
       <div className="grid place-items-center px-4 py-10">
       <Card className="w-full max-w-md p-8">
-        <Link to="/" className="flex items-center gap-2 font-semibold mb-6">
-          <div className="w-9 h-9 rounded-lg bg-black grid place-items-center overflow-hidden">
+        <Link to="/" className="flex min-w-0 items-center gap-2 font-semibold mb-6">
+          <div className="w-9 h-9 shrink-0 rounded-lg bg-black grid place-items-center overflow-hidden">
             <img src={logoAsset.url} alt="KE-FORGE LEARN" className="w-full h-full object-contain" />
           </div>
-          KE-FORGE LEARN
+          <span className="font-display text-base sm:text-lg font-semibold tracking-tight whitespace-nowrap">KE-FORGE LEARN</span>
         </Link>
         <h1 className="text-2xl font-bold">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
         <p className="text-sm text-muted-foreground mt-1">{mode === "signin" ? "Sign in to continue learning." : "Pick a unique username to get started."}</p>
