@@ -12,11 +12,22 @@ export async function publishPlan(opts: { planId: string; userId: string; title:
   const { data: plan } = await supabase.from("learning_plans").select("share_token").eq("id", opts.planId).maybeSingle();
   const { error: e1 } = await supabase.from("learning_plans").update({ is_public: true, share_token: plan?.share_token ?? token }).eq("id", opts.planId);
   if (e1) throw e1;
-  const { error } = await supabase.from("community_publications").upsert({
-    plan_id: opts.planId, user_id: opts.userId, title: opts.title, subject: opts.subject, language: opts.language,
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) throw new Error("Please sign in again to publish");
+  const row = {
+    title: opts.title, subject: opts.subject, language: opts.language,
     description: opts.description || null, author_name: opts.author, days: opts.days,
-  }, { onConflict: "plan_id" });
-  if (error) throw error;
+  };
+  const { data: existing } = await supabase.from("community_publications").select("id,user_id").eq("plan_id", opts.planId).maybeSingle();
+  if (existing) {
+    if (existing.user_id !== uid) throw new Error("This plan is already published by another learner");
+    const { error } = await supabase.from("community_publications").update(row).eq("id", existing.id);
+    if (error) throw error;
+  } else {
+    const { error } = await supabase.from("community_publications").insert({ ...row, plan_id: opts.planId, user_id: uid });
+    if (error) throw error;
+  }
 }
 
 export async function unpublishPlan(planId: string) {
