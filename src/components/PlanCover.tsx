@@ -5,14 +5,22 @@ import science from "@/assets/covers/science.jpg";
 import law from "@/assets/covers/law.jpg";
 import mathematics from "@/assets/covers/mathematics.jpg";
 import literature from "@/assets/covers/literature.jpg";
+import medicine from "@/assets/covers/medicine.jpg";
+import engineering from "@/assets/covers/engineering.jpg";
+import agriculture from "@/assets/covers/agriculture.jpg";
+import arts from "@/assets/covers/arts.jpg";
 
 const RULES: [RegExp, string][] = [
-  [/code|program|software|algorithm|computer|data|python|java|web|ai\b|machine|network|cyber|tech|engineer/i, technology],
+  [/medic|anatom|physiolog|nurs|pharm|clinic|surgery|disease|patholog|health|dent/i, medicine],
+  [/engineer|mechanic|electrical|civil|circuit|thermodynam|structur|robot/i, engineering],
+  [/agric|farm|crop|soil|livestock|animal science|horticult|fish|forestry/i, agriculture],
+  [/\bart\b|arts|design|music|paint|drawing|theatre|film|photograph|fashion|architect/i, arts],
+  [/code|program|software|algorithm|computer|data|python|java|web|ai\b|machine|network|cyber|tech/i, technology],
   [/business|market|finance|account|econom|manage|case study|startup|commerce/i, business],
   [/bio|chem|physic|science|medic|anatom|health|lab|research|nurs|pharm/i, science],
   [/law|legal|constitution|court|policy|govern|politic/i, law],
   [/math|calculus|algebra|statistic|geometry|equation|exam|jamb|waec|sat/i, mathematics],
-  [/literature|english|history|novel|poem|poetry|language|philosoph|art|humanit/i, literature],
+  [/literature|english|history|novel|poem|poetry|language|philosoph|humanit/i, literature],
 ];
 
 export function coverFor(text: string | null | undefined): string {
