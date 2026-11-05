@@ -171,7 +171,7 @@ async function callAI(body: any) {
         await wait(Math.max(retryAfterMs, backoffMs));
         continue;
       }
-      if (r.status === 402) throw new AiGatewayError(402, "AI credits are exhausted. Please add AI balance or try again later.", "credits_exhausted");
+      if (r.status === 402) return await fallbackChat(CURRENT_ACTION, body);
       break;
     }
   }
@@ -338,6 +338,7 @@ Deno.serve(async (req) => {
   try {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
     const { action, payload, style } = await req.json();
+    CURRENT_ACTION = String(action || "chat");
     STYLE = typeof style === "string" ? style.slice(0, 1200) : "";
 
     if (action === "generate_day") {

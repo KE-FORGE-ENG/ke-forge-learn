@@ -5,7 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const YT_KEY = Deno.env.get("YOUTUBE_API_KEY");
+const YT_KEYS = [Deno.env.get("YOUTUBE_API_KEY"), Deno.env.get("YOUTUBE_API_KEY_2")].filter(Boolean) as string[];
+const YT_KEY = YT_KEYS[0];
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
 type DayCtx = {
@@ -51,10 +52,16 @@ async function ytSearch(query: string, max = 8) {
     videoEmbeddable: "true",
     safeSearch: "moderate",
     order: "relevance",
-    key: YT_KEY!,
   });
-  const r = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`);
-  const d = await r.json();
+  let d: any = {};
+  // Rotate keys: if one hits its daily quota (403/429), try the next.
+  for (const key of YT_KEYS) {
+    params.set("key", key);
+    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`);
+    d = await r.json();
+    if (r.ok) break;
+    if (r.status !== 403 && r.status !== 429) break;
+  }
   return (d.items || []).map((it: any) => ({
     id: it.id.videoId,
     title: it.snippet.title,
